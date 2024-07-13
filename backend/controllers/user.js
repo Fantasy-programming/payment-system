@@ -1,36 +1,48 @@
-const bcrypt = require("bcrypt");
-const userRouter = require("express").Router();
+const router = require("express").Router();
+
 const User = require("../models/User");
 
-userRouter.get("/", async (request, response) => {
+router.get("/", async (request, response) => {
   const users = await User.find({});
   response.json(users);
 });
 
-userRouter.post("/", async (request, response) => {
-  const { username, name, password } = request.body;
-
-  // Validate password length
-  if (!password || password.length < 3) {
-    return response
-      .status(400)
-      .json({ error: "password must be at least 3 characters long" });
-  }
-
-  const saltRounds = 10;
-  const passwordHash = await bcrypt.hash(password, saltRounds);
-
-  const user = new User({
-    username,
-    name,
-    passwordHash,
-  });
+router.delete("/:id", async (request, response) => {
   try {
-    const savedUser = await user.save();
-    response.status(201).json(savedUser);
+    await User.findByIdAndRemove(request.params.id);
+    response.status(204).json({ message: "User deleted successfully" });
   } catch {
-    response.status(400).json({ error: "expected `username` to be unique" });
+    response.status(400).json({ error: "malformatted id" });
   }
 });
 
-module.exports = userRouter;
+router.patch("/:id", async (request, response) => {
+  const body = request.body;
+
+  const user = {
+    firstName: body.firstName,
+    lastName: body.lastName,
+    email: body.email,
+    phone: body.phone,
+    password: body.password,
+    zone: body.zone,
+    address: body.address,
+    routerID: body.routerID,
+    emailVerified: body.emailVerified,
+    phoneVerified: body.phoneVerified,
+    role: body.role,
+  };
+
+  const updatedUser = await User.findByIdAndUpdate(request.params.id, user, {
+    new: true,
+  });
+
+  response.json(updatedUser);
+});
+
+router.get("/:id", async (request, response) => {
+  const user = await User.findById(request.params.id);
+  response.json(user);
+});
+
+module.exports = router;

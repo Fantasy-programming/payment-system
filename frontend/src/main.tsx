@@ -1,10 +1,17 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import App from './App.tsx'
-import './index.css'
+import React from "react";
+import ReactDOM from "react-dom/client";
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+import "./index.css";
+
+import { Toaster } from "@/components/ui/toaster";
+import { AuthProvider } from "./providers/AuthProvider";
+import Routes from "./routes";
+
+ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <App />
+    <AuthProvider>
+      <Routes />
+      <Toaster />
+    </AuthProvider>
   </React.StrictMode>,
-)
+);

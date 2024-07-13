@@ -8,6 +8,8 @@ const logger = require("./lib/logger");
 
 require("express-async-errors");
 const userRouter = require("./controllers/user");
+const authRouter = require("./controllers/auth");
+const middleware = require("./lib/middleware");
 
 const app = express();
 
@@ -28,10 +30,14 @@ app.use(morgan("tiny"));
 app.use(cors());
 app.use(express.json());
 app.use(express.static("dist_static"));
+app.use(middleware.tokenExtractor);
 
 // setup the routes (/api)
 app.use("/api/users", userRouter);
+app.use("/api/auth", authRouter);
 
 // custom middlewares
+app.use(middleware.unknownEndpoint);
+app.use(middleware.errorHandler);
 
 module.exports = app;

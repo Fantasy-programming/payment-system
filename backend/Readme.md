@@ -1,0 +1,24 @@
+- [ ] The user can login to the system.
+  - [ ] The user can login with email and password
+  - [ ] The user can login with phone number
+  - [ ] The email is verified with otp before login
+  - [ ] The username is verified with otp before login
+- [ ] The user can logout from the system.
+- [ ] The user can register to the system.
+  - [ ] The email is verified on signup
+- [ ] The admin (only) can view all users (and crud them)
+- [ ] The admin can view all transactions
+- [ ] The admin can print receipts
+- [ ] The admin can extract transactions as csv
+- [ ] The admin can change customers plan ?
+- [ ] The users can view their payment history
+- [ ] The users can export their payment history as csv
+- [ ] The users can pay their bills
+- [ ] The users can upgrade their plan
+- [ ] The users can subscribe for auto payments
+- [ ] The users can cancel auto payments
+- [ ] The users can subscribe for notifications (alerts)
+- [ ] The admin can setup auto export of transactions (mail)
+- [ ] The admin are mailed on successful transactions
+- [ ] The admin can view the system logs
+- [ ] The admin are mailed on system errors
