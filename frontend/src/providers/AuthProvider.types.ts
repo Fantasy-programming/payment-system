@@ -1,4 +1,4 @@
-import { AuthResponse } from "@/services/auth";
+import { AuthResponse } from "@/services/auth.types";
 
 export interface AuthProviderProps {
   children: React.ReactNode;

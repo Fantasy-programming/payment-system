@@ -1,10 +1,15 @@
 const router = require("express").Router();
+const userExtractor = require("../lib/middleware").userExtractor;
 
 const User = require("../models/User");
 
 router.get("/", async (request, response) => {
   const users = await User.find({});
   response.json(users);
+});
+
+router.get("/me", userExtractor, async (request, response) => {
+  return response.json(request.user);
 });
 
 router.delete("/:id", async (request, response) => {

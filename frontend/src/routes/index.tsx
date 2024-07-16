@@ -6,13 +6,16 @@ import {
   RouteObject,
 } from "react-router-dom";
 import { ProtectedRoute } from "./ProtectedRoute";
-import { UserDashboardLayout } from "./user/root";
+import { homeLoader, UserDashboardLayout } from "./user/root";
 import { UserHomeView } from "./user/home";
+import { HistoryView } from "./user/history";
 import { Login } from "./auth/login";
 import Signup from "./auth/signup";
 import Verify from "./auth/verify";
 import { AdminHomeView } from "./admin/root";
 import { AdminDashboardLayout } from "./admin/home";
+import SettingsView from "./user/settings";
+import { UnProtectedRoute } from "./UnProtectedRoute";
 
 const Routes: React.FC = () => {
   const protectedUserRoutes: RouteObject[] = [
@@ -31,8 +34,16 @@ const Routes: React.FC = () => {
         {
           path: "home",
           element: <UserHomeView />,
+          loader: homeLoader,
         },
-        // Add more nested routes as needed
+        {
+          path: "history",
+          element: <HistoryView />,
+        },
+        {
+          path: "settings",
+          element: <SettingsView />,
+        },
       ],
     },
   ];
@@ -65,15 +76,27 @@ const Routes: React.FC = () => {
     },
     {
       path: "/login",
-      element: <Login />,
+      element: (
+        <UnProtectedRoute>
+          <Login />
+        </UnProtectedRoute>
+      ),
     },
     {
       path: "/verify",
-      element: <Verify />,
+      element: (
+        <UnProtectedRoute>
+          <Verify />
+        </UnProtectedRoute>
+      ),
     },
     {
       path: "/signup",
-      element: <Signup />,
+      element: (
+        <UnProtectedRoute>
+          <Signup />
+        </UnProtectedRoute>
+      ),
     },
   ];
 

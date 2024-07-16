@@ -64,7 +64,7 @@ const Signup = () => {
       toast({
         variant: "destructive",
         title: "Uh oh! Something went wrong.",
-        description: "This account already exist.",
+        description: "Internal Server Error.",
       });
     }
   };

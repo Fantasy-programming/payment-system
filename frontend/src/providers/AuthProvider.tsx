@@ -1,8 +1,9 @@
 import axios from "axios";
 import { useState, useEffect, createContext, useCallback } from "react";
-import { AuthResponse } from "@/services/auth";
+import { AuthResponse } from "@/services/auth.types";
 import { AuthContext, AuthProviderProps } from "./AuthProvider.types";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { isTokenExpired } from "@/lib/utils";
 
 export const Context = createContext<null | AuthContext>(null);
 
@@ -19,6 +20,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     if (storedUser) {
       const parsedUser = JSON.parse(storedUser);
+
+      if (isTokenExpired(parsedUser.token)) {
+        localStorage.removeItem("user");
+        delete axios.defaults.headers.common["Authorization"];
+        return;
+      }
+
       axios.defaults.headers.common["Authorization"] =
         `Bearer ${parsedUser.token}`;
       setUser(parsedUser);
