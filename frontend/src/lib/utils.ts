@@ -26,9 +26,9 @@ export const handleError = (error: unknown): string => {
 
 export const isTokenExpired = (token: string) => {
   if (!token) return true;
+
   try {
     const decodedToken = jwtDecode(token);
-    console.log("decodedToken", decodedToken);
     const currentTime = Date.now() / 1000;
 
     if (!decodedToken.exp) return true;
@@ -42,7 +42,6 @@ export const isTokenExpired = (token: string) => {
 
 export const formatDate = (dateStr: string): string => {
   const date = new Date(dateStr);
-
   const formattedDate = format(date, "MMMM dd, yyyy");
   return formattedDate;
 };

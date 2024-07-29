@@ -1,11 +1,14 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { z } from "zod";
+import { toast } from "sonner";
 
 import authservice from "@/services/auth";
+import { handleError } from "@/lib/utils";
 
-import { Button } from "@/components/ui/button";
+import { LoadingButton } from "@/components/ui/loading-button";
 import { Card, CardContent, CardFooter, CardTitle } from "@/components/ui/card";
 import {
   InputOTP,
@@ -36,6 +39,7 @@ const FormSchema = z.object({
 });
 
 const Verify = () => {
+  const [isSubmitting, setSubmitting] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { storeUser } = useAuth();
@@ -51,11 +55,15 @@ const Verify = () => {
 
   async function onSubmit(data: z.infer<typeof FormSchema>) {
     try {
+      setSubmitting(true);
       const response = await authservice.verify(data.token, type, value);
       storeUser(response);
+      setSubmitting(false);
       navigate("/dashboard");
     } catch (error) {
-      console.log(error);
+      const err = handleError(error);
+      toast.error(err);
+      setSubmitting(false);
     }
   }
 
@@ -101,9 +109,14 @@ const Verify = () => {
               />
             </CardContent>
             <CardFooter>
-              <Button type="submit" className="w-full">
-                Sign in
-              </Button>
+              <LoadingButton
+                type="submit"
+                loading={isSubmitting}
+                className="w-full"
+              >
+                {" "}
+                Sign in{" "}
+              </LoadingButton>
             </CardFooter>
           </form>
         </Form>

@@ -1,10 +1,10 @@
-import axios from "axios";
+import axios from "@/lib/axios";
 
 import { SignupFormValues } from "@/routes/auth/signup";
 import { EmailFormValues, PhoneFormValues } from "@/routes/auth/login";
 import { AuthResponse } from "./auth.types";
 
-const BASEURI = "http://localhost:3001/api/auth";
+const BASEURI = "/auth";
 
 const login = async (credentials: EmailFormValues) => {
   const response = await axios.post<AuthResponse>(

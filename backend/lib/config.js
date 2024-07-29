@@ -1,6 +1,7 @@
 require("dotenv").config();
 
 const PORT = process.env.PORT;
+const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
 
 const MONGODB_URI =
   process.env.NODE_ENV === "production"
@@ -15,4 +16,5 @@ module.exports = {
   PORT,
   SMS_SENDER_ID,
   SMS_API_KEY,
+  PAYSTACK_SECRET_KEY,
 };

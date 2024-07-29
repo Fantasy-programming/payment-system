@@ -1,8 +1,7 @@
-import axios from "axios";
-
+import axios from "@/lib/axios";
 import { UserInfo } from "./user.types";
 
-const BASEURI = "http://localhost:3001/api/users";
+const BASEURI = "/users";
 
 const getMe = async () => {
   const response = await axios.get<UserInfo>(`${BASEURI}/me`);

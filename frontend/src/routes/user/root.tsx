@@ -1,11 +1,4 @@
-import {
-  Home,
-  Package2,
-  PanelLeft,
-  Search,
-  Settings,
-  ShoppingCart,
-} from "lucide-react";
+import { Home, PanelLeft, Search, Settings, ShoppingCart } from "lucide-react";
 
 import {
   Breadcrumb,
@@ -36,28 +29,24 @@ import { Link, Outlet } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 import { useLocation } from "react-router-dom";
-import userService from "@/services/user";
-
-export async function homeLoader() {
-  const user = await userService.getMe();
-  return { user };
-}
+import { useAuth } from "@/hooks/useAuth";
 
 export function UserDashboardLayout() {
   const location = useLocation();
+  const { logout } = useAuth();
+
+  const locString = location.pathname.split("/").at(-1);
+  const loc = locString
+    ? locString.charAt(0).toUpperCase() + locString.slice(1)
+    : "";
 
   return (
     <TooltipProvider>
       <div className="flex min-h-screen w-full flex-col bg-muted/40">
         <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
           <nav className="flex flex-col items-center gap-4 px-2 sm:py-5">
-            <Link to="#" className="group h-12 w-12">
-              <img
-                src="/Mikronet.png"
-                className="h-12 w-12 transition-all group-hover:scale-110"
-                alt="Mikronet"
-              />
-
+            <Link to="#" className="scale-110 h-12 w-12">
+              <img src="/Mikronet.png" alt="Mikronet" />
               <span className="sr-only">Mikronet</span>
             </Link>
             <Tooltip>
@@ -76,15 +65,15 @@ ${location.pathname === "/dashboard/home" ? "bg-accent text-accent-foreground" :
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <a
-                  href="/dashboard/history"
+                <Link
+                  to="/dashboard/history"
                   className={`flex h-9 w-9 items-center justify-center rounded-lg  text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8
 ${location.pathname === "/dashboard/history" ? "bg-accent text-accent-foreground" : ""}
 `}
                 >
                   <ShoppingCart className="h-5 w-5" />
                   <span className="sr-only">History</span>
-                </a>
+                </Link>
               </TooltipTrigger>
               <TooltipContent side="right">History</TooltipContent>
             </Tooltip>
@@ -117,30 +106,30 @@ ${location.pathname === "/dashboard/settings" ? "bg-accent text-accent-foregroun
               </SheetTrigger>
               <SheetContent side="left" className="sm:max-w-xs">
                 <nav className="grid gap-6 text-lg font-medium">
-                  <Link
-                    to="#"
-                    className="group flex h-10 w-10 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:text-base"
-                  >
-                    <Package2 className="h-5 w-5 transition-all group-hover:scale-110" />
-                    <span className="sr-only">Home</span>
+                  <Link to="#" className="scale-110 h-12 w-12">
+                    <img src="/Mikronet.png" alt="Mikronet" />
+                    <span className="sr-only">Mikronet</span>
                   </Link>
                   <Link
                     to="/dasbhboard/home"
-                    className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
+                    className={`  flex items-center gap-4 px-2.5
+            ${location.pathname === "/dashboard/home" ? "text-foreground " : "text-muted-foreground"} `}
                   >
                     <Home className="h-5 w-5" />
                     Dashboard
                   </Link>
                   <Link
                     to="/dashboard/history"
-                    className="flex items-center gap-4 px-2.5 text-foreground"
+                    className={`  flex items-center gap-4 px-2.5
+            ${location.pathname === "/dashboard/history" ? "text-foreground " : "text-muted-foreground"} `}
                   >
                     <ShoppingCart className="h-5 w-5" />
                     History
                   </Link>
                   <Link
                     to="/dashboard/settings"
-                    className="flex items-center gap-4 px-2.5 text-muted-foreground hover:text-foreground"
+                    className={`  flex items-center gap-4 px-2.5
+            ${location.pathname === "/dashboard/settings" ? "text-foreground " : "text-muted-foreground"} `}
                   >
                     <Settings className="h-5 w-5" />
                     Settings
@@ -158,7 +147,7 @@ ${location.pathname === "/dashboard/settings" ? "bg-accent text-accent-foregroun
                 <BreadcrumbSeparator />
                 <BreadcrumbItem>
                   <BreadcrumbLink asChild>
-                    <Link to="/dashboard/home">Home</Link>
+                    <Link to={location.pathname}>{loc}</Link>
                   </BreadcrumbLink>
                 </BreadcrumbItem>
               </BreadcrumbList>
@@ -187,10 +176,13 @@ ${location.pathname === "/dashboard/settings" ? "bg-accent text-accent-foregroun
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>Settings</DropdownMenuItem>
-                <DropdownMenuItem>Support</DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Link to="/dashboard/settings">Settings</Link>
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>Logout</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => logout()}>
+                  Logout
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </header>

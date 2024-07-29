@@ -1,4 +1,4 @@
-import { CircleUser, Menu, Package2, Search } from "lucide-react";
+import { CircleUser, Menu, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -10,47 +10,59 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useLocation } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
-export function AdminHomeView() {
+export function AdminDashboardLayout() {
+  const location = useLocation();
+  const { logout } = useAuth();
+
+  console.log(location.pathname);
+
   return (
     <div className="flex min-h-screen w-full flex-col">
       <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
         <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
           <Link
             to="#"
-            className="flex items-center gap-2 text-lg font-semibold md:text-base"
+            className="scale-125 h-12 w-12 flex items-center justify-center"
           >
-            <Package2 className="h-6 w-6" />
-            <span className="sr-only">Acme Inc</span>
+            <img src="/Mikronet.png" alt="Mikronet" />
+
+            <span className="sr-only">Mikronet</span>
           </Link>
           <Link
-            to="#"
-            className="text-foreground transition-colors hover:text-foreground"
+            to="/admin/home"
+            className={` transition-colors hover:text-foreground
+            ${location.pathname === "/admin/home" ? "text-foreground " : "text-muted-foreground"} `}
           >
             Dashboard
           </Link>
           <Link
-            to="#"
-            className="text-muted-foreground transition-colors hover:text-foreground"
+            to="/admin/orders"
+            className={` transition-colors hover:text-foreground
+            ${location.pathname === "/admin/orders" ? "text-foreground " : "text-muted-foreground"} `}
           >
             Orders
           </Link>
           <Link
-            to="#"
-            className="text-muted-foreground transition-colors hover:text-foreground"
+            to="/admin/products"
+            className={` transition-colors hover:text-foreground
+            ${location.pathname === "/admin/products" ? "text-foreground " : "text-muted-foreground"} `}
           >
             Products
           </Link>
           <Link
-            to="#"
-            className="text-muted-foreground transition-colors hover:text-foreground"
+            to="/admin/customers"
+            className={` transition-colors hover:text-foreground
+            ${location.pathname === "/admin/customers" ? "text-foreground " : "text-muted-foreground"} `}
           >
             Customers
           </Link>
           <Link
-            to="#"
-            className="text-muted-foreground transition-colors hover:text-foreground"
+            to="/admin/analytics"
+            className={` transition-colors hover:text-foreground
+            ${location.pathname === "/admin/analytics" ? "text-foreground " : "text-muted-foreground"} `}
           >
             Analytics
           </Link>
@@ -70,35 +82,44 @@ export function AdminHomeView() {
             <nav className="grid gap-6 text-lg font-medium">
               <Link
                 to="#"
-                className="flex items-center gap-2 text-lg font-semibold"
+                className="scale-125 h-12 w-12 flex items-center justify-center"
               >
-                <Package2 className="h-6 w-6" />
-                <span className="sr-only">Acme Inc</span>
+                <img src="/Mikronet.png" alt="Mikronet" />
+
+                <span className="sr-only">Mikronet</span>
               </Link>
-              <Link to="#" className="hover:text-foreground">
+              <Link
+                to="/admin/home"
+                className={`  hover:text-foreground
+            ${location.pathname === "/admin/home" ? "text-foreground " : "text-muted-foreground"} `}
+              >
                 Dashboard
               </Link>
               <Link
-                to="#"
-                className="text-muted-foreground hover:text-foreground"
+                to="/admin/orders"
+                className={`  hover:text-foreground
+            ${location.pathname === "/admin/orders" ? "text-foreground " : "text-muted-foreground"} `}
               >
                 Orders
               </Link>
               <Link
-                to="#"
-                className="text-muted-foreground hover:text-foreground"
+                to="/admin/products"
+                className={`  hover:text-foreground
+            ${location.pathname === "/admin/products" ? "text-foreground " : "text-muted-foreground"} `}
               >
                 Products
               </Link>
               <Link
-                to="#"
-                className="text-muted-foreground hover:text-foreground"
+                to="/admin/customers"
+                className={`  hover:text-foreground
+            ${location.pathname === "/admin/customers" ? "text-foreground " : "text-muted-foreground"} `}
               >
                 Customers
               </Link>
               <Link
-                to="#"
-                className="text-muted-foreground hover:text-foreground"
+                to="/admin/analytics"
+                className={`  hover:text-foreground
+            ${location.pathname === "/admin/analytics" ? "text-foreground " : "text-muted-foreground"} `}
               >
                 Analytics
               </Link>
@@ -111,7 +132,7 @@ export function AdminHomeView() {
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 type="search"
-                placeholder="Search products..."
+                placeholder="Search customer..."
                 className="pl-8 sm:w-[300px] md:w-[200px] lg:w-[300px]"
               />
             </div>
@@ -126,10 +147,13 @@ export function AdminHomeView() {
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Settings</DropdownMenuItem>
-              <DropdownMenuItem>Support</DropdownMenuItem>
+              <DropdownMenuItem>
+                <Link to="/admin/settings">Settings</Link>
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Logout</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => logout()}>
+                Logout
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

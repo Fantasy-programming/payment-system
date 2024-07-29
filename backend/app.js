@@ -9,6 +9,8 @@ const logger = require("./lib/logger");
 require("express-async-errors");
 const userRouter = require("./controllers/user");
 const authRouter = require("./controllers/auth");
+const productRouter = require("./controllers/products");
+const transactionRouter = require("./controllers/transaction");
 const middleware = require("./lib/middleware");
 
 const app = express();
@@ -35,6 +37,8 @@ app.use(middleware.tokenExtractor);
 // setup the routes (/api)
 app.use("/api/users", userRouter);
 app.use("/api/auth", authRouter);
+app.use("/api/transactions", transactionRouter);
+app.use("/api/products", productRouter);
 
 // custom middlewares
 app.use(middleware.unknownEndpoint);

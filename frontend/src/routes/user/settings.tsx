@@ -34,12 +34,11 @@ const SettingsView = () => {
               <TabsList>
                 <TabsTrigger value="general">General</TabsTrigger>
                 <TabsTrigger value="alerting">Alerting</TabsTrigger>
-                <TabsTrigger value="support">Support</TabsTrigger>
               </TabsList>
               <TabsContent value="general">
-                <div className="grid gap-6">
+                <div className="grid gap-6 pt-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="name">Name</Label>
+                    <Label htmlFor="name">Phone</Label>
                     <Input id="name" placeholder="Your name" />
                     <div className="text-sm text-muted-foreground">
                       This is the name that will be displayed on your profile.
@@ -79,30 +78,13 @@ const SettingsView = () => {
                       Choose the theme for your dashboard.
                     </div>
                   </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="language">Language</Label>
-                    <Select defaultValue="en">
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Select language" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="en">English</SelectItem>
-                        <SelectItem value="es">Spanish</SelectItem>
-                        <SelectItem value="fr">French</SelectItem>
-                        <SelectItem value="de">German</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <div className="text-sm text-muted-foreground">
-                      This is the language that will be used in the dashboard.
-                    </div>
-                  </div>
                   <div className="flex justify-end">
                     <Button>Save Changes</Button>
                   </div>
                 </div>
               </TabsContent>
               <TabsContent value="alerting">
-                <div className="grid gap-6">
+                <div className="grid gap-6 pt-4">
                   <div className="grid gap-2">
                     <Label htmlFor="notifications">Notifications</Label>
                     <Select defaultValue="everything">

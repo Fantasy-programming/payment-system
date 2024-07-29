@@ -1,14 +1,6 @@
 const logger = require("./logger");
 const nodemailer = require("nodemailer");
 
-/*
- * Send email to users
- * @param {String} email - Email address of the user
- * @param {String} title - Title of the email
- * @param {String} body - Body of the email
- * @returns {Promise} - Promise of the email sent
- * @throws {Error} - Throws error if email is not sent
- * */
 async function sendMail(email, title, body) {
   try {
     // Create a Transporter to send emails
@@ -32,7 +24,6 @@ async function sendMail(email, title, body) {
       html: body,
     });
 
-    logger.info("Email info: ", info);
     return info;
   } catch (error) {
     logger.error(error.message);

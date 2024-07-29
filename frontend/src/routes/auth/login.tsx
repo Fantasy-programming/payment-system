@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { LoadingButton } from "@/components/ui/loading-button";
 import { Input } from "@/components/ui/input";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -29,7 +29,7 @@ const emailSchema = z.object({
     .string()
     .min(8, "Password must be at least 8 characters long")
     .regex(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?])[A-Za-z\d!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]{8,}$/,
       "Password must contain at least one lowercase letter, one uppercase letter, one number and one special character",
     ),
 });
@@ -43,8 +43,10 @@ export type PhoneFormValues = z.infer<typeof phoneSchema>;
 
 function EmailLoginForm({
   onSubmit,
+  isSubmitting,
 }: {
   onSubmit: SubmitHandler<EmailFormValues>;
+  isSubmitting: boolean;
 }) {
   const form = useForm<EmailFormValues>({
     resolver: zodResolver(emailSchema),
@@ -91,9 +93,10 @@ function EmailLoginForm({
             )}
           />
         </div>
-        <Button type="submit" className="w-full">
-          Login
-        </Button>
+        <LoadingButton type="submit" loading={isSubmitting} className="w-full">
+          {" "}
+          Login{" "}
+        </LoadingButton>
       </form>
     </Form>
   );
@@ -101,8 +104,10 @@ function EmailLoginForm({
 
 function PhoneLoginForm({
   onSubmit,
+  isSubmitting,
 }: {
   onSubmit: SubmitHandler<PhoneFormValues>;
+  isSubmitting: boolean;
 }) {
   const form = useForm<PhoneFormValues>({
     resolver: zodResolver(phoneSchema),
@@ -129,54 +134,44 @@ function PhoneLoginForm({
             )}
           />
         </div>
-        <Button type="submit" className="w-full">
+        <LoadingButton type="submit" loading={isSubmitting} className="w-full">
           Login
-        </Button>
+        </LoadingButton>
       </form>
     </Form>
   );
 }
 
 export function Login() {
-  const [activeTab, setActiveTab] = useState<"user" | "admin">("user");
   const [loginType, setLoginType] = useState<"email" | "phone">("email");
+  const [isSubmitting, setSubmitting] = useState(false);
   const { storeUser } = useAuth();
-  const { toast } = useToast();
   const navigate = useNavigate();
-
-  const handleTabChange = (value: string) => {
-    if (value === "user" || value === "admin") {
-      setActiveTab(value);
-    }
-  };
 
   const onSubmitEmail: SubmitHandler<EmailFormValues> = async (values) => {
     try {
+      setSubmitting(true);
       const response = await authservice.login(values);
       storeUser(response);
+      setSubmitting(false);
       navigate("/dashboard");
     } catch (error) {
       const err = handleError(error);
-
-      toast({
-        variant: "destructive",
-        title: "Uh oh! Something went wrong.",
-        description: err,
-      });
+      toast.error(err);
+      setSubmitting(false);
     }
   };
 
   const onSubmitPhone: SubmitHandler<PhoneFormValues> = async (values) => {
     try {
+      setSubmitting(true);
       await authservice.mobileLogin(values);
+      setSubmitting(false);
       navigate("/verify", { state: { type: "phone", value: values.phone } });
     } catch (error) {
+      setSubmitting(false);
       const err = handleError(error);
-      toast({
-        variant: "destructive",
-        title: "Uh oh! Something went wrong.",
-        description: err,
-      });
+      toast.error(err);
     }
   };
 
@@ -184,30 +179,25 @@ export function Login() {
     <div className="w-full lg:grid min-h-screen lg:grid-cols-2 overflow-y-hidden">
       <div className="flex h-screen items-center justify-center py-12">
         <div className="mx-auto grid w-[330px] sm:w-[400px] gap-6">
-          <Tabs
-            value={activeTab}
-            onValueChange={handleTabChange}
-            className="w-full"
-          >
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="user">Login as User</TabsTrigger>
-              <TabsTrigger value="admin">Login as Admin</TabsTrigger>
-            </TabsList>
-            <TabsContent value="user">
-              {loginType === "email" ? (
-                <EmailLoginForm onSubmit={onSubmitEmail} />
-              ) : (
-                <PhoneLoginForm onSubmit={onSubmitPhone} />
-              )}
-            </TabsContent>
-            <TabsContent value="admin">
-              {loginType === "email" ? (
-                <EmailLoginForm onSubmit={onSubmitEmail} />
-              ) : (
-                <PhoneLoginForm onSubmit={onSubmitPhone} />
-              )}
-            </TabsContent>
-          </Tabs>
+          <div className="grid gap-2 text-center">
+            <h1 className="text-3xl font-bold">Login</h1>
+            <p className="text-balance text-muted-foreground">
+              Enter your {loginType === "email" ? "email" : "phone"} below to
+              login to your account
+            </p>
+          </div>
+
+          {loginType === "email" ? (
+            <EmailLoginForm
+              onSubmit={onSubmitEmail}
+              isSubmitting={isSubmitting}
+            />
+          ) : (
+            <PhoneLoginForm
+              onSubmit={onSubmitPhone}
+              isSubmitting={isSubmitting}
+            />
+          )}
           <Button
             variant="outline"
             className="w-full flex items-center justify-center gap-2"
@@ -228,9 +218,9 @@ export function Login() {
             )}
           </Button>
           <div className="mt-4 text-center text-sm">
-            Don&apos;t have an account?{" "}
-            <Link to="/signup" className="underline">
-              Sign up
+            Forgot your password?{" "}
+            <Link to="/recover" className="underline">
+              recover it
             </Link>
           </div>
         </div>

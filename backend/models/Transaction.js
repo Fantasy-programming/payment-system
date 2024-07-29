@@ -1,17 +1,28 @@
 const mongoose = require("mongoose");
 
 const transactionSchema = new mongoose.Schema({
-  email: { type: String, unique: true, required: true },
-  phone: { type: String, unique: true, required: true },
-  password: String,
-  emailVerified: { type: Boolean, default: false },
-  phoneVerified: { type: Boolean, default: false },
-  emailToken: String,
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  product: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Product",
+    required: true,
+  },
+  reference: { type: String, required: true },
+  trxRef: { type: String, required: true },
+  type: { type: String, enum: ["subscription", "top-up"], required: true },
+  medium: { type: String, required: true },
+  recurring: { type: Boolean, default: false },
+  startDate: { type: Date, required: true },
+  endDate: { type: Date, required: true },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
 
-userSchema.set("toJSON", {
+transactionSchema.set("toJSON", {
   transform: (_, returnedObject) => {
     returnedObject.id = returnedObject._id.toString();
     delete returnedObject._id;

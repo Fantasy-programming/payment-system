@@ -1,4 +1,5 @@
 export interface UserInfo {
+  id: string;
   firstName: string;
   lastName: string;
   email: string;
@@ -11,5 +12,4 @@ export interface UserInfo {
   role: string;
   createdAt: string;
   updatedAt: string;
-  id: string;
 }

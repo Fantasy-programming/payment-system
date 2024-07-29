@@ -7,4 +7,5 @@ export interface AuthProviderProps {
 export interface AuthContext {
   user: AuthResponse;
   storeUser: (newJwt: AuthResponse) => void;
+  logout: () => void;
 }

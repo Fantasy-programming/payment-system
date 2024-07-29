@@ -1,9 +1,10 @@
 import { useForm, SubmitHandler } from "react-hook-form";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import authservice from "@/services/auth";
+import { handleError } from "@/lib/utils";
 
 import { Input } from "@/components/ui/input";
 import {
@@ -21,7 +22,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { LoadingButton } from "@/components/ui/loading-button";
 import { Link, useNavigate } from "react-router-dom";
 
 const SignupSchema = z.object({
@@ -33,7 +35,7 @@ const SignupSchema = z.object({
     .string()
     .min(8, "Password must be at least 8 characters long")
     .regex(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?])[A-Za-z\d!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]{8,}$/,
       "Password must contain at least one lowercase letter, one uppercase letter, one number and one special character",
     ),
   zone: z.string({
@@ -46,7 +48,7 @@ const SignupSchema = z.object({
 export type SignupFormValues = z.infer<typeof SignupSchema>;
 
 const Signup = () => {
-  const { toast } = useToast();
+  const [isSubmitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
 
   const form = useForm<z.infer<typeof SignupSchema>>({
@@ -57,15 +59,14 @@ const Signup = () => {
     values,
   ) => {
     try {
-      const response = await authservice.signup(values);
+      setSubmitting(true);
+      await authservice.signup(values);
+      setSubmitting(false);
       navigate("/verify", { state: { type: "email", value: values.email } });
-      console.log(response);
     } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Uh oh! Something went wrong.",
-        description: "Internal Server Error.",
-      });
+      const err = handleError(error);
+      toast.error(err);
+      setSubmitting(false);
     }
   };
 
@@ -231,9 +232,13 @@ const Signup = () => {
               )}
             />
           </div>
-          <Button type="submit" className="w-full">
+          <LoadingButton
+            loading={isSubmitting}
+            type="submit"
+            className="w-full"
+          >
             Sign Up
-          </Button>
+          </LoadingButton>
 
           <div className="mt-4 text-center text-sm">
             Already have an account ?{" "}
