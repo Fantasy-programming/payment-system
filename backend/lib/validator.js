@@ -8,7 +8,7 @@ const PASSREGEX =
  * @returns {boolean} true if email is valid, false otherwise
  */
 
-function validateEmail(email) {
+export function validateEmail(email) {
   return EMAILREGEX.test(email);
 }
 
@@ -18,11 +18,6 @@ function validateEmail(email) {
  * @returns {boolean} true if password is strong, false otherwise
  */
 
-function validatePassword(password) {
+export function validatePassword(password) {
   return PASSREGEX.test(password);
 }
-
-module.exports = {
-  validatePassword,
-  validateEmail,
-};

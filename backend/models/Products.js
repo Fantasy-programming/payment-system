@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const productSchema = new mongoose.Schema({
   name: { type: String, required: true, trim: true },
@@ -27,5 +27,4 @@ productSchema.set("toJSON", {
   },
 });
 
-const Product = mongoose.model("Product", productSchema);
-module.exports = Product;
+export const Product = mongoose.model("Product", productSchema);

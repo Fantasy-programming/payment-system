@@ -1,7 +1,7 @@
-const router = require("express").Router();
-// const userExtractor = require("../lib/middleware").userExtractor;
+import { Router } from "express";
+import { Product } from "../models/Products";
 
-const Product = require("../models/Products");
+const router = Router();
 
 // Get all products
 router.get("/", async (request, response) => {
@@ -150,4 +150,4 @@ router.put("/:id", async (request, response) => {
   response.json(updatedProduct);
 });
 
-module.exports = router;
+export default router;

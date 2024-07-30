@@ -1,7 +1,9 @@
-const router = require("express").Router();
-const userExtractor = require("../lib/middleware").userExtractor;
+import { Router } from "express";
+import { User } from "../models/User";
 
-const User = require("../models/User");
+import { userExtractor } from "../lib/middleware";
+
+const router = Router();
 
 // Get all users
 router.get("/", userExtractor, async (request, response) => {
@@ -98,7 +100,6 @@ router.post("/", async (request, response) => {
 
     await user.save();
 
-    //TODO: Send onboarding email
     response.status(200).json({ message: "User created Successfully" });
   } catch (error) {
     logger.error(error);
@@ -172,4 +173,4 @@ router.patch("/:id", async (request, response) => {
   response.json(updatedUser);
 });
 
-module.exports = router;
+export default router;

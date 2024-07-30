@@ -13,17 +13,14 @@ import {
 } from "@react-email/components";
 import * as React from "react";
 
-interface MikronetWelcomeProps {
-  firstName?: string;
-  lastName?: string;
-}
+// interface MikronetWelcomeProps {
+//   firstName?: string;
+//   lastName?: string;
+// }
 
 const baseUrl = process.env.LIVE_URL;
 
-export const MikronetWelcomeEmail = ({
-  firstName,
-  lastName,
-}: MikronetWelcomeProps) => (
+export const MikronetWelcomeEmail = ({ firstName, lastName }) => (
   <Html>
     <Head />
     <Preview>Welcome to Mikronet!</Preview>
@@ -73,7 +70,7 @@ export const MikronetWelcomeEmail = ({
 MikronetWelcomeEmail.PreviewProps = {
   firstName: "John",
   lastName: "Doe",
-} as MikronetWelcomeProps;
+};
 
 export default MikronetWelcomeEmail;
 
@@ -104,7 +101,7 @@ const paragraph = {
 
   fontSize: "16px",
   lineHeight: "24px",
-  textAlign: "left" as const,
+  textAlign: "left",
 };
 
 const anchor = {
@@ -118,7 +115,7 @@ const button = {
   fontSize: "16px",
   fontWeight: "bold",
   textDecoration: "none",
-  textAlign: "center" as const,
+  textAlign: "center",
   display: "block",
   width: "100%",
   padding: "10px",

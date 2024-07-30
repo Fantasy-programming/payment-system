@@ -1,23 +1,22 @@
-const express = require("express");
-const morgan = require("morgan");
-const cors = require("cors");
-const mongoose = require("mongoose");
+import express from "express";
+import morgan from "morgan";
+import cors from "cors";
+import mongoose from "mongoose";
+import config from "./lib/config.js";
+import logger from "./lib/logger.js";
+import { sendEmail } from "./script/sendSMS.js";
 
-const config = require("./lib/config");
-const logger = require("./lib/logger");
-const sendMail = require("./script/sendSMS");
+import "express-async-errors";
 
-require("express-async-errors");
-const userRouter = require("./controllers/user");
-const authRouter = require("./controllers/auth");
-const productRouter = require("./controllers/products");
-const transactionRouter = require("./controllers/transaction");
-const middleware = require("./lib/middleware");
+import userRouter from "./controllers/user.js";
+import authRouter from "./controllers/auth.js";
+import productRouter from "./controllers/products.js";
+import transactionRouter from "./controllers/transaction.js";
+import middleware from "./lib/middleware.js";
 
 const app = express();
 
 // connect to the DB
-
 mongoose.set("strictQuery", false);
 mongoose
   .connect(config.MONGODB_URI)
@@ -41,10 +40,10 @@ app.use("/api/auth", authRouter);
 app.use("/api/transactions", transactionRouter);
 app.use("/api/products", productRouter);
 
-sendMail();
+sendEmail();
 
 // custom middlewares
 app.use(middleware.unknownEndpoint);
 app.use(middleware.errorHandler);
 
-module.exports = app;
+export default app;

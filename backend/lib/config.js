@@ -1,4 +1,4 @@
-require("dotenv").config();
+import "dotenv/config";
 
 const PORT = process.env.PORT;
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
@@ -11,7 +11,7 @@ const MONGODB_URI =
 const SMS_API_KEY = process.env.SMS_API_KEY;
 const SMS_SENDER_ID = process.env.SMS_DEVICE_ID;
 
-module.exports = {
+export default {
   MONGODB_URI,
   PORT,
   SMS_SENDER_ID,

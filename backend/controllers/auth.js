@@ -1,9 +1,11 @@
-const jwt = require("jsonwebtoken");
-const router = require("express").Router();
-const logger = require("../lib/logger");
-const sms = require("../lib/sms");
+import jwt from "jsonwebtoken";
+import logger from "../lib/logger";
+import sms from "../lib/sms";
 
-const User = require("../models/User");
+import { Router } from "express";
+import { User } from "../models/User";
+
+const router = Router();
 
 // Verify OTP When using phone
 router.post("/verify-otp", async (request, response) => {
@@ -127,4 +129,4 @@ router.post("/mobile", async (request, response) => {
   }
 });
 
-module.exports = router;
+export default router;

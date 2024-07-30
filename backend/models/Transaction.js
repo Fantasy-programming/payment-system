@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const transactionSchema = new mongoose.Schema({
   user: {
@@ -30,5 +30,4 @@ transactionSchema.set("toJSON", {
   },
 });
 
-const Transaction = mongoose.model("Transaction", transactionSchema);
-module.exports = Transaction;
+export const Transaction = mongoose.model("Transaction", transactionSchema);

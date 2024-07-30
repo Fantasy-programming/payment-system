@@ -1,8 +1,9 @@
-const router = require("express").Router();
-const userExtractor = require("../lib/middleware").userExtractor;
+import { Router } from "express";
+import { Transaction } from "../models/Transaction";
+import { userExtractor } from "../lib/middleware";
+import { getPaymentMethod } from "../lib/paystack";
 
-const Transaction = require("../models/Transaction");
-const paystack = require("../lib/paystack");
+const router = Router();
 
 // Get all transactions
 router.get("/", userExtractor, async (request, response) => {
@@ -47,7 +48,7 @@ router.post("/", userExtractor, async (request, response) => {
 
   const startDate = new Date();
   const endDate = new Date(new Date().setMonth(startDate.getMonth() + 1));
-  let medium = await paystack.getPaymentMethod(reference);
+  let medium = await getPaymentMethod(reference);
 
   const transaction = new Transaction({
     user: request.user._id,
@@ -82,4 +83,4 @@ router.delete("/", userExtractor, async (request, response) => {
   return response.status(204).end();
 });
 
-module.exports = router;
+export default router;

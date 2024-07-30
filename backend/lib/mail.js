@@ -1,7 +1,7 @@
-const logger = require("./logger");
-const nodemailer = require("nodemailer");
+import logger from "./logger";
+import nodemailer from "nodemailer";
 
-async function sendMail(email, title, body) {
+export async function sendMail(email, title, body) {
   try {
     // Create a Transporter to send emails
     let transporter = nodemailer.createTransport({
@@ -29,5 +29,3 @@ async function sendMail(email, title, body) {
     logger.error(error.message);
   }
 }
-
-module.exports = sendMail;

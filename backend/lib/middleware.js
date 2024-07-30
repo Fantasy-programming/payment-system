@@ -1,7 +1,6 @@
-const jwt = require("jsonwebtoken");
-const User = require("../models/User");
-
-const logger = require("./logger");
+import jwt from "jsonwebtoken";
+import logger from "./logger";
+import { User } from "../models/User";
 
 const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: "unknown endpoint" });
@@ -33,7 +32,7 @@ const tokenExtractor = (request, response, next) => {
   next();
 };
 
-const userExtractor = async (request, response, next) => {
+export const userExtractor = async (request, response, next) => {
   try {
     if (!request.token) {
       return response.status(401).json({ error: "token missing or invalid" });
@@ -51,7 +50,7 @@ const userExtractor = async (request, response, next) => {
   }
 };
 
-module.exports = {
+export default {
   unknownEndpoint,
   errorHandler,
   userExtractor,

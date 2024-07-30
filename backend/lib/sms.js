@@ -1,4 +1,4 @@
-const axios = require("axios");
+import axios from "axios";
 
 const EXPIRY = 5; // in minutes
 const LENGTH = 6; // OTP length
@@ -62,4 +62,4 @@ const verifyOTP = async ({ code, number }) => {
   }
 };
 
-module.exports = { sendOTP, verifyOTP };
+export default { sendOTP, verifyOTP };

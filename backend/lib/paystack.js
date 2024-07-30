@@ -1,9 +1,10 @@
-const { Paystack } = require("paystack-sdk");
-const config = require("./config");
+import { Paystack } from "paystack-sdk";
+import config from "./config";
+import logger from "./logger";
 
 const paystack = new Paystack(config.PAYSTACK_SECRET_KEY);
 
-async function getPaymentMethod(transactionReference) {
+export async function getPaymentMethod(transactionReference) {
   try {
     const response = await paystack.transaction.verify(transactionReference);
     if (response.status) {
@@ -20,11 +21,9 @@ async function getPaymentMethod(transactionReference) {
 
       return medium;
     } else {
-      console.log("Transaction not found or verification failed");
+      logger.error("Transaction not found or verification failed");
     }
   } catch (error) {
-    console.error("Error fetching transaction details:", error);
+    logger.error("Error fetching transaction details:", error);
   }
 }
-
-module.exports = { getPaymentMethod };
