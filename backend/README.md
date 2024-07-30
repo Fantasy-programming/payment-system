@@ -5,17 +5,17 @@
   - [x] The phone is verified with otp before login
 - [x] The user can logout from the system.
 
-- [ ] The admin can register new user.
-- [ ] The admin (only) can view all users (and crud them)
-- [ ] The admin can view all transactions
+- [x] The admin can register new user.
+- [x] The admin (only) can view all users (and crud them)
+- [x] The admin can view all transactions
 - [ ] The admin can print receipts
 - [ ] The admin can extract transactions as csv
 - [ ] The admin can change customers plan ?
 
-- [ ] The users can view their payment history
-- [ ] The users can export their payment history as csv
+- [x] The users can view their payment history
+- [x] The users can export their payment history as csv
 
-- [ ] The users can pay their bills
+- [x] The users can pay their bills
 - [ ] The users can upgrade their plan
 - [ ] The users can subscribe for auto payments
 - [ ] The users can cancel auto payments

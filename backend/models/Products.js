@@ -3,6 +3,12 @@ const mongoose = require("mongoose");
 const productSchema = new mongoose.Schema({
   name: { type: String, required: true, trim: true },
   description: { type: String, required: true, trim: true },
+  status: {
+    type: String,
+    enum: ["active", "draft", "archived", "deleted"],
+    default: "active",
+    required: true,
+  },
   price: { type: Number, required: true },
   rate: { type: Number, required: true },
   cap: { type: Number, required: false },

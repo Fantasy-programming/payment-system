@@ -19,6 +19,7 @@ const userSchema = new mongoose.Schema({
   routerID: { type: String, required: true },
   emailVerified: { type: Boolean, default: false },
   phoneVerified: { type: Boolean, default: false },
+  status: { type: String, enum: ["active", "inactive"], default: "active" },
   role: {
     type: String,
     enum: ["user", "admin"],

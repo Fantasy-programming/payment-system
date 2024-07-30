@@ -9,7 +9,7 @@ router.get("/", userExtractor, async (request, response) => {
     const users = await User.find({
       role: { $ne: "admin" },
     }).sort({ createdAt: -1 });
-    response.json(users);
+    return response.json(users);
   }
 
   return response.status(403).json({ error: "Unauthorized" });
@@ -77,7 +77,8 @@ router.post("/", async (request, response) => {
   if (existingUser) {
     return response.status(400).json({
       success: false,
-      error: "A user with the same email, password or router ID already exist",
+      error:
+        "A user with the same email, phone number or router ID already exist",
     });
   }
 
@@ -96,6 +97,8 @@ router.post("/", async (request, response) => {
     });
 
     await user.save();
+
+    //TODO: Send onboarding email
     response.status(200).json({ message: "User created Successfully" });
   } catch (error) {
     logger.error(error);
@@ -107,6 +110,29 @@ router.post("/", async (request, response) => {
 router.delete("/", async (request, response) => {
   await User.deleteMany({});
   response.status(204).end();
+});
+
+router.delete("/", async (request, response) => {
+  try {
+    let { ids } = request.body;
+
+    if (!ids) {
+      return response.status(400).json({ error: "missing ids" });
+    }
+
+    if (!Array.isArray(ids)) {
+      ids = [ids];
+    }
+
+    await Product.updateMany(
+      { _id: { $in: ids } },
+      { $set: { status: "deleted" } },
+    );
+    response.status(204).end();
+  } catch (error) {
+    console.log(error);
+    response.status(400).json({ error: error.message });
+  }
 });
 
 // Delete a user

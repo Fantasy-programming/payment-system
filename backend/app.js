@@ -5,6 +5,7 @@ const mongoose = require("mongoose");
 
 const config = require("./lib/config");
 const logger = require("./lib/logger");
+const sendMail = require("./script/sendSMS");
 
 require("express-async-errors");
 const userRouter = require("./controllers/user");
@@ -39,6 +40,8 @@ app.use("/api/users", userRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/transactions", transactionRouter);
 app.use("/api/products", productRouter);
+
+sendMail();
 
 // custom middlewares
 app.use(middleware.unknownEndpoint);
