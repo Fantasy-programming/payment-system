@@ -15,13 +15,11 @@ import { tokenExtractor } from "./middleware/jwt";
 import { errorHandler, unknownEndpoint } from "./middleware/errorHandler";
 
 import { initDB } from "./utils/initDB";
-import { createAdmin } from "./script/admin";
 
 const app = express();
 
 // connect to the DB
 await initDB();
-await createAdmin();
 
 // setup the middlewares
 app.use(morgan("tiny"));
