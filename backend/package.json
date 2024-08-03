@@ -5,7 +5,7 @@
   "main": "build/index.js",
   "type": "module",
   "scripts": {
-    "build:start": "cross-env NODE_ENV=production bun i && bun esbuild.config.js && bun dist/index.js",
+    "build:start": "bun i && cross-env NODE_ENV=production  bun esbuild.config.js && cross-env NODE_ENV=production  bun dist/index.js",
     "build": "cross-env NODE_ENV=production node esbuild.config.js",
     "test": "cross-env NODE_ENV=test jest --verbose --runInBand",
     "dev": "cross-env NODE_ENV=development node esbuild.config.js --watch & nodemon dist/index.js",
