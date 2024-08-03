@@ -11,10 +11,10 @@
 - [ ] Setup request for move
 - [ ] Setup request for support
 
-- [ ] See all transactions
-- [ ] Export transactions to CSV
+- [x] See all transactions
+- [x] Export transactions to CSV
 - [ ] Filter transactions by type & date?
-- [ ] View transaction info & download receipt
+- [x] View transaction info & download receipt
 
 - [ ] Change password, phone and email
 - [ ] Setup alerting preferences
@@ -27,8 +27,8 @@
 - [ ] See all customers & manage them (info + send reset-pass mail)
 - [ ] See all transactions + export to CSV
 - [ ] See all active subscriptions
-- [ ] Create plans (products)
+- [x] Create plans (products)
 - [ ] See analytics
 - [ ] Setup alerting preferences
-- [ ] See all the backend ??
+- [?] See all the backend ??
 - [ ] View all invoices

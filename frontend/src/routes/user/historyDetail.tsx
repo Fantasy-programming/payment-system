@@ -1,3 +1,11 @@
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { usePDF } from "react-to-pdf";
+
+import { userInfoQuery, userTransactionsQuery } from "@/queries/userQueries";
+import { formatDate } from "@/lib/utils";
+
 import {
   ChevronLeft,
   ChevronRight,
@@ -21,13 +29,8 @@ import {
   PaginationItem,
 } from "@/components/ui/pagination";
 import { Separator } from "@/components/ui/separator";
-import { useQuery } from "@tanstack/react-query";
-import { userInfoQuery, userTransactionsQuery } from "@/queries/userQueries";
-import { useParams } from "react-router-dom";
-import { Transaction } from "@/services/transaction.types";
-import { useEffect, useState } from "react";
-import { formatDate } from "@/lib/utils";
-import { usePDF } from "react-to-pdf";
+
+import type { Transaction } from "@/services/transaction.types";
 
 export const HistoryDetailView = () => {
   const [transaction, setTransaction] = useState<Transaction | null>();
@@ -35,17 +38,8 @@ export const HistoryDetailView = () => {
 
   const { id } = useParams<"id">();
 
-  const {
-    data: user,
-    isLoading: isUserLoading,
-    isError: isUserError,
-  } = useQuery(userInfoQuery());
-
-  const {
-    data: transactions,
-    isLoading: isTrscLoading,
-    isError: isTrscError,
-  } = useQuery(userTransactionsQuery());
+  const { data: user } = useSuspenseQuery(userInfoQuery());
+  const { data: transactions } = useSuspenseQuery(userTransactionsQuery());
 
   useEffect(() => {
     if (transactions) {
@@ -56,16 +50,12 @@ export const HistoryDetailView = () => {
 
   return (
     <>
-      {isUserLoading || isTrscLoading || !transaction ? (
-        <div>loading</div>
-      ) : isUserError || isTrscError ? (
-        <div className="text-red-500">Error</div>
-      ) : (
+      {transaction && (
         <Card className="overflow-hidden" ref={targetRef}>
           <CardHeader className="flex flex-row items-start bg-muted/50">
             <div className="grid gap-0.5">
-              <CardTitle className="group flex items-center gap-2 text-lg">
-                Order {transaction.trxRef}
+              <CardTitle className="group flex items-center gap-2 text-sm md:text-lg ">
+                <span className="truncate  "> Order {transaction.trxRef}</span>
                 <Button
                   size="icon"
                   variant="outline"
@@ -99,9 +89,16 @@ export const HistoryDetailView = () => {
               <ul className="grid gap-3">
                 <li className="flex items-center justify-between">
                   <span className="text-muted-foreground">
-                    {transaction.product.name} data plan x <span>1 month</span>
+                    {transaction.product.name}{" "}
+                    {transaction.recurring ? (
+                      "Plan (Recurring)"
+                    ) : (
+                      <>
+                        data plan x <span>{transaction.months} month</span>
+                      </>
+                    )}
                   </span>
-                  <span>₵{transaction.product.price.toFixed(2)}</span>
+                  <span>₵{transaction.finalPrice.toFixed(2)}</span>
                 </li>
               </ul>
               <Separator className="my-2" />
@@ -116,7 +113,7 @@ export const HistoryDetailView = () => {
                 </li>
                 <li className="flex items-center justify-between font-semibold">
                   <span className="text-muted-foreground">Total</span>
-                  <span>₵{transaction.product.price.toFixed(2)}</span>
+                  <span>₵{transaction.finalPrice.toFixed(2)}</span>
                 </li>
               </ul>
             </div>
@@ -125,9 +122,9 @@ export const HistoryDetailView = () => {
               <div className="grid gap-3">
                 <div className="font-semibold">Address</div>
                 <address className="grid gap-0.5 not-italic text-muted-foreground">
-                  <span>Liam Johnson</span>
-                  <span>1234 Main St.</span>
-                  <span>Anytown, CA 12345</span>
+                  {user.address.split(",").map((line, index) => (
+                    <span key={index}>{line}</span>
+                  ))}
                 </address>
               </div>
               <div className="grid auto-rows-max gap-3">

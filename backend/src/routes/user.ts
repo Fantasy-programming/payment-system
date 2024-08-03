@@ -3,7 +3,11 @@ import { userExtractor } from "../middleware/jwt";
 
 import { validateData, validateParams } from "../middleware/validation";
 import { idparam, idsSchema } from "../types/Api.type";
-import { createUserSchema, updateUserSchema } from "../types/User.type";
+import {
+  createUserSchema,
+  updateUserSchema,
+  userPersonalUpdateSchema,
+} from "../types/User.type";
 
 import userController from "../controllers/userController";
 
@@ -14,6 +18,14 @@ userRouter.get("/", userExtractor, userController.getUsers);
 
 // Get current user info
 userRouter.get("/me", userExtractor, userController.getCurrentUser);
+
+// Update current user info
+userRouter.put(
+  "/me",
+  userExtractor,
+  validateData(userPersonalUpdateSchema),
+  userController.updateCurrentUser,
+);
 
 // Get a single user detail
 userRouter.get(

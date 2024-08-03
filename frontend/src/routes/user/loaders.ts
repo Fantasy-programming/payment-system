@@ -3,6 +3,7 @@ import {
   userInfoQuery,
   userTransactionsQuery,
   userProductsQuery,
+  usePrefQuery,
 } from "@/queries/userQueries";
 
 export const homeLoader = (queryClient: QueryClient) => async () => {
@@ -17,16 +18,28 @@ export const homeLoader = (queryClient: QueryClient) => async () => {
   return { user, transactions };
 };
 
+export const settingsLoader = (queryClient: QueryClient) => async () => {
+  const userQuery = userInfoQuery();
+  const prefQuery = usePrefQuery();
+
+  const [user, preferences] = await Promise.all([
+    queryClient.ensureQueryData(prefQuery),
+    queryClient.ensureQueryData(userQuery),
+  ]);
+
+  return { user, preferences };
+};
+
 export const historyLoader = (queryClient: QueryClient) => async () => {
   const trscQuery = userTransactionsQuery();
 
   const transactions = await queryClient.ensureQueryData(trscQuery);
-  return { transactions };
+  return transactions;
 };
 
 export const productsLoader = (queryClient: QueryClient) => async () => {
   const productsQuery = userProductsQuery();
 
   const products = await queryClient.ensureQueryData(productsQuery);
-  return { products };
+  return products;
 };

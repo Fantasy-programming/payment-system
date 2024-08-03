@@ -38,7 +38,7 @@ const FormSchema = z.object({
   }),
 });
 
-const Verify = () => {
+export const Verify = () => {
   const [isSubmitting, setSubmitting] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -124,5 +124,3 @@ const Verify = () => {
     </main>
   );
 };
-
-export default Verify;

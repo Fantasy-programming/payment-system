@@ -1,4 +1,4 @@
-import { UserInfo } from "@/services/user.types";
+import { User } from "@/services/user.types";
 import { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -13,8 +13,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { MetaProps } from "./customers-table";
 
-export const columns: ColumnDef<UserInfo>[] = [
+export const columns: ColumnDef<User>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -76,12 +77,19 @@ export const columns: ColumnDef<UserInfo>[] = [
   },
   {
     accessorKey: "createdAt",
-    header: "Date",
+    header: "Onboarding Date",
+    cell: ({ row }) => {
+      const time = row.original.createdAt;
+      return <span>{new Date(time).toLocaleDateString()}</span>;
+    },
   },
   {
     id: "actions",
-    cell: ({ row }) => {
-      const payment = row.original;
+    cell: ({ row, table }) => {
+      const customer = row.original;
+      const goto = (table.options.meta as MetaProps)?.gotoPage;
+      const deleteCustomer = (table.options.meta as MetaProps)?.deleteCustomer;
+      const resetPassword = (table.options.meta as MetaProps)?.resetPassword;
 
       return (
         <DropdownMenu>
@@ -93,10 +101,16 @@ export const columns: ColumnDef<UserInfo>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem>View customer details</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => goto(customer.id)}>
+              View customer details
+            </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>Reset password</DropdownMenuItem>
-            <DropdownMenuItem>Delete</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => resetPassword(customer.id)}>
+              Reset password
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => deleteCustomer(customer.id)}>
+              Delete
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );

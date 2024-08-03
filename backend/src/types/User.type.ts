@@ -1,8 +1,10 @@
 import { z } from "zod";
-import { Model, type ObjectId } from "mongoose";
+import { Model } from "mongoose";
+import { createObjectId } from "./Api.type";
 
 export const userSchema = z.object({
-  id: z.custom<ObjectId>(),
+  _id: createObjectId("invalid ID"),
+  id: createObjectId("invalid ID"),
   firstName: z.string().min(1, "Enter a valid first name"),
   lastName: z.string().min(1, "Enter a valid last name"),
   email: z.string().min(1, "Enter a valid email address").email(),
@@ -19,17 +21,35 @@ export const userSchema = z.object({
   phoneVerified: z.boolean(),
   status: z.enum(["active", "inactive"]),
   role: z.enum(["user", "admin"]),
-  createdAt: z.date(),
-  updatedAt: z.date(),
+  createdAt: z.coerce.date(),
+  updatedAt: z.coerce.date(),
 });
 
+export const userPersonalUpdateSchema = userSchema
+  .pick({
+    phone: true,
+    email: true,
+  })
+  .extend({
+    phone: z.string().length(10, "Phone must have 10 digits").optional(),
+    email: z.string().email().optional(),
+    password: z
+      .string()
+      .min(8, "Password must be at least 8 characters long")
+      .regex(
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?])[A-Za-z\d!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]{8,}$/,
+        "Password must contain at least one lowercase letter, one uppercase letter, one number and one special character",
+      )
+      .optional(),
+  });
+
 export const updateUserSchema = userSchema.omit({
-  id: true,
+  _id: true,
   password: true,
 });
 
 export const createUserSchema = userSchema.omit({
-  id: true,
+  _id: true,
   emailVerified: true,
   phoneVerified: true,
   status: true,
@@ -41,4 +61,5 @@ export const createUserSchema = userSchema.omit({
 export type IUser = z.infer<typeof userSchema>;
 export type IUserCreate = z.infer<typeof createUserSchema>;
 export type IUserUpdate = z.infer<typeof updateUserSchema>;
+export type IUserPersonalUpdate = z.infer<typeof userPersonalUpdateSchema>;
 export type UserModel = Model<IUser>;

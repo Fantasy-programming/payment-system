@@ -1,4 +1,4 @@
-import { Products } from "@/services/product.types";
+import { Transaction } from "@/services/transaction.types";
 import { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,11 +12,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
+import { MetaProps } from "./orders-table";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
 
-export const columns: ColumnDef<Products>[] = [
+export const columns: ColumnDef<Transaction>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -39,27 +40,47 @@ export const columns: ColumnDef<Products>[] = [
     enableSorting: false,
     enableHiding: false,
   },
-
   {
-    accessorKey: "name",
+    accessorKey: "user.lastName",
     header: "Name",
+    cell: ({ row }) => {
+      const user = row.original.user;
+      return (
+        <span>
+          {user.firstName} {user.lastName}
+        </span>
+      );
+    },
   },
   {
-    accessorKey: "description",
-    header: "Description",
+    accessorKey: "user.email",
+    header: "Email",
   },
   {
-    accessorKey: "rate",
-    header: "Rate",
+    accessorKey: "user.phone",
+    header: "Phone",
   },
   {
-    accessorKey: "price",
-    header: "Price",
+    accessorKey: "user.routerID",
+    header: "Router ID",
+  },
+  {
+    accessorKey: "product.name",
+    header: "Plan",
+  },
+  {
+    accessorKey: "createdAt",
+    header: "Payment Date",
+    cell: ({ row }) => {
+      const time = row.original.createdAt;
+      return <span>{new Date(time).toLocaleDateString()}</span>;
+    },
   },
   {
     id: "actions",
-    cell: ({ row }) => {
+    cell: ({ table, row }) => {
       const payment = row.original;
+      const goto = (table.options.meta as MetaProps)?.gotoPage;
 
       return (
         <DropdownMenu>
@@ -71,7 +92,16 @@ export const columns: ColumnDef<Products>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem>Edit Product</DropdownMenuItem>
+            <DropdownMenuItem>Print Receipt</DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => goto(payment.id)}>
+              View payment details
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => goto(`/admin/customers/${payment.user.id}`)}
+            >
+              View customer details
+            </DropdownMenuItem>
             <DropdownMenuItem>Delete</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

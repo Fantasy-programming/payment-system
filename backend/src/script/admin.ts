@@ -13,6 +13,7 @@ export async function createAdmin() {
     phone: "0596060556",
     zone: "Accra",
     address: "123 Accra",
+    status: "active",
     routerID: "0",
     emailVerified: true,
     phoneVerified: true,

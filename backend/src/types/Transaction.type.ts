@@ -6,7 +6,9 @@ export const transactionSchema = z.object({
   id: createObjectId("invalid ID"),
   user: createObjectId("invalid user ID"),
   product: createObjectId("invalid product ID"),
-  reference: z.string(),
+  reference: z.string({ required_error: "Reference is required" }),
+  months: z.number(),
+  finalPrice: z.number(),
   trxRef: z.string(),
   type: z.enum(["subscription", "top-up"]),
   medium: z.string(),
@@ -20,9 +22,10 @@ export const transactionSchema = z.object({
 export const createTransactionSchema = transactionSchema
   .omit({
     id: true,
-    startDate: true,
     user: true,
     product: true,
+    startDate: true,
+    medium: true,
     endDate: true,
     createdAt: true,
     updatedAt: true,

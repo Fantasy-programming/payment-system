@@ -6,34 +6,25 @@ import type { ICreateTransaction } from "../types/Transaction.type";
 
 const getAll = async (role: string, id: ObjectId) => {
   if (role === "admin") {
-    const transactions = await Transaction.find({})
-      .populate("user")
-      .populate("product")
-      .sort({ createdAt: -1 });
+    const transactions = await Transaction.find({});
     return transactions;
   }
 
-  const transactions = await Transaction.find({ user: id })
-    .sort({
-      createdAt: -1,
-    })
-    .populate("product");
+  const transactions = await Transaction.find({ user: id });
 
   return transactions;
 };
 
 const getOne = async (id: string, role: string, userId: ObjectId) => {
   if (role === "admin") {
-    const transaction = await Transaction.findById(id)
-      .populate("user")
-      .populate("product");
+    const transaction = await Transaction.findById(id);
     return transaction;
   }
 
   const transaction = await Transaction.findOne({
     _id: id,
     user: userId,
-  }).populate("product");
+  });
   return transaction;
 };
 
@@ -45,9 +36,11 @@ const create = async (trsc: ICreateTransaction, userId: ObjectId) => {
   const transaction = new Transaction({
     user: userId,
     product: trsc.productID,
-    refence: trsc.reference,
+    reference: trsc.reference,
     trxRef: trsc.trxRef,
     type: trsc.type,
+    finalPrice: trsc.finalPrice,
+    months: trsc.months,
     medium,
     recurring: trsc.recurring,
     startDate,

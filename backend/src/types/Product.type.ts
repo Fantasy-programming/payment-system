@@ -1,8 +1,9 @@
 import { z } from "zod";
-import { Model, type ObjectId } from "mongoose";
+import { Model } from "mongoose";
+import { createObjectId } from "./Api.type";
 
 export const productSchema = z.object({
-  id: z.custom<ObjectId>(),
+  id: createObjectId("invalid ID"),
   name: z.string().min(3, "Name is too short"),
   description: z
     .string({

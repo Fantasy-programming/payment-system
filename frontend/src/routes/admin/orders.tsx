@@ -1,5 +1,5 @@
-import { columns } from "./orders-column";
-import { DataTable } from "./orders-table";
+import { columns } from "./_components/orders-column";
+import { DataTable } from "./_components/orders-table";
 
 import { File, PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";

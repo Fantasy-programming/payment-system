@@ -5,7 +5,6 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -60,11 +59,11 @@ export function AdminDashboardLayout() {
             Customers
           </Link>
           <Link
-            to="/admin/analytics"
+            to="/admin/settings"
             className={` transition-colors hover:text-foreground
-            ${location.pathname === "/admin/analytics" ? "text-foreground " : "text-muted-foreground"} `}
+            ${location.pathname === "/admin/settings" ? "text-foreground " : "text-muted-foreground"} `}
           >
-            Analytics
+            Settings
           </Link>
         </nav>
         <Sheet>
@@ -117,11 +116,11 @@ export function AdminDashboardLayout() {
                 Customers
               </Link>
               <Link
-                to="/admin/analytics"
+                to="/admin/settings"
                 className={`  hover:text-foreground
-            ${location.pathname === "/admin/analytics" ? "text-foreground " : "text-muted-foreground"} `}
+            ${location.pathname === "/admin/Settings" ? "text-foreground " : "text-muted-foreground"} `}
               >
-                Analytics
+                Settings
               </Link>
             </nav>
           </SheetContent>
@@ -145,12 +144,7 @@ export function AdminDashboardLayout() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>My Account</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <Link to="/admin/settings">Settings</Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
+              <DropdownMenuLabel>Administrator</DropdownMenuLabel>
               <DropdownMenuItem onClick={() => logout()}>
                 Logout
               </DropdownMenuItem>

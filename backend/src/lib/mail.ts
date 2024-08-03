@@ -1,7 +1,10 @@
+import { render } from "@react-email/components";
+import { MikronetWelcomeEmail } from "../templates/mikronet-welcome";
 import { oauth2Client } from "../constants/mail";
-import { type Options } from "nodemailer/lib/smtp-transport/index";
+import { type Options } from "nodemailer/lib/smtp-transport/index.js";
 import logger from "../logger";
 import nodemailer from "nodemailer";
+
 import {
   MAIL_SERVICE,
   MAIL_USERNAME,
@@ -45,4 +48,16 @@ export async function sendMail(email: string, title: string, body: string) {
   } catch (error) {
     logger.error(error);
   }
+}
+
+export async function sendWelcomeMail(
+  email: string,
+  firstName: string,
+  lastName: string,
+  password: string,
+) {
+  const title = "Welcome to Mikronet";
+  const body = render(MikronetWelcomeEmail({ firstName, lastName, password }));
+  await sendMail(email, title, body);
+  logger.info("Welcome email sent successfully");
 }

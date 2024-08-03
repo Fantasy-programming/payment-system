@@ -12,6 +12,8 @@ const transactionSchema = new Schema<ITransaction, TransactionModel>({
     ref: "Product",
     required: true,
   },
+  months: { type: Number, required: true },
+  finalPrice: { type: Number, required: true },
   reference: { type: String, required: true },
   trxRef: { type: String, required: true },
   type: { type: String, enum: ["subscription", "top-up"], required: true },
@@ -21,6 +23,11 @@ const transactionSchema = new Schema<ITransaction, TransactionModel>({
   endDate: { type: Date, required: true },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
+});
+
+transactionSchema.pre("find", function (next) {
+  this.populate("product").populate("user").sort({ createdAt: -1 });
+  next();
 });
 
 transactionSchema.set("toJSON", {

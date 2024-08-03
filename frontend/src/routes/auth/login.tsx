@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button";
 import { LoadingButton } from "@/components/ui/loading-button";
 import { Input } from "@/components/ui/input";
-import { Link, useNavigate } from "react-router-dom";
+import { PasswordInput } from "@/components/ui/passinput";
 
 import authservice from "@/services/auth";
 
@@ -22,24 +22,12 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { Mail, Phone } from "lucide-react";
 import { handleError } from "@/lib/utils";
-
-const emailSchema = z.object({
-  email: z.string().min(1, "Enter a valid email address").email(),
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters long")
-    .regex(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?])[A-Za-z\d!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]{8,}$/,
-      "Password must contain at least one lowercase letter, one uppercase letter, one number and one special character",
-    ),
-});
-
-const phoneSchema = z.object({
-  phone: z.string().length(10, "Phone must have 10 digits"),
-});
-
-export type EmailFormValues = z.infer<typeof emailSchema>;
-export type PhoneFormValues = z.infer<typeof phoneSchema>;
+import {
+  EmailFormValues,
+  emailLoginSchema,
+  PhoneFormValues,
+  phoneLoginSchema,
+} from "@/services/auth.types";
 
 function EmailLoginForm({
   onSubmit,
@@ -49,7 +37,7 @@ function EmailLoginForm({
   isSubmitting: boolean;
 }) {
   const form = useForm<EmailFormValues>({
-    resolver: zodResolver(emailSchema),
+    resolver: zodResolver(emailLoginSchema),
     defaultValues: {
       email: "",
       password: "",
@@ -82,11 +70,7 @@ function EmailLoginForm({
               <FormItem>
                 <FormLabel>Password</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="enter password "
-                    type="password"
-                    {...field}
-                  />
+                  <PasswordInput placeholder="enter password" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -110,7 +94,7 @@ function PhoneLoginForm({
   isSubmitting: boolean;
 }) {
   const form = useForm<PhoneFormValues>({
-    resolver: zodResolver(phoneSchema),
+    resolver: zodResolver(phoneLoginSchema),
     defaultValues: {
       phone: "",
     },
@@ -151,7 +135,7 @@ export function Login() {
   const onSubmitEmail: SubmitHandler<EmailFormValues> = async (values) => {
     try {
       setSubmitting(true);
-      const response = await authservice.login(values);
+      const response = await authservice.emaillogin(values);
       storeUser(response);
       setSubmitting(false);
       navigate("/dashboard");

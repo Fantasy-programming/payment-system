@@ -1,5 +1,3 @@
-import { PocketKnife, Truck } from "lucide-react";
-
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,15 +8,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-
-import {
-  ResponsiveModal,
-  ResponsiveModalContent,
-  ResponsiveModalDescription,
-  ResponsiveModalHeader,
-  ResponsiveModalTitle,
-  ResponsiveModalTrigger,
-} from "@/components/ui/responsive-modal";
 
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
@@ -31,29 +20,23 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatDate } from "@/lib/utils";
-import { useQuery } from "@tanstack/react-query";
-import { Link } from "react-router-dom";
-import { TableSkeleton } from "./TableSkeletton";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { differenceInDays, isBefore, parseISO } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import { userInfoQuery, userTransactionsQuery } from "@/queries/userQueries";
+import { RequestTransferModal } from "./_components/RequetTransfertModal";
+import RequestSupportModal from "./_components/RequestSupportModal";
 
 export const UserHomeView = () => {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [percentagePassed, setPercentagePassed] = useState<number>(0);
 
-  const {
-    data: user,
-    isLoading: isUserLoading,
-    isError: isUserError,
-  } = useQuery(userInfoQuery());
+  const navigate = useNavigate();
 
-  const {
-    data: transactions,
-    isLoading: isTrscLoading,
-    isError: isTrscError,
-  } = useQuery(userTransactionsQuery());
+  const { data: user } = useSuspenseQuery(userInfoQuery());
+  const { data: transactions } = useSuspenseQuery(userTransactionsQuery());
 
   useEffect(() => {
     if (transactions && transactions.length > 0) {
@@ -93,12 +76,21 @@ export const UserHomeView = () => {
                 Subscribe now to enjoy our services.
               </CardDescription>
             </CardHeader>
-            <CardFooter>
-              <Button>
-                <Link to="/dashboard/subscribe">
-                  {isSubscribed ? "Top-Up Subscription" : "Subscribe Now"}
-                </Link>
+            <CardFooter className="gap-2">
+              <Button
+                onClick={() =>
+                  navigate(
+                    isSubscribed ? "/dashboard/top-up" : "/dashboard/subscribe",
+                  )
+                }
+              >
+                {isSubscribed ? "Top-Up Subscription" : "Subscribe Now"}
               </Button>
+              {transactions[0].recurring ? (
+                <Button variant="destructiveOutline">
+                  Cancel Subscription
+                </Button>
+              ) : null}
             </CardFooter>
           </Card>
           <Card>
@@ -154,199 +146,136 @@ export const UserHomeView = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {isTrscLoading ? (
-                <TableSkeleton />
-              ) : isTrscError ? (
-                <div>Error</div>
-              ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead className="hidden sm:table-cell">
-                        Type
-                      </TableHead>
-                      <TableHead className="hidden sm:table-cell">
-                        Plan
-                      </TableHead>
-                      <TableHead className="hidden md:table-cell">
-                        Date
-                      </TableHead>
-                      <TableHead className="text-right">Amount</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {transactions && transactions.length > 0 ? (
-                      transactions.slice(-5).map((transaction) => (
-                        <TableRow
-                          className="hover:bg-accent"
-                          key={transaction.id}
-                        >
-                          <TableCell>
-                            <div className="font-medium">
-                              {user?.firstName} {user?.lastName}
-                            </div>
-                            <div className="hidden text-sm text-muted-foreground md:inline">
-                              {user?.email}
-                            </div>
-                          </TableCell>
-                          <TableCell className="hidden sm:table-cell">
-                            {transaction.type}
-                          </TableCell>
-                          <TableCell className="hidden sm:table-cell">
-                            <Badge className="text-xs" variant="secondary">
-                              {transaction.product.name}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="hidden md:table-cell">
-                            {transaction.startDate.split("T")[0]}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            ₵{transaction.product.price}
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    ) : (
-                      <TableRow>
-                        <TableCell colSpan={5} className="text-center py-4">
-                          No transaction yet
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead className="hidden sm:table-cell">Type</TableHead>
+                    <TableHead className="hidden sm:table-cell">Plan</TableHead>
+                    <TableHead className="hidden md:table-cell">Date</TableHead>
+                    <TableHead className="text-right">Amount</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {transactions && transactions.length > 0 ? (
+                    transactions.slice(-5).map((transaction) => (
+                      <TableRow
+                        className="hover:bg-accent"
+                        key={transaction.id}
+                      >
+                        <TableCell>
+                          <div className="font-medium">
+                            {user?.firstName} {user?.lastName}
+                          </div>
+                          <div className="hidden text-sm text-muted-foreground md:inline">
+                            {user?.email}
+                          </div>
+                        </TableCell>
+                        <TableCell className="hidden sm:table-cell">
+                          {transaction.recurring
+                            ? "Recurring"
+                            : `${transaction.months} month`}{" "}
+                          {transaction.type}
+                        </TableCell>
+                        <TableCell className="hidden sm:table-cell">
+                          <Badge className="text-xs" variant="secondary">
+                            {transaction.product.name}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="hidden md:table-cell">
+                          {transaction.startDate.split("T")[0]}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          ₵{transaction.finalPrice}
                         </TableCell>
                       </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              )}
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-4">
+                        No transaction yet
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
             </CardContent>
           </Card>
         </div>
       </div>
       <div>
-        {isUserLoading ? (
-          <div> loading </div>
-        ) : isUserError ? (
-          <div>Error</div>
-        ) : (
-          <Card className="overflow-hidden">
-            <CardHeader className="flex flex-row items-start bg-muted/50">
-              <div className="grid gap-0.5">
-                <CardTitle className="group flex items-center gap-2 text-lg">
-                  Account
-                </CardTitle>
-                <CardDescription>
-                  Date: {user?.createdAt ? formatDate(user?.createdAt) : ""}
-                </CardDescription>
-              </div>
-              <div className="ml-auto flex items-center gap-1">
-                <RequestTransferModal />
-              </div>
-            </CardHeader>
-            <CardContent className="p-6 text-sm">
-              <div className="grid gap-3">
-                <div className="font-semibold">Customer Information</div>
-                <dl className="grid gap-3">
-                  <div className="flex items-center justify-between">
-                    <dt className="text-muted-foreground">First Name</dt>
-                    <dd>{user?.firstName}</dd>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <dt className="text-muted-foreground">Last Name</dt>
-                    <dd>{user?.lastName}</dd>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <dt className="text-muted-foreground">Email</dt>
-                    <dd>
-                      <a href={`mailto:${user?.email}`}>{user?.email}</a>
-                    </dd>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <dt className="text-muted-foreground">Phone</dt>
-                    <dd>
-                      <a href={`tel:${user?.phone}`}>{user?.phone}</a>
-                    </dd>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <dt className="text-muted-foreground">Zone</dt>
-                    <dd>{user?.zone}</dd>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <dt className="text-muted-foreground">Router ID</dt>
-                    <dd>{user?.routerID}</dd>
-                  </div>
-                </dl>
-              </div>
-
-              <Separator className="my-4" />
-              <div className="grid grid-cols-2 gap-4">
-                <div className="grid gap-3">
-                  <div className="font-semibold">Address</div>
-                  <address className="grid gap-0.5 not-italic text-muted-foreground">
-                    <span>Liam Johnson</span>
-                    <span>1234 Main St.</span>
-                    <span>Anytown, CA 12345</span>
-                  </address>
+        <Card className="overflow-hidden">
+          <CardHeader className="flex flex-row items-start bg-muted/50">
+            <div className="grid gap-0.5">
+              <CardTitle className="group flex items-center gap-2 text-lg">
+                Account
+              </CardTitle>
+              <CardDescription>
+                Date: {user?.createdAt ? formatDate(user?.createdAt) : ""}
+              </CardDescription>
+            </div>
+            <div className="ml-auto flex items-center gap-1">
+              <RequestTransferModal />
+            </div>
+          </CardHeader>
+          <CardContent className="p-6 text-sm">
+            <div className="grid gap-3">
+              <div className="font-semibold">Customer Information</div>
+              <dl className="grid gap-3">
+                <div className="flex items-center justify-between">
+                  <dt className="text-muted-foreground">First Name</dt>
+                  <dd>{user?.firstName}</dd>
                 </div>
+                <div className="flex items-center justify-between">
+                  <dt className="text-muted-foreground">Last Name</dt>
+                  <dd>{user?.lastName}</dd>
+                </div>
+                <div className="flex items-center justify-between">
+                  <dt className="text-muted-foreground">Email</dt>
+                  <dd>
+                    <a href={`mailto:${user?.email}`}>{user?.email}</a>
+                  </dd>
+                </div>
+                <div className="flex items-center justify-between">
+                  <dt className="text-muted-foreground">Phone</dt>
+                  <dd>
+                    <a href={`tel:${user?.phone}`}>{user?.phone}</a>
+                  </dd>
+                </div>
+                <div className="flex items-center justify-between">
+                  <dt className="text-muted-foreground">Zone</dt>
+                  <dd>{user?.zone}</dd>
+                </div>
+                <div className="flex items-center justify-between">
+                  <dt className="text-muted-foreground">Router ID</dt>
+                  <dd>{user?.routerID}</dd>
+                </div>
+              </dl>
+            </div>
+
+            <Separator className="my-4" />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-3">
+                <div className="font-semibold">Address</div>
+                <address className="grid gap-0.5 not-italic text-muted-foreground">
+                  {user.address.split(",").map((line, index) => (
+                    <span key={index}>{line}</span>
+                  ))}
+                </address>
               </div>
-            </CardContent>
-            <CardFooter className="flex flex-row items-center border-t bg-muted/50 px-6 py-3">
-              <div className="text-xs text-muted-foreground">
-                Updated{" "}
-                <time dateTime="2023-11-23">
-                  {user?.updatedAt ? formatDate(user?.updatedAt) : ""}
-                </time>
-              </div>
-              <RequestSupportModal />
-            </CardFooter>
-          </Card>
-        )}
+            </div>
+          </CardContent>
+          <CardFooter className="flex flex-row items-center border-t bg-muted/50 px-6 py-3">
+            <div className="text-xs text-muted-foreground">
+              Updated{" "}
+              <time dateTime="2023-11-23">
+                {user?.updatedAt ? formatDate(user?.updatedAt) : ""}
+              </time>
+            </div>
+            <RequestSupportModal />
+          </CardFooter>
+        </Card>
       </div>
     </main>
-  );
-};
-
-const RequestTransferModal = () => {
-  return (
-    <ResponsiveModal>
-      <ResponsiveModalTrigger asChild>
-        <Button size="sm" variant="outline" className="h-8 gap-1">
-          <Truck className="h-3.5 w-3.5" />
-          <span className="lg:sr-only xl:not-sr-only xl:whitespace-nowrap">
-            Request Transfert
-          </span>
-        </Button>
-      </ResponsiveModalTrigger>
-      <ResponsiveModalContent>
-        <ResponsiveModalHeader>
-          <ResponsiveModalTitle>Are you absolutely sure?</ResponsiveModalTitle>
-          <ResponsiveModalDescription>
-            This action cannot be undone. This will permanently delete your
-            account and remove your data from our servers.
-          </ResponsiveModalDescription>
-        </ResponsiveModalHeader>
-      </ResponsiveModalContent>
-    </ResponsiveModal>
-  );
-};
-
-const RequestSupportModal = () => {
-  return (
-    <ResponsiveModal>
-      <ResponsiveModalTrigger asChild>
-        <Button size="sm" variant="outline" className="h-8 ml-auto mr-0 gap-1">
-          <PocketKnife className="h-3.5 w-3.5" />
-          <span className="lg:sr-only xl:not-sr-only xl:whitespace-nowrap">
-            Request Support
-          </span>
-        </Button>
-      </ResponsiveModalTrigger>
-      <ResponsiveModalContent>
-        <ResponsiveModalHeader>
-          <ResponsiveModalTitle>Are you absolutely sure?</ResponsiveModalTitle>
-          <ResponsiveModalDescription>
-            This action cannot be undone. This will permanently delete your
-            account and remove your data from our servers.
-          </ResponsiveModalDescription>
-        </ResponsiveModalHeader>
-      </ResponsiveModalContent>
-    </ResponsiveModal>
   );
 };

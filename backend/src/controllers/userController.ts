@@ -2,7 +2,11 @@ import userService from "../services/userService";
 
 import type { Request, Response } from "express";
 import type { IdParam, Ids } from "../types/Api.type";
-import type { IUserCreate, IUserUpdate } from "../types/User.type";
+import type {
+  IUserCreate,
+  IUserPersonalUpdate,
+  IUserUpdate,
+} from "../types/User.type";
 
 const getUsers = async (request: Request, response: Response) => {
   if (request?.user?.role !== "admin") {
@@ -37,6 +41,15 @@ const updateUser = async (request: Request, response: Response) => {
   response.json(data);
 };
 
+const updateCurrentUser = async (request: Request, response: Response) => {
+  const userId = request.user?.id;
+
+  const body = request.body as IUserPersonalUpdate;
+  const data = await userService.updateUser(userId!, body);
+
+  response.json(data);
+};
+
 const deleteUsers = async (request: Request, response: Response) => {
   const { ids } = request.body as Ids;
   await userService.remove(ids);
@@ -49,5 +62,6 @@ export default {
   getUser,
   createUser,
   updateUser,
+  updateCurrentUser,
   deleteUsers,
 };

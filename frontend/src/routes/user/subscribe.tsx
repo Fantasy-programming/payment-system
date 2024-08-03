@@ -1,8 +1,17 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { PAYSTACK_PUBLIC_KEY } from "@/lib/config";
-import trscService from "@/services/transaction";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { usePaystackPayment } from "react-paystack";
+import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 
+import { PAYSTACK_PUBLIC_KEY } from "@/lib/config";
+import { userProductsQuery } from "@/queries/userQueries";
+import trscService from "@/services/transaction";
+import { handleError } from "@/lib/utils";
+
+import { Button } from "@/components/ui/button";
+import { CheckIcon } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -20,25 +29,21 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { CheckIcon } from "lucide-react";
-import { usePaystackPayment } from "react-paystack";
-import { useAuth } from "@/hooks/useAuth";
-import { toast } from "sonner";
-import { handleError } from "@/lib/utils";
-import { useQuery } from "@tanstack/react-query";
-import { userProductsQuery } from "@/queries/userQueries";
-import { Products } from "@/services/product.types";
 
-export const SubscribeView = () => {
-  const [paymentFrequency, setPaymentFrequency] = useState("onetime");
+import { Product } from "@/services/product.types";
+
+interface SubscribeViewProps {
+  type: "subscription" | "top-up";
+}
+
+type PaymentFrequency = "onetime" | "monthly";
+
+export const SubscribeView = ({ type }: SubscribeViewProps) => {
+  const [paymentFrequency, setPaymentFrequency] =
+    useState<PaymentFrequency>("onetime");
   const [paymentMonths, setPaymentMonths] = useState(1);
 
-  const {
-    data: plans,
-    isLoading: isUserLoading,
-    isError: isUserError,
-  } = useQuery(userProductsQuery());
+  const { data: plans } = useSuspenseQuery(userProductsQuery());
 
   const onClose = () => {
     console.log("failure");
@@ -48,27 +53,33 @@ export const SubscribeView = () => {
     <div className="w-full max-w-6xl mx-auto py-12 md:py-16 lg:py-20 px-4 md:px-6">
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 md:mb-12">
         <div className="space-y-2">
-          <h1 className="text-3xl md:text-4xl font-bold">Subscription Plans</h1>
+          <h1 className="text-3xl md:text-4xl font-bold">
+            {type === "top-up" ? "Top-Up" : "Subscription"} Plans
+          </h1>
           <p className="text-muted-foreground">
             Choose the plan that best fits your needs.
           </p>
         </div>
-        <div className="flex items-center gap-2 mt-4 md:mt-0">
-          <Label htmlFor="payment-frequency">Payment Frequency:</Label>
-          <Select
-            defaultValue="onetime"
-            value={paymentFrequency}
-            onValueChange={(value) => setPaymentFrequency(value)}
-          >
-            <SelectTrigger className="w-32">
-              <SelectValue placeholder="Select" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="onetime">One-Time</SelectItem>
-              <SelectItem value="monthly">Monthly</SelectItem>
-            </SelectContent>
-          </Select>
-          {paymentFrequency === "monthly" && (
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center gap-2 mt-4 md:mt-0">
+            <Label htmlFor="payment-frequency">Payment Frequency:</Label>
+            <Select
+              defaultValue="onetime"
+              value={paymentFrequency}
+              onValueChange={(value: PaymentFrequency) =>
+                setPaymentFrequency(value)
+              }
+            >
+              <SelectTrigger className="w-32">
+                <SelectValue placeholder="Select" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="onetime">One-Time</SelectItem>
+                <SelectItem value="monthly">Monthly</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          {paymentFrequency === "onetime" && (
             <div className="flex items-center gap-2">
               <Label htmlFor="payment-months">Months:</Label>
               <Slider
@@ -87,24 +98,26 @@ export const SubscribeView = () => {
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {isUserLoading ? (
-          <div>Loading..</div>
-        ) : isUserError ? (
-          <div>Error</div>
-        ) : (
-          <>
-            {plans?.map((plan) => (
-              <SubsribeCard key={plan.id} plan={plan} onClose={onClose} />
-            ))}
-          </>
-        )}
+        {plans?.map((plan) => (
+          <SubsribeCard
+            key={plan.id}
+            type={type}
+            frequency={paymentFrequency}
+            months={paymentMonths}
+            plan={plan}
+            onClose={onClose}
+          />
+        ))}
       </div>
     </div>
   );
 };
 
 interface SubscribeCardProps {
-  plan: Products;
+  plan: Product;
+  frequency: PaymentFrequency;
+  months: number;
+  type: "subscription" | "top-up";
   onClose: () => void;
 }
 
@@ -118,13 +131,26 @@ interface TransactionInfo {
   trxref: string;
 }
 
-const SubsribeCard = ({ plan, onClose }: SubscribeCardProps) => {
+const SubsribeCard = ({
+  plan,
+  months,
+  type,
+  frequency,
+  onClose,
+}: SubscribeCardProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
   const initializePayment = usePaystackPayment({
     publicKey: PAYSTACK_PUBLIC_KEY,
   });
+
+  const recurring = frequency === "monthly" ? true : false;
+  const upgradeTax = type === "subscription" ? 0 : 0.3;
+  const price = !recurring
+    ? plan.price * months + plan.price * upgradeTax
+    : plan.price + plan.price * upgradeTax;
+  const finalPrice = price * 100;
 
   const onSuccess = (reference: TransactionInfo) => {
     try {
@@ -133,8 +159,10 @@ const SubsribeCard = ({ plan, onClose }: SubscribeCardProps) => {
           productID: plan.id,
           reference: reference.reference,
           trxRef: reference.trxref,
-          type: "subscription",
-          recurring: false,
+          months: months,
+          finalPrice: price,
+          type: type,
+          recurring: recurring,
         })
         .then(() => {
           toast.success("Operation succeeded");
@@ -150,44 +178,37 @@ const SubsribeCard = ({ plan, onClose }: SubscribeCardProps) => {
     <Card>
       <CardHeader>
         <CardTitle>{plan.name}</CardTitle>
-        <CardDescription>{plan.rate} mbs</CardDescription>
+        <CardDescription>₵{price}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* <div className="flex items-baseline gap-2"> */}
-        {/*   <span className="text-4xl font-bold"> */}
-        {/*     {paymentFrequency === "onetime" */}
-        {/*       ? `$${310 * paymentMonths}` */}
-        {/*       : `$310/month`} */}
-        {/*   </span> */}
-        {/*   <span className="text-muted-foreground"> */}
-        {/*     {paymentFrequency === "onetime" */}
-        {/*       ? `/${paymentMonths} months` */}
-        {/*       : ""} */}
-        {/*   </span> */}
-        {/* </div> */}
         <ul className="space-y-2 text-muted-foreground">
           {plan.rate && (
             <li>
               <CheckIcon className="mr-2 inline-block h-4 w-4 text-green-500" />
-              {plan.rate} Rate
+              {plan.rate} mbs
             </li>
           )}
           {plan.hasCap && (
             <li>
               <CheckIcon className="mr-2 inline-block h-4 w-4 text-green-500" />
-              {plan.cap} Cap
+              {plan.cap} GB Cap
             </li>
           )}
           {plan.capDownTo && (
             <li>
               <CheckIcon className="mr-2 inline-block h-4 w-4 text-green-500" />
-              Downgrade to {plan.capDownTo}
+              Downgrade to {plan.capDownTo} mbs
             </li>
           )}
-          {!plan.hasPublicIp && (
+          {!plan.hasPublicIp ? (
             <li>
               <CheckIcon className="mr-2 inline-block h-4 w-4 text-red-500" />
               No Public IP
+            </li>
+          ) : (
+            <li>
+              <CheckIcon className="mr-2 inline-block h-4 w-4 text-green-500" />
+              Public IP
             </li>
           )}
         </ul>
@@ -202,7 +223,7 @@ const SubsribeCard = ({ plan, onClose }: SubscribeCardProps) => {
               config: {
                 reference: new Date().getTime().toString(),
                 email: user.email,
-                amount: plan.price * 100,
+                amount: finalPrice,
                 currency: "GHS",
               },
             })

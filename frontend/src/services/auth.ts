@@ -1,12 +1,10 @@
 import axios from "@/lib/axios";
 
-import { SignupFormValues } from "@/routes/auth/signup";
-import { EmailFormValues, PhoneFormValues } from "@/routes/auth/login";
-import { AuthResponse } from "./auth.types";
+import { AuthResponse, EmailFormValues, PhoneFormValues } from "./auth.types";
 
 const BASEURI = "/auth";
 
-const login = async (credentials: EmailFormValues) => {
+const emaillogin = async (credentials: EmailFormValues) => {
   const response = await axios.post<AuthResponse>(
     `${BASEURI}/login`,
     credentials,
@@ -16,11 +14,6 @@ const login = async (credentials: EmailFormValues) => {
 
 const mobileLogin = async (credentials: PhoneFormValues) => {
   const response = await axios.post(`${BASEURI}/mobile`, credentials);
-  return response.data;
-};
-
-const signup = async (data: SignupFormValues) => {
-  const response = await axios.post(`${BASEURI}/signup`, data);
   return response.data;
 };
 
@@ -37,4 +30,4 @@ const verify = async (
   return response.data;
 };
 
-export default { login, signup, verify, mobileLogin };
+export default { emaillogin, verify, mobileLogin };

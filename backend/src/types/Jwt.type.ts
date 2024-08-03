@@ -1,10 +1,10 @@
 import { z } from "zod";
-import { type ObjectId } from "mongoose";
+import { createObjectId } from "./Api.type";
 
 export const jwtTokenSchema = z.object({
   email: z.string().email(),
   role: z.enum(["admin", "user"]),
-  id: z.custom<ObjectId>(),
+  id: createObjectId("invalid ID"),
 });
 
 export type IJWT = z.infer<typeof jwtTokenSchema>;

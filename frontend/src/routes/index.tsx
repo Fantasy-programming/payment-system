@@ -5,37 +5,58 @@ import {
   Navigate,
   RouteObject,
 } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+import { AuthProvider } from "@/providers/AuthProvider";
 import { ProtectedRoute } from "./ProtectedRoute";
+import { UnProtectedRoute } from "./UnProtectedRoute";
+import { ErrorPage } from "./error-page";
+
+import { Login } from "./auth/login";
+import { Verify } from "./auth/verify";
+
 import { UserDashboardLayout } from "./user/root";
 import { UserHomeView } from "./user/home";
 import { HistoryView } from "./user/history";
-import { Login } from "./auth/login";
-import { homeLoader, historyLoader, productsLoader } from "./user/loaders";
+import { HistoryDetailView } from "./user/historyDetail";
+import { SettingsView } from "./user/settings";
+import { HistoryIndex } from "./user/historyindex";
+import { SubscribeView } from "./user/subscribe";
+import {
+  homeLoader,
+  historyLoader,
+  productsLoader,
+  settingsLoader,
+} from "./user/loaders";
+
+import { AdminDashboardLayout } from "./admin/root";
+import { AdminHomeView } from "./admin/home";
+import { AdminOrdersView } from "./admin/orders";
+import { AdminProductsView } from "./admin/products";
+import { SelectedProductView } from "./admin/product-view";
+import { AdminCustomerView } from "./admin/customers";
+import { AdminSettingsView } from "./admin/settings";
 import {
   adminHomeLoader,
   ordersLoader,
   adminProductsLoader,
   usersLoader,
+  adminProductLoader,
+  userLoader,
 } from "./admin/loaders";
-import Verify from "./auth/verify";
-import { AdminDashboardLayout } from "./admin/root";
-import { AdminHomeView } from "./admin/home";
-import SettingsView from "./user/settings";
-import { UnProtectedRoute } from "./UnProtectedRoute";
-import { QueryClient } from "@tanstack/react-query";
-import { SubscribeView } from "./user/subscribe";
-import { HistoryDetailView } from "./user/historyDetail";
-import { HistoryIndex } from "./user/historyindex";
-import { ErrorPage } from "./error-page";
-import { AdminOrdersView } from "./admin/orders";
-import { AdminProductsView } from "./admin/products";
-import { AdminCustomerView } from "./admin/customers";
-import { AdminAnalyticsView } from "./admin/analytics";
-import AdminSettingsView from "./admin/settings";
+import { NewProductView } from "./admin/newproduct-view";
+import { UserCreationPage } from "./admin/customer-view";
+import { UserViewPage } from "./admin/newcustomer-view";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 10,
+    },
+  },
+});
 
 const Routes: React.FC = () => {
-  const queryClient = new QueryClient();
-
   const protectedUserRoutes: RouteObject[] = [
     {
       path: "/dashboard",
@@ -57,7 +78,12 @@ const Routes: React.FC = () => {
         },
         {
           path: "subscribe",
-          element: <SubscribeView />,
+          element: <SubscribeView type="subscription" />,
+          loader: productsLoader(queryClient),
+        },
+        {
+          path: "top-up",
+          element: <SubscribeView type="top-up" />,
           loader: productsLoader(queryClient),
         },
         {
@@ -80,6 +106,7 @@ const Routes: React.FC = () => {
         {
           path: "settings",
           element: <SettingsView />,
+          loader: settingsLoader(queryClient),
         },
       ],
     },
@@ -93,6 +120,7 @@ const Routes: React.FC = () => {
           <AdminDashboardLayout />
         </ProtectedRoute>
       ),
+      errorElement: <ErrorPage />,
       children: [
         {
           path: "",
@@ -102,6 +130,7 @@ const Routes: React.FC = () => {
           path: "home",
           element: <AdminHomeView />,
           loader: adminHomeLoader(queryClient),
+          errorElement: <ErrorPage />,
         },
         {
           path: "orders",
@@ -125,7 +154,13 @@ const Routes: React.FC = () => {
               loader: adminProductsLoader(queryClient),
             },
             {
+              path: "new",
+              element: <NewProductView />,
+            },
+            {
               path: ":id",
+              element: <SelectedProductView />,
+              loader: adminProductLoader(queryClient),
             },
           ],
         },
@@ -138,17 +173,24 @@ const Routes: React.FC = () => {
               loader: usersLoader(queryClient),
             },
             {
+              path: "new",
+              element: <UserCreationPage />,
+            },
+            {
               path: ":id",
+              element: <UserViewPage />,
+              loader: userLoader(queryClient),
             },
           ],
         },
         {
-          path: "analytics",
-          element: <AdminAnalyticsView />,
-        },
-        {
           path: "settings",
-          element: <AdminSettingsView />,
+          children: [
+            {
+              index: true,
+              element: <AdminSettingsView />,
+            },
+          ],
         },
       ],
     },
@@ -187,7 +229,13 @@ const Routes: React.FC = () => {
     },
   ]);
 
-  return <RouterProvider router={router} />;
+  return (
+    <AuthProvider>
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
+    </AuthProvider>
+  );
 };
 
 export default Routes;

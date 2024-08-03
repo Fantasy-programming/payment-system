@@ -8,16 +8,20 @@ import userRouter from "./routes/user";
 import authRouter from "./routes/auth";
 import productRouter from "./routes/product";
 import transactionRouter from "./routes/transaction";
+import supportRouter from "./routes/support";
+import preferenceRouter from "./routes/preference";
 
 import { tokenExtractor } from "./middleware/jwt";
 import { errorHandler, unknownEndpoint } from "./middleware/errorHandler";
 
 import { initDB } from "./utils/initDB";
+import { createAdmin } from "./script/admin";
 
 const app = express();
 
 // connect to the DB
 await initDB();
+await createAdmin();
 
 // setup the middlewares
 app.use(morgan("tiny"));
@@ -31,6 +35,8 @@ app.use("/api/users", userRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/transactions", transactionRouter);
 app.use("/api/products", productRouter);
+app.use("/api/support", supportRouter);
+app.use("/api/preferences", preferenceRouter);
 
 // custom middlewares
 app.use(unknownEndpoint);

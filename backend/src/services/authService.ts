@@ -8,7 +8,7 @@ import { JWT_SECRET } from "../env";
 import { CommonError } from "../utils/errors";
 
 const emailLogin = async (email: string, password: string) => {
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email, status: "active" });
 
   if (!user) {
     throw new CommonError("Invalid email or password");
@@ -35,7 +35,7 @@ const emailLogin = async (email: string, password: string) => {
 };
 
 const mobileLogin = async (phone: string) => {
-  const user = await User.findOne({ phone });
+  const user = await User.findOne({ phone, status: "active" });
 
   if (!user) {
     throw new CommonError("No user with this phone number");

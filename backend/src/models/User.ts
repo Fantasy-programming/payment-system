@@ -1,14 +1,13 @@
 import mongoose from "mongoose";
-import uniqueValidator from "mongoose-unique-validator";
 import type { IUser, UserModel } from "../types/User.type";
+import { UserAlert } from "./UserPreference";
 
 const userSchema = new mongoose.Schema<IUser, UserModel>({
   firstName: { type: String, required: true, trim: true },
   lastName: { type: String, required: true, trim: true },
-  email: { type: String, unique: true, required: true, trim: true },
+  email: { type: String, required: true, trim: true },
   phone: {
     type: String,
-    unique: true,
     required: true,
     minlength: 10,
     maxlength: 10,
@@ -29,7 +28,37 @@ const userSchema = new mongoose.Schema<IUser, UserModel>({
   updatedAt: { type: Date, default: Date.now },
 });
 
-userSchema.plugin(uniqueValidator);
+// userSchema.pre("find", function () {
+//   if (this.model.modelName === "User") {
+//     this.where({ status: { $ne: "inactive" } });
+//   }
+// });
+//
+// userSchema.pre("findOne", function () {
+//   if (this.model.modelName === "User") {
+//     this.where({ status: { $ne: "inactive" } });
+//   }
+// });
+
+// Middleware to create a preference when a user is created
+userSchema.post("save", async function (doc, next) {
+  try {
+    await UserAlert.create({ userId: doc._id });
+    next();
+  } catch (err) {
+    next(err as Error);
+  }
+});
+
+// Middleware to delete preferences when a user is soft deleted
+userSchema.pre<IUser>("updateMany", async function (this, next) {
+  try {
+    await UserAlert.deleteMany({ userId: this._id });
+    next();
+  } catch (err) {
+    next(err as Error);
+  }
+});
 
 userSchema.set("toJSON", {
   transform: (_, returnedObject) => {

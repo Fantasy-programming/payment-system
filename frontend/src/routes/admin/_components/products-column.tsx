@@ -1,4 +1,4 @@
-import { Transaction } from "@/services/transaction.types";
+import { Product } from "@/services/product.types";
 import { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -8,16 +8,15 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
-import { MetaProps } from "./orders-table";
+import { MetaProps } from "./products-table";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
 
-export const columns: ColumnDef<Transaction>[] = [
+export const columns: ColumnDef<Product>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -40,35 +39,29 @@ export const columns: ColumnDef<Transaction>[] = [
     enableSorting: false,
     enableHiding: false,
   },
+
   {
-    accessorKey: "user.firstName",
+    accessorKey: "name",
     header: "Name",
   },
   {
-    accessorKey: "user.email",
-    header: "Email",
+    accessorKey: "description",
+    header: "Description",
   },
   {
-    accessorKey: "user.phone",
-    header: "Phone",
+    accessorKey: "rate",
+    header: "Rate",
   },
   {
-    accessorKey: "user.routerID",
-    header: "Router ID",
-  },
-  {
-    accessorKey: "product.name",
-    header: "Plan",
-  },
-  {
-    accessorKey: "createdAt",
-    header: "Date",
+    accessorKey: "price",
+    header: "Price",
   },
   {
     id: "actions",
-    cell: ({ table, row }) => {
-      const payment = row.original;
+    cell: ({ row, table }) => {
+      const product = row.original;
       const goto = (table.options.meta as MetaProps)?.gotoPage;
+      const deleteProduct = (table.options.meta as MetaProps)?.deleteProduct;
 
       return (
         <DropdownMenu>
@@ -80,17 +73,12 @@ export const columns: ColumnDef<Transaction>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem>Print Receipt</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => goto(payment.id)}>
-              View payment details
+            <DropdownMenuItem onClick={() => goto(product.id)}>
+              Edit Product
             </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => goto(`/admin/customers/${payment.user.id}`)}
-            >
-              View customer details
+            <DropdownMenuItem onClick={() => deleteProduct(product.id)}>
+              Delete
             </DropdownMenuItem>
-            <DropdownMenuItem>Delete</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );

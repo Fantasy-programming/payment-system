@@ -23,25 +23,40 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Link } from "react-router-dom";
+import { Link, useLoaderData } from "react-router-dom";
 import {
   adminTransactionsQuery,
   adminUsersQuery,
 } from "@/queries/adminQueries";
 import { useQuery } from "@tanstack/react-query";
+import { adminHomeLoader } from "./loaders";
+import { timeAgo } from "@/lib/utils";
 
 export const AdminHomeView = () => {
-  const {
-    data: users,
-    isLoading: isUsersLoading,
-    isError: isUsersError,
-  } = useQuery(adminUsersQuery());
+  const initialData = useLoaderData() as Awaited<
+    ReturnType<ReturnType<typeof adminHomeLoader>>
+  >;
 
-  const {
-    data: transactions,
-    isLoading: isTrscLoading,
-    isError: isTrscError,
-  } = useQuery(adminTransactionsQuery());
+  const { data: users } = useQuery({
+    ...adminUsersQuery(),
+    initialData: initialData.users,
+  });
+
+  const { data: transactions } = useQuery({
+    ...adminTransactionsQuery(),
+    initialData: initialData.transactions,
+  });
+
+  const totalRevenue = transactions?.reduce((acc, transaction) => {
+    return acc + transaction.finalPrice;
+  }, 0);
+
+  const totalSubscriptions = transactions?.filter(
+    (transaction) =>
+      transaction.recurring && new Date(transaction.endDate) > new Date(),
+  ).length;
+
+  const activeNow = users.length;
 
   return (
     <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
@@ -52,43 +67,43 @@ export const AdminHomeView = () => {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">$45,231.89</div>
+            <div className="text-2xl font-bold">{totalRevenue.toFixed(2)}</div>
             <p className="text-xs text-muted-foreground">
               +20.1% from last month
             </p>
           </CardContent>
         </Card>
-        <Card x-chunk="dashboard-01-chunk-1">
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Subscriptions</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">+2350</div>
+            <div className="text-2xl font-bold">{totalSubscriptions}</div>
             <p className="text-xs text-muted-foreground">
               +180.1% from last month
             </p>
           </CardContent>
         </Card>
-        <Card x-chunk="dashboard-01-chunk-2">
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Sales</CardTitle>
             <CreditCard className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">+12,234</div>
+            <div className="text-2xl font-bold">+{totalRevenue.toFixed(2)}</div>
             <p className="text-xs text-muted-foreground">
               +19% from last month
             </p>
           </CardContent>
         </Card>
-        <Card x-chunk="dashboard-01-chunk-3">
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active Now</CardTitle>
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">+573</div>
+            <div className="text-2xl font-bold">{activeNow}</div>
             <p className="text-xs text-muted-foreground">
               +201 since last hour
             </p>
@@ -149,7 +164,7 @@ export const AdminHomeView = () => {
                         {new Date(transaction.createdAt).toLocaleDateString()}
                       </TableCell>
                       <TableCell className="text-right">
-                        $ {transaction.product.price}
+                        $ {transaction.finalPrice}
                       </TableCell>
                     </TableRow>
                   ))
@@ -164,42 +179,36 @@ export const AdminHomeView = () => {
             </Table>
           </CardContent>
         </Card>
-        <Card x-chunk="dashboard-01-chunk-5">
+        <Card>
           <CardHeader>
             <CardTitle>Recent Onboarding</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-8">
-            {isUsersLoading ? (
-              <div>Loading...</div>
-            ) : isUsersError ? (
-              <div>Error</div>
+            {users && users.length > 0 ? (
+              users.slice(-5).map((user) => (
+                <div className="flex items-center gap-4">
+                  <Avatar className="hidden h-9 w-9 sm:flex">
+                    <AvatarImage src="/avatars/01.png" alt="Avatar" />
+                    <AvatarFallback>
+                      {user.firstName.at(0)?.toUpperCase()}
+                      {user.lastName.at(0)?.toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="grid gap-1">
+                    <p className="text-sm font-medium leading-none">
+                      {user.firstName} {user.lastName}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {user.email}
+                    </p>
+                  </div>
+                  <div className="ml-auto text-sm  text-muted-foreground">
+                    {timeAgo(user.createdAt)}
+                  </div>
+                </div>
+              ))
             ) : (
-              <>
-                {users && users.length > 0 ? (
-                  users.slice(-5).map((user) => (
-                    <div className="flex items-center gap-4">
-                      <Avatar className="hidden h-9 w-9 sm:flex">
-                        <AvatarImage src="/avatars/01.png" alt="Avatar" />
-                        <AvatarFallback>
-                          {user.firstName.at(0)?.toUpperCase()}
-                          {user.lastName.at(0)?.toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="grid gap-1">
-                        <p className="text-sm font-medium leading-none">
-                          {user.firstName} {user.lastName}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {user.email}
-                        </p>
-                      </div>
-                      <div className="ml-auto font-medium">+$450.00</div>
-                    </div>
-                  ))
-                ) : (
-                  <div>No user yet</div>
-                )}
-              </>
+              <div>No user yet</div>
             )}
           </CardContent>
         </Card>
