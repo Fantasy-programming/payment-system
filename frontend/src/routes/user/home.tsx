@@ -66,7 +66,7 @@ export const UserHomeView = () => {
     <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8 lg:grid-cols-3 xl:grid-cols-3">
       <div className="grid auto-rows-max items-start gap-4 md:gap-8 lg:col-span-2">
         <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4">
-          <Card className="sm:col-span-2" x-chunk="dashboard-05-chunk-0">
+          <Card className="sm:col-span-2">
             <CardHeader className="pb-3">
               <CardTitle>
                 {isSubscribed ? "Top-Up Subscription" : "Subscribe Now"}
@@ -86,7 +86,7 @@ export const UserHomeView = () => {
               >
                 {isSubscribed ? "Top-Up Subscription" : "Subscribe Now"}
               </Button>
-              {transactions[0].recurring ? (
+              {transactions[0]?.recurring ? (
                 <Button variant="destructiveOutline">
                   Cancel Subscription
                 </Button>
@@ -172,21 +172,21 @@ export const UserHomeView = () => {
                           </div>
                         </TableCell>
                         <TableCell className="hidden sm:table-cell">
-                          {transaction.recurring
+                          {transaction?.recurring
                             ? "Recurring"
-                            : `${transaction.months} month`}{" "}
-                          {transaction.type}
+                            : `${transaction?.months} month`}{" "}
+                          {transaction?.type}
                         </TableCell>
                         <TableCell className="hidden sm:table-cell">
                           <Badge className="text-xs" variant="secondary">
-                            {transaction.product.name}
+                            {transaction?.product.name}
                           </Badge>
                         </TableCell>
                         <TableCell className="hidden md:table-cell">
-                          {transaction.startDate.split("T")[0]}
+                          {transaction?.startDate.split("T")[0]}
                         </TableCell>
                         <TableCell className="text-right">
-                          ₵{transaction.finalPrice}
+                          ₵{transaction?.finalPrice}
                         </TableCell>
                       </TableRow>
                     ))
@@ -258,9 +258,9 @@ export const UserHomeView = () => {
               <div className="grid gap-3">
                 <div className="font-semibold">Address</div>
                 <address className="grid gap-0.5 not-italic text-muted-foreground">
-                  {user.address.split(",").map((line, index) => (
-                    <span key={index}>{line}</span>
-                  ))}
+                  {user?.address
+                    .split(",")
+                    .map((line, index) => <span key={index}>{line}</span>)}
                 </address>
               </div>
             </div>
