@@ -45,11 +45,13 @@ export const userPersonalUpdateSchema = userSchema
 
 export const updateUserSchema = userSchema.omit({
   _id: true,
+  id: true,
   password: true,
 });
 
 export const createUserSchema = userSchema.omit({
   _id: true,
+  id: true,
   emailVerified: true,
   phoneVerified: true,
   status: true,
