@@ -26,7 +26,7 @@ const verify = async (
   type: "email" | "phone",
   value: string,
 ) => {
-  const response = await axios.post<AuthResponse>(`${BASEURI}/verify-otp`, {
+  const response = await axios.post<AuthResponse>(`${BASEURI}/verify`, {
     token,
     type,
     value,
