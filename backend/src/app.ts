@@ -1,6 +1,7 @@
 import express from "express";
 import morgan from "morgan";
 import cors from "cors";
+import cookies from "cookie-parser";
 
 import "express-async-errors";
 
@@ -26,6 +27,7 @@ await initDB();
 app.use(morgan("tiny"));
 app.use(cors());
 app.use(express.json());
+app.use(cookies());
 app.use(express.static("static"));
 app.use(tokenExtractor);
 

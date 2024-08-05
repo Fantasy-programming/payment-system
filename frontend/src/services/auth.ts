@@ -17,6 +17,10 @@ const mobileLogin = async (credentials: PhoneFormValues) => {
   return response.data;
 };
 
+const logout = async () => {
+  await axios.post(`${BASEURI}/logout`);
+};
+
 const verify = async (
   token: string,
   type: "email" | "phone",
@@ -30,4 +34,4 @@ const verify = async (
   return response.data;
 };
 
-export default { emaillogin, verify, mobileLogin };
+export default { emaillogin, verify, mobileLogin, logout };

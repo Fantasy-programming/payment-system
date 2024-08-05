@@ -1,6 +1,6 @@
-import { useState, useEffect, createContext, useCallback } from "react";
+import authService from "@/services/auth";
 
-import axios from "@/lib/axios";
+import { useState, useEffect, createContext, useCallback } from "react";
 import { isTokenExpired } from "@/lib/utils";
 
 import { AuthResponse } from "@/services/auth.types";
@@ -20,14 +20,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const logout = useCallback(() => {
     localStorage.removeItem("user");
-    delete axios.defaults.headers.common["Authorization"];
+    authService.logout();
     setUser({ token: "", email: "", role: "" });
   }, []);
 
   const storeUser = useCallback((newJwt: AuthResponse) => {
     const toStore = JSON.stringify(newJwt);
     localStorage.setItem("user", toStore);
-    axios.defaults.headers.common["Authorization"] = `Bearer ${newJwt.token}`;
     setUser(newJwt);
   }, []);
 
@@ -42,8 +41,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         return;
       }
 
-      axios.defaults.headers.common["Authorization"] =
-        `Bearer ${parsedUser.token}`;
       setUser(parsedUser);
     } else {
       logout();

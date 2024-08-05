@@ -7,12 +7,14 @@ export const ARKESEL_API_KEY = process.env.ARKESEL_API_KEY;
 
 // Server
 
+export const NODE_ENV = process.env.NODE_ENV || false;
 export const PORT = process.env.PORT;
 export const MONGODB_URI =
   process.env.NODE_ENV === "production"
     ? process.env.MONGODB_ATLAS_URI
     : process.env.MONGODB_LOCAL_URI;
 export const JWT_SECRET = process.env.SECRET || "";
+export const JWT_REFRESH_SECRET = process.env.REFRESH_SECRET || "";
 
 // Payment
 export const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;

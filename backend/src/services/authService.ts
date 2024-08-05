@@ -4,8 +4,19 @@ import arkesel from "../lib/sms";
 import sms from "../constants/sms";
 
 import { User } from "../models/User";
-import { JWT_SECRET } from "../env";
+import { JWT_REFRESH_SECRET, JWT_SECRET } from "../env";
 import { CommonError } from "../utils/errors";
+import type { ObjectId } from "mongoose";
+
+const generateAccessToken = (email: string, role: string, id: ObjectId) => {
+  return jwt.sign({ email, role, id }, JWT_SECRET, {
+    expiresIn: "1h",
+  });
+};
+
+const generateRefreshToken = (email: string) => {
+  return jwt.sign({ email }, JWT_REFRESH_SECRET, { expiresIn: "7d" });
+};
 
 const emailLogin = async (email: string, password: string) => {
   const user = await User.findOne({ email, status: "active" });
@@ -20,16 +31,7 @@ const emailLogin = async (email: string, password: string) => {
     throw new CommonError("Invalid email or password");
   }
 
-  const userForToken = {
-    email: user.email,
-    role: user.role,
-    id: user._id,
-  };
-
-  // Token expires in 1 hour 60s x 60s
-  const token = jwt.sign(userForToken, JWT_SECRET, {
-    expiresIn: 60 * 60,
-  });
+  const token = generateAccessToken(user.email, user.role, user._id);
 
   return { token, role: user.role, email: user.email };
 };
@@ -71,4 +73,27 @@ const verifyOTP = async (value: string, code: string) => {
   return { token, role: user.role, email: user.email };
 };
 
-export default { emailLogin, mobileLogin, verifyOTP };
+const refreshToken = async (token: string) => {
+  try {
+    const decoded = jwt.verify(token, JWT_REFRESH_SECRET) as { email: string };
+    const user = await User.findOne({ email: decoded.email, status: "active" });
+
+    if (!user) {
+      throw new CommonError("User not found");
+    }
+
+    const newToken = generateAccessToken(user.email, user.role, user._id);
+
+    return { token: newToken, role: user.role, email: user.email };
+  } catch (error) {
+    throw new CommonError("Invalid token");
+  }
+};
+
+export default {
+  emailLogin,
+  mobileLogin,
+  verifyOTP,
+  generateRefreshToken,
+  refreshToken,
+};
