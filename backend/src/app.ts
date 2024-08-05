@@ -10,6 +10,7 @@ import productRouter from "./routes/product";
 import transactionRouter from "./routes/transaction";
 import supportRouter from "./routes/support";
 import preferenceRouter from "./routes/preference";
+import mistRouter from "./routes/mist";
 
 import { tokenExtractor } from "./middleware/jwt";
 import { errorHandler, unknownEndpoint } from "./middleware/errorHandler";
@@ -35,6 +36,7 @@ app.use("/api/transactions", transactionRouter);
 app.use("/api/products", productRouter);
 app.use("/api/support", supportRouter);
 app.use("/api/preferences", preferenceRouter);
+app.use("*", mistRouter);
 
 // custom middlewares
 app.use(unknownEndpoint);
