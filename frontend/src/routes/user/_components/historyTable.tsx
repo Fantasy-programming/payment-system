@@ -1,6 +1,5 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { CSVLink } from "react-csv";
 
 import {
   ColumnDef,
@@ -40,6 +39,7 @@ import {
 } from "@/components/ui/card";
 
 import { Transaction } from "@/services/transaction.types";
+import { useCSVExport } from "@/hooks/useCSVExport";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -52,6 +52,7 @@ export function DataTable<TData, TValue>({
 }: DataTableProps<TData, TValue>) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { exportToCSV } = useCSVExport();
   const activeLocation = location.pathname.split("/").filter(Boolean).pop();
 
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -67,29 +68,34 @@ export function DataTable<TData, TValue>({
     },
   });
 
-  const cleanTransactions = (data as Transaction[])?.map((transaction) => ({
-    plan: transaction.product.name,
-    price: transaction.product.price,
-    type: transaction.type,
-    medium: transaction.medium,
-    creditor: "Mikronet",
-    reference: transaction.reference,
-    recurring: transaction.recurring,
-    startDate: transaction.startDate,
-    endDate: transaction.endDate,
-  }));
-
-  const handleClick = () => {
+  const handleCsvDownload = useCallback(() => {
     if (!data) return false;
 
-    if (data.length === 0) {
-      alert("nothing to export");
-      return false;
+    const response = confirm("Export selected data to csv ?");
+
+    if (!response) {
+      return;
     }
 
-    const response = confirm("Export data to csv ?");
-    return response;
-  };
+    const csvData = (data as Transaction[])?.map((row) => {
+      const transaction = row as Transaction;
+
+      return {
+        creditor: "Mikronet",
+        plan: transaction.product.name,
+        price: transaction.finalPrice,
+        duration: transaction.months,
+        type: transaction.type,
+        medium: transaction.medium,
+        reference: transaction.reference,
+        recurring: transaction.recurring,
+        startDate: transaction.startDate,
+        endDate: transaction.endDate,
+      };
+    });
+
+    exportToCSV(csvData, "transactions.csv");
+  }, [exportToCSV, data]);
 
   const hideit = (str: string) => {
     return str !== "trxRef" && str !== "product_price";
@@ -132,16 +138,15 @@ export function DataTable<TData, TValue>({
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>
           </DropdownMenu>
-          <CSVLink
-            data={cleanTransactions ?? []}
-            filename={"my-file.csv"}
-            onClick={handleClick}
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-7 gap-1 text-sm"
+            onClick={handleCsvDownload}
           >
-            <Button size="sm" variant="outline" className="h-7 gap-1 text-sm">
-              <File className="h-3.5 w-3.5" />
-              <span className="sr-only sm:not-sr-only">Export</span>
-            </Button>
-          </CSVLink>
+            <File className="h-3.5 w-3.5" />
+            <span className="sr-only sm:not-sr-only">Export</span>
+          </Button>
         </div>
       </CardHeader>
       <CardContent>

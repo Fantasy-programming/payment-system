@@ -13,6 +13,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
 import { MetaProps } from "./orders-table";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import PDFReceipt from "@/components/pdf/PDFReceipt";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
@@ -92,7 +94,12 @@ export const columns: ColumnDef<Transaction>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem>Print Receipt</DropdownMenuItem>
+            <PDFDownloadLink
+              document={<PDFReceipt orderData={payment} />}
+              fileName={`receipt-${payment.trxRef}.pdf`}
+            >
+              <DropdownMenuItem>Print Receipt</DropdownMenuItem>
+            </PDFDownloadLink>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => goto(payment.id)}>
               View payment details

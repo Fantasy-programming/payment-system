@@ -164,7 +164,7 @@ export const AdminHomeView = () => {
                         {new Date(transaction.createdAt).toLocaleDateString()}
                       </TableCell>
                       <TableCell className="text-right">
-                        $ {transaction.finalPrice}
+                        ¢{transaction.finalPrice.toFixed(2)}
                       </TableCell>
                     </TableRow>
                   ))

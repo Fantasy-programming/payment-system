@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { usePDF } from "react-to-pdf";
 
-import { userInfoQuery, userTransactionsQuery } from "@/queries/userQueries";
+import { userTransactionsQuery } from "@/queries/userQueries";
 import { formatDate } from "@/lib/utils";
 
 import {
@@ -31,16 +30,16 @@ import {
 import { Separator } from "@/components/ui/separator";
 
 import type { Transaction } from "@/services/transaction.types";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import PDFReceipt from "@/components/pdf/PDFReceipt";
 
 export const HistoryDetailView = () => {
   const [transaction, setTransaction] = useState<Transaction | null>();
-  const { toPDF, targetRef } = usePDF({ filename: "receipt.pdf" });
 
   const { id } = useParams<"id">();
-
-  const { data: user } = useSuspenseQuery(userInfoQuery());
   const { data: transactions } = useSuspenseQuery(userTransactionsQuery());
 
+  //TODO: Get rid of the effect and fetch the transaction directly from the query
   useEffect(() => {
     if (transactions) {
       const result = transactions.find((t) => t.id === id);
@@ -51,7 +50,7 @@ export const HistoryDetailView = () => {
   return (
     <>
       {transaction && (
-        <Card className="overflow-hidden" ref={targetRef}>
+        <Card className="overflow-hidden">
           <CardHeader className="flex flex-row items-start bg-muted/50">
             <div className="grid gap-0.5">
               <CardTitle className="group flex items-center gap-2 text-sm md:text-lg ">
@@ -70,17 +69,17 @@ export const HistoryDetailView = () => {
               </CardDescription>
             </div>
             <div className="ml-auto flex items-center gap-1">
-              <Button
-                size="sm"
-                variant="outline"
-                className="h-8 gap-1"
-                onClick={() => toPDF()}
+              <PDFDownloadLink
+                document={<PDFReceipt orderData={transaction} />}
+                fileName={`receipt-${transaction.trxRef}.pdf`}
               >
-                <Truck className="h-3.5 w-3.5" />
-                <span className="lg:sr-only xl:not-sr-only xl:whitespace-nowrap">
-                  Export receipt
-                </span>
-              </Button>
+                <Button size="sm" variant="outline" className="h-8 gap-1">
+                  <Truck className="h-3.5 w-3.5" />
+                  <span className="lg:sr-only xl:not-sr-only xl:whitespace-nowrap">
+                    Export receipt
+                  </span>
+                </Button>
+              </PDFDownloadLink>
             </div>
           </CardHeader>
           <CardContent className="p-6 text-sm">
@@ -122,7 +121,7 @@ export const HistoryDetailView = () => {
               <div className="grid gap-3">
                 <div className="font-semibold">Address</div>
                 <address className="grid gap-0.5 not-italic text-muted-foreground">
-                  {user.address.split(",").map((line, index) => (
+                  {transaction.user.address.split(",").map((line, index) => (
                     <span key={index}>{line}</span>
                   ))}
                 </address>
@@ -141,19 +140,23 @@ export const HistoryDetailView = () => {
                 <div className="flex items-center justify-between">
                   <dt className="text-muted-foreground">Customer</dt>
                   <dd>
-                    {user?.lastName} {user?.firstName}
+                    {transaction.user?.lastName} {transaction?.user?.firstName}
                   </dd>
                 </div>
                 <div className="flex items-center justify-between">
                   <dt className="text-muted-foreground">Email</dt>
                   <dd>
-                    <a href={`mailto:${user?.email}`}>{user?.email}</a>
+                    <a href={`mailto:${transaction?.user?.email}`}>
+                      {transaction?.user?.email}
+                    </a>
                   </dd>
                 </div>
                 <div className="flex items-center justify-between">
                   <dt className="text-muted-foreground">Phone</dt>
                   <dd>
-                    <a href={`tel:${user?.phone}`}>{user?.phone}</a>
+                    <a href={`tel:${transaction?.user?.phone}`}>
+                      {transaction?.user?.phone}
+                    </a>
                   </dd>
                 </div>
               </dl>
@@ -175,7 +178,7 @@ export const HistoryDetailView = () => {
                   {transaction.medium === "Visa" ? (
                     <dd>**** **** **** 4532</dd>
                   ) : (
-                    <dd>{user?.phone}</dd>
+                    <dd>{transaction?.user?.phone}</dd>
                   )}
                 </div>
               </dl>

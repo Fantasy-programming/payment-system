@@ -46,6 +46,10 @@ export const Verify = () => {
 
   const { type, value } = location.state as VerifyProps;
 
+  if (!type || !value) {
+    navigate("/login");
+  }
+
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
