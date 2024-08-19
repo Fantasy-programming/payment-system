@@ -56,10 +56,18 @@ const deleteUsers = async (request: Request, response: Response) => {
   response.status(204).end();
 };
 
+const resetPassword = async (request: Request, response: Response) => {
+  const { id } = request.params as unknown as IdParam;
+
+  await userService.resetPassword(id);
+  response.status(200).json({ message: "Password reset successfully" });
+};
+
 export default {
   getUsers,
   getCurrentUser,
   getUser,
+  resetPassword,
   createUser,
   updateUser,
   updateCurrentUser,

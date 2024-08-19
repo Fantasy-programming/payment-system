@@ -60,4 +60,11 @@ userRouter.delete(
   userController.deleteUsers,
 );
 
+userRouter.post(
+  "/reset-password/:id",
+  userExtractor,
+  validateParams(idparam),
+  userController.resetPassword,
+);
+
 export default userRouter;
