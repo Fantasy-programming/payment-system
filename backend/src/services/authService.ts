@@ -5,7 +5,7 @@ import sms from "../constants/sms";
 
 import { User } from "../models/User";
 import { JWT_REFRESH_SECRET, JWT_SECRET } from "../env";
-import { CommonError } from "../utils/errors";
+import { UnauthorizedError } from "../utils/errors";
 import type { ObjectId } from "mongoose";
 
 const generateAccessToken = (email: string, role: string, id: ObjectId) => {
@@ -22,13 +22,13 @@ const emailLogin = async (email: string, password: string) => {
   const user = await User.findOne({ email, status: "active" });
 
   if (!user) {
-    throw new CommonError("Invalid email or password");
+    throw new UnauthorizedError("Invalid email or password");
   }
 
   const goodpass = await bcrypt.compare(password, user.password);
 
   if (!goodpass) {
-    throw new CommonError("Invalid email or password");
+    throw new UnauthorizedError("Invalid email or password");
   }
 
   const token = generateAccessToken(user.email, user.role, user._id);
@@ -40,7 +40,7 @@ const mobileLogin = async (phone: string) => {
   const user = await User.findOne({ phone, status: "active" });
 
   if (!user) {
-    throw new CommonError("No user with this phone number");
+    throw new UnauthorizedError("No user with this phone number");
   }
 
   await arkesel.sendOTP(sms.OTP_MESSAGE, phone);
@@ -50,13 +50,13 @@ const verifyOTP = async (value: string, code: string) => {
   const res = await arkesel.verifyOTP(code, value);
 
   if (res.code !== "1100") {
-    throw new CommonError("OTP invalid or has expired");
+    throw new UnauthorizedError("OTP invalid or has expired");
   }
 
   const user = await User.findOne({ phone: value });
 
   if (!user) {
-    throw new CommonError("No user with this phone number");
+    throw new UnauthorizedError("No user with this phone number");
   }
 
   const userForToken = {
@@ -79,14 +79,14 @@ const refreshToken = async (token: string) => {
     const user = await User.findOne({ email: decoded.email, status: "active" });
 
     if (!user) {
-      throw new CommonError("User not found");
+      throw new UnauthorizedError("User not found");
     }
 
     const newToken = generateAccessToken(user.email, user.role, user._id);
 
     return { token: newToken, role: user.role, email: user.email };
   } catch (error) {
-    throw new CommonError("Invalid token");
+    throw new UnauthorizedError("Invalid token");
   }
 };
 

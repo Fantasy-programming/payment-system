@@ -1,14 +1,16 @@
 import bcrypt from "bcrypt";
 
 import type { ObjectId } from "mongoose";
-import { User } from "../models/User";
-import { CommonError } from "../utils/errors";
 import type {
   IUserCreate,
   IUserPersonalUpdate,
   IUserUpdate,
 } from "../types/User.type";
+
+import { User } from "../models/User";
+import { InternalError, UnauthorizedError } from "../utils/errors";
 import { sendWelcomeMail } from "../lib/mail";
+import { generatePassword } from "../utils/password";
 
 const getAll = async () => {
   const users = await User.find({
@@ -34,7 +36,7 @@ const create = async (user: IUserCreate) => {
   });
 
   if (exist) {
-    throw new CommonError(
+    throw new UnauthorizedError(
       "A user with the same email, phone number or router ID already exist",
     );
   }
@@ -68,9 +70,13 @@ const updateOne = async (id: ObjectId, user: IUserUpdate) => {
 
 const updateUser = async (id: ObjectId, user: IUserPersonalUpdate) => {
   const updatedAt = new Date();
-  const userUpdate = { ...user, updatedAt };
 
-  // TODO: If we have a new password, hash it
+  if (user.password) {
+    const passHash = await bcrypt.hash(user.password, 10);
+    user.password = passHash;
+  }
+
+  const userUpdate = { ...user, updatedAt };
 
   const updated = await User.findByIdAndUpdate(
     id,
@@ -83,6 +89,24 @@ const updateUser = async (id: ObjectId, user: IUserPersonalUpdate) => {
   return updated;
 };
 
+const resetPassword = async (id: ObjectId) => {
+  const password = generatePassword(8);
+
+  const passHash = await bcrypt.hash(password, 10);
+
+  try {
+    await User.findByIdAndUpdate(
+      id,
+      { password: passHash },
+      { new: true, runValidators: true },
+    );
+  } catch (error) {
+    throw new InternalError("Error resetting password");
+  }
+
+  //TODO: Send an email to the user with the new password
+};
+
 const remove = async (ids: ObjectId[] | ObjectId) => {
   let id = ids;
 
@@ -93,4 +117,12 @@ const remove = async (ids: ObjectId[] | ObjectId) => {
   await User.updateMany({ _id: { $in: id } }, { $set: { status: "inactive" } });
 };
 
-export default { getAll, getOne, create, remove, updateOne, updateUser };
+export default {
+  getAll,
+  getOne,
+  create,
+  remove,
+  updateOne,
+  updateUser,
+  resetPassword,
+};

@@ -1,7 +1,16 @@
 import bcrypt from "bcrypt";
 import { User } from "../models/User";
+import { AdminAlert } from "../models/AdminPreference";
 
 export async function createAdmin() {
+  // Clean up the old admin
+
+  console.log("Cleaning up old admin...");
+
+  await User.deleteMany({ role: "admin " });
+
+  console.log("Creating admin...");
+
   let password = "123456Admin@";
   password = await bcrypt.hash(password, 10);
 
@@ -20,5 +29,27 @@ export async function createAdmin() {
     role: "admin",
   });
 
-  await admin.save();
+  const data = await admin.save();
+
+  console.log("Admin created successfully!");
+  console.log("Setting up preferences...");
+
+  const preference = new AdminAlert({
+    userId: data._id,
+    emailAlerts: true,
+    smsAlerts: true,
+    leaveAlertEmail: data.email,
+    problemAlertEmail: data.email,
+    activationAlertEmail: data.email,
+    leaveAlertPhone: data.phone,
+    problemAlertPhone: data.phone,
+    activationAlertPhone: data.phone,
+    leaveAlert: true,
+    problemAlert: true,
+    activationAlert: true,
+  });
+
+  await preference.save();
+
+  console.log("Preferences set up successfully!");
 }
