@@ -8,6 +8,8 @@ const TYPE = "numeric"; // OTP type
 
 const OTP_ENDPOINT = "https://sms.arkesel.com/api/otp/generate";
 const OTP_VERIFY_ENDPOINT = "https://sms.arkesel.com/api/otp/verify";
+const SMS_ENDPOINT = "https://sms.arkesel.com/api/v2/sms/send";
+
 const OTP_MESSAGE =
   "Your otp is %otp_code%. It will expire in %expiry% minutes.";
 
@@ -35,4 +37,5 @@ export default {
   OTP_ENDPOINT,
   OTP_VERIFY_ENDPOINT,
   OTP_MESSAGE,
+  SMS_ENDPOINT,
 };

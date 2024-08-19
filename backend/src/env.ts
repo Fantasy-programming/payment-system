@@ -1,12 +1,9 @@
 import "dotenv/config";
 
 // SMS
-export const SMS_API_KEY = process.env.SMS_API_KEY;
-export const SMS_SENDER_ID = process.env.SMS_DEVICE_ID;
 export const ARKESEL_API_KEY = process.env.ARKESEL_API_KEY;
 
 // Server
-
 export const NODE_ENV = process.env.NODE_ENV || false;
 export const PORT = process.env.PORT;
 export const MONGODB_URI =
