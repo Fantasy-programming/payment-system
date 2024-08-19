@@ -1,9 +1,11 @@
-import { render } from "@react-email/components";
-import { MikronetWelcomeEmail } from "../templates/mikronet-welcome";
-import { oauth2Client } from "../constants/mail";
-import { type Options } from "nodemailer/lib/smtp-transport/index.js";
 import logger from "../logger";
 import nodemailer from "nodemailer";
+
+import { render } from "@react-email/components";
+import { MikronetWelcomeEmail } from "../templates/mikronet-welcome";
+
+import { oauth2Client } from "../constants/mail";
+import { type Options } from "nodemailer/lib/smtp-transport/index.js";
 
 import {
   MAIL_SERVICE,
@@ -44,6 +46,33 @@ export async function sendMail(email: string, title: string, body: string) {
       to: email,
       subject: title,
       html: body,
+    });
+  } catch (error) {
+    logger.error(error);
+  }
+}
+
+export async function sendMailAttachment(
+  email: string,
+  title: string,
+  body: string,
+  path: string,
+  name: string,
+) {
+  try {
+    const transporter = await createTransporter();
+
+    await transporter.sendMail({
+      from: "Mikronet - Reception",
+      to: email,
+      subject: title,
+      html: body,
+      attachments: [
+        {
+          filename: name,
+          path: path,
+        },
+      ],
     });
   } catch (error) {
     logger.error(error);
