@@ -1,60 +1,77 @@
-import axios from "axios";
+import axios, { AxiosInstance } from "axios";
 import { isTokenExpired } from "@/lib/utils";
 import { AuthResponse } from "@/services/auth.types";
-import { toast } from "sonner";
 
-const api = axios.create({
-  baseURL: "/api",
-  withCredentials: true,
-});
+let refreshTokenPromise: Promise<string> | null = null;
 
-api.defaults.headers.common["Content-Type"] = "application/json";
+const createAPI = (
+  refreshTokenFn: () => Promise<string>,
+  logoutFn: () => void,
+): AxiosInstance => {
+  const api = axios.create({
+    baseURL: "/api",
+    withCredentials: true,
+  });
 
-api.interceptors.request.use(
-  async (config) => {
-    const storedUser = localStorage.getItem("user");
+  api.defaults.headers.common["Content-Type"] = "application/json";
 
-    if (storedUser) {
-      const parsedUser: AuthResponse = JSON.parse(storedUser);
-
-      if (isTokenExpired(parsedUser.token)) {
-        const { data } = await api.post<AuthResponse>("/auth/refresh");
-        const store = JSON.stringify(data);
-        localStorage.setItem("user", store);
-
-        config.headers["Authorization"] = `Bearer ${data?.token}`;
-
-        return config;
+  api.interceptors.request.use(
+    async (config) => {
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        const parsedUser: AuthResponse = JSON.parse(storedUser);
+        if (isTokenExpired(parsedUser.token)) {
+          const newToken = await refreshTokenFn();
+          config.headers["Authorization"] = `Bearer ${newToken}`;
+        } else {
+          config.headers["Authorization"] = `Bearer ${parsedUser.token}`;
+        }
       }
+      return config;
+    },
+    (error) => Promise.reject(error),
+  );
 
-      config.headers["Authorization"] = `Bearer ${parsedUser?.token}`;
-    }
+  api.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+      const originalRequest = error.config;
 
-    return config;
-  },
-  (error) => Promise.reject(error),
-);
+      if (error.response) {
+        const { status, data } = error.response;
 
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response) {
-      const { status, data } = error.response;
-
-      if (
-        status === 401 &&
-        (data.error.trim() === "token missing or invalid" ||
-          data.error.trim() === "token expired")
-      ) {
-        toast.error("Session expired. Please log in again.");
-        localStorage.removeItem("user");
-        window.location.href = "/login"; // Redirect to login page
-      } else {
-        console.error("API error:", data.error);
+        if (
+          status === 401 &&
+          data.error.trim() === "token missing or invalid" &&
+          !originalRequest._retry
+        ) {
+          originalRequest._retry = true;
+          try {
+            if (!refreshTokenPromise) {
+              refreshTokenPromise = refreshTokenFn();
+            }
+            const newToken = await refreshTokenPromise;
+            refreshTokenPromise = null;
+            originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
+            return api(originalRequest);
+          } catch (refreshError) {
+            logoutFn();
+            return Promise.reject(refreshError);
+          }
+        }
       }
-    }
-    return Promise.reject(error);
-  },
-);
+      return Promise.reject(error);
+    },
+  );
 
-export default api;
+  return api;
+};
+
+export let api: AxiosInstance;
+
+export const initAPI = (
+  refreshTokenFn: () => Promise<string>,
+  logoutFn: () => void,
+) => {
+  api = createAPI(refreshTokenFn, logoutFn);
+};

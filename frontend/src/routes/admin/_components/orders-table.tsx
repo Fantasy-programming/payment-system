@@ -49,8 +49,6 @@ export function DataTable<TData, TValue>({
 
   const navigate = useNavigate();
 
-  //TODO: Print PDF
-
   const table = useReactTable({
     data,
     columns,

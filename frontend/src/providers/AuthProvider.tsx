@@ -1,11 +1,11 @@
 import authService from "@/services/auth";
 
 import { useState, useEffect, createContext, useCallback } from "react";
-import { isTokenExpired } from "@/lib/utils";
 
 import { AuthResponse } from "@/services/auth.types";
 import { AuthContext, AuthProviderProps } from "./AuthProvider.types";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { initAPI } from "@/lib/axios";
 
 export const Context = createContext<null | AuthContext>(null);
 
@@ -30,24 +30,39 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setUser(newJwt);
   }, []);
 
+  const refreshToken = useCallback(async () => {
+    try {
+      const response = await fetch("/api/auth/refresh", {
+        method: "POST",
+        credentials: "include",
+      });
+      if (!response.ok) throw new Error("Failed to refresh token");
+      const data: AuthResponse = await response.json();
+      storeUser(data);
+      return data.token;
+    } catch (error) {
+      console.error("Failed to refresh token:", error);
+      logout();
+      throw error;
+    }
+  }, [storeUser, logout]);
+
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-
-    if (storedUser) {
-      const parsedUser = JSON.parse(storedUser);
-
-      if (isTokenExpired(parsedUser.token)) {
-        logout();
-        return;
+    const initializeAuth = async () => {
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        const parsedUser = JSON.parse(storedUser);
+        setUser(parsedUser);
       }
 
-      setUser(parsedUser);
-    } else {
-      logout();
-    }
+      // Initialize the API with refreshToken and logout functions
+      initAPI(refreshToken, logout);
 
-    setLoading(false);
-  }, [logout]);
+      setLoading(false);
+    };
+
+    initializeAuth();
+  }, [logout, refreshToken]);
 
   if (loading) {
     return (

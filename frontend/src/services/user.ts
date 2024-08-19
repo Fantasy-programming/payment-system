@@ -1,4 +1,4 @@
-import axios from "@/lib/axios";
+import { api as axios } from "@/lib/axios";
 import { NewUser, User, UserPersonalUpdate, UserUpdate } from "./user.types";
 
 const BASEURI = "/users";

@@ -1,4 +1,4 @@
-import axios from "@/lib/axios";
+import { api as axios } from "@/lib/axios";
 import { UserAlertingRequest, UserAlertingSettings } from "./preference.types";
 
 const BASEURI = "/preferences";

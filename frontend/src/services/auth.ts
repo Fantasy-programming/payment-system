@@ -1,4 +1,4 @@
-import axios from "@/lib/axios";
+import { api as axios } from "@/lib/axios";
 
 import { AuthResponse, EmailFormValues, PhoneFormValues } from "./auth.types";
 

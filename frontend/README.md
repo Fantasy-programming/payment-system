@@ -2,33 +2,32 @@
 
 - [x] Pay plan
   - [ ] Make it look & act nice
-  - [ ] Add all of the plans
+  - [x] Add all of the plans
   - [ ] Automatic renewal
-  - [ ] Pay for many months
+  - [x] Pay for many months
   - [ ] Receipt is sent to him + admin
-- [ ] Top up current plan
+- [x] Top up current plan
   - [ ] Make it look & act nice
-- [ ] Setup request for move
-- [ ] Setup request for support
+- [x] Setup request for move
+- [x] Setup request for support
 
 - [x] See all transactions
 - [x] Export transactions to CSV
-- [ ] Filter transactions by type & date?
+- [x] Filter transactions by type
 - [x] View transaction info & download receipt
 
-- [ ] Change password, phone and email
-- [ ] Setup alerting preferences
+- [x] Change password, phone and email
+- [x] Setup alerting preferences
   - [ ] Remind me when my plan is about to expire
   - [ ] Remind me when my payment fails
   - [ ] Reminder vector (email, sms)
 
 # ADMIN
 
-- [ ] See all customers & manage them (info + send reset-pass mail)
-- [ ] See all transactions + export to CSV
-- [ ] See all active subscriptions
+- [x] See all customers & manage them (info + send reset-pass mail)
+- [x] See all transactions + export to CSV
+- [x] See all active subscriptions
 - [x] Create plans (products)
-- [ ] See analytics
-- [ ] Setup alerting preferences
+- [?] Setup alerting preferences
 - [?] See all the backend ??
-- [ ] View all invoices
+- [x] View all invoices

@@ -1,4 +1,4 @@
-import axios from "@/lib/axios";
+import { api as axios } from "@/lib/axios";
 import { Product, ProductRequest } from "./product.types";
 
 const BASEURI = "/products";
