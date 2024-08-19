@@ -2,6 +2,7 @@ import express from "express";
 import morgan from "morgan";
 import cors from "cors";
 import cookies from "cookie-parser";
+import helmet from "helmet";
 
 import "express-async-errors";
 
@@ -16,16 +17,19 @@ import mistRouter from "./routes/mist";
 import { tokenExtractor } from "./middleware/jwt";
 import { errorHandler, unknownEndpoint } from "./middleware/errorHandler";
 
-import { initDB } from "./utils/initDB";
+import { initDB } from "./utils/mongo";
+import { initPulse } from "./utils/pulse";
 
 const app = express();
 
 // connect to the DB
 await initDB();
+await initPulse();
 
 // setup the middlewares
 app.use(morgan("tiny"));
 app.use(cors());
+app.use(helmet());
 app.use(express.json());
 app.use(cookies());
 app.use(express.static("static"));
