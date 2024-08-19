@@ -1,3 +1,4 @@
+import logger from "../logger";
 import type { Request, Response, NextFunction } from "express";
 
 export const errorHandler = (
@@ -6,7 +7,7 @@ export const errorHandler = (
   response: Response,
   next: NextFunction,
 ) => {
-  console.log(error);
+  logger.error(error);
 
   if (error.name === "CastError") {
     return response.status(400).send({ error: "malformatted id" });
@@ -14,10 +15,10 @@ export const errorHandler = (
     return response.status(400).json({ error: error.message });
   } else if (error.name === "SyntaxError") {
     return response.status(400).json({ error: "malformatted request" });
-  } else if (error.name === "CommonError") {
+  } else if (error.name === "UnauthorizedError") {
     return response.status(401).json({ error: error.message });
   } else if (error.name === "InternalError") {
-    return response.status(500).json({ error: "Something went wrong" });
+    return response.status(500).json({ error: error.message });
   } else if (error.name === "TokenExpiredError") {
     return response.status(401).json({ error: "token expired" });
   } else if (error.name === "JsonWebTokenError") {
