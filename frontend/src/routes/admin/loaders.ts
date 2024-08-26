@@ -5,8 +5,10 @@ import {
   adminProductsQuery,
   adminProductQuery,
   adminUserQuery,
+  adminPrefQuery,
 } from "@/queries/adminQueries";
 import type { Params } from "react-router-dom";
+import { userInfoQuery } from "@/queries/userQueries";
 
 export const adminHomeLoader = (queryClient: QueryClient) => async () => {
   const usersQuery = adminUsersQuery();
@@ -58,3 +60,15 @@ export const adminProductLoader =
     const products = await queryClient.ensureQueryData(productQuery);
     return products;
   };
+
+export const adminSettingsLoader = (queryClient: QueryClient) => async () => {
+  const userQuery = userInfoQuery();
+  const prefQuery = adminPrefQuery();
+
+  const [user, preferences] = await Promise.all([
+    queryClient.ensureQueryData(prefQuery),
+    queryClient.ensureQueryData(userQuery),
+  ]);
+
+  return { user, preferences };
+};

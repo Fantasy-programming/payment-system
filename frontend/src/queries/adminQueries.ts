@@ -1,6 +1,7 @@
 import userService from "@/services/user";
 import trscService from "@/services/transaction";
 import productService from "@/services/product";
+import preferenceService from "@/services/preference";
 
 export const adminUsersQuery = () => ({
   queryKey: ["admin", "users"],
@@ -15,6 +16,11 @@ export const adminProductsQuery = () => ({
 export const adminUserQuery = (id: string) => ({
   queryKey: ["admin", "user", id],
   queryFn: async () => userService.getUser(id),
+});
+
+export const adminPrefQuery = () => ({
+  queryKey: ["admin", "preferences"],
+  queryFn: preferenceService.getAdminPrefs,
 });
 
 export const adminProductQuery = (id: string) => ({

@@ -16,8 +16,6 @@ export function AdminDashboardLayout() {
   const location = useLocation();
   const { logout } = useAuth();
 
-  console.log(location.pathname);
-
   return (
     <div className="flex min-h-screen w-full flex-col">
       <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
@@ -61,7 +59,7 @@ export function AdminDashboardLayout() {
           <Link
             to="/admin/settings"
             className={` transition-colors hover:text-foreground
-            ${location.pathname === "/admin/settings" ? "text-foreground " : "text-muted-foreground"} `}
+            ${location.pathname.startsWith("/admin/settings/") ? "text-foreground " : "text-muted-foreground"} `}
           >
             Settings
           </Link>
@@ -118,7 +116,7 @@ export function AdminDashboardLayout() {
               <Link
                 to="/admin/settings"
                 className={`  hover:text-foreground
-            ${location.pathname === "/admin/Settings" ? "text-foreground " : "text-muted-foreground"} `}
+            ${location.pathname.startsWith("/admin/settings/") ? "text-foreground " : "text-muted-foreground"} `}
               >
                 Settings
               </Link>

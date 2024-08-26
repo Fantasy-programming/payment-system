@@ -1,11 +1,10 @@
 import authService from "@/services/auth";
-
 import { useState, useEffect, createContext, useCallback } from "react";
+import { initAPI } from "@/lib/axios";
 
 import { AuthResponse } from "@/services/auth.types";
 import { AuthContext, AuthProviderProps } from "./AuthProvider.types";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { initAPI } from "@/lib/axios";
 
 export const Context = createContext<null | AuthContext>(null);
 
@@ -31,37 +30,31 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   }, []);
 
   const refreshToken = useCallback(async () => {
-    try {
-      const response = await fetch("/api/auth/refresh", {
-        method: "POST",
-        credentials: "include",
-      });
-      if (!response.ok) throw new Error("Failed to refresh token");
-      const data: AuthResponse = await response.json();
-      storeUser(data);
-      return data.token;
-    } catch (error) {
-      console.error("Failed to refresh token:", error);
-      logout();
-      throw error;
-    }
+    const response = await fetch("/api/auth/refresh", {
+      method: "POST",
+      credentials: "include",
+    });
+
+    if (!response.ok) logout();
+
+    const data: AuthResponse = await response.json();
+    storeUser(data);
+
+    return data.token;
   }, [storeUser, logout]);
 
   useEffect(() => {
-    const initializeAuth = async () => {
-      const storedUser = localStorage.getItem("user");
-      if (storedUser) {
-        const parsedUser = JSON.parse(storedUser);
-        setUser(parsedUser);
-      }
+    const storedUser = localStorage.getItem("user");
 
-      // Initialize the API with refreshToken and logout functions
-      initAPI(refreshToken, logout);
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      setUser(parsedUser);
+    }
 
-      setLoading(false);
-    };
+    // Initialize the API with refreshToken and logout functions
+    initAPI(refreshToken, logout);
 
-    initializeAuth();
+    setLoading(false);
   }, [logout, refreshToken]);
 
   if (loading) {

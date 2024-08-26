@@ -7,7 +7,6 @@ import {
 } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-import { AuthProvider } from "@/providers/AuthProvider";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { UnProtectedRoute } from "./UnProtectedRoute";
 import { ErrorPage } from "./error-page";
@@ -35,7 +34,7 @@ import { AdminOrdersView } from "./admin/orders";
 import { AdminProductsView } from "./admin/products";
 import { SelectedProductView } from "./admin/product-view";
 import { AdminCustomerView } from "./admin/customers";
-import { AdminSettingsView } from "./admin/settings";
+import { AdminAlertingSettings } from "./admin/settings-alerting";
 import {
   adminHomeLoader,
   ordersLoader,
@@ -43,15 +42,18 @@ import {
   usersLoader,
   adminProductLoader,
   userLoader,
+  adminSettingsLoader,
 } from "./admin/loaders";
 import { NewProductView } from "./admin/newproduct-view";
 import { UserCreationPage } from "./admin/customer-view";
 import { UserViewPage } from "./admin/newcustomer-view";
+import { AdminGeneralSetting } from "./admin/settings-general";
+import { AdminSettingsView } from "./admin/settings-root";
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 10,
+      staleTime: 1000 * 30,
     },
   },
 });
@@ -185,10 +187,21 @@ const Routes: React.FC = () => {
         },
         {
           path: "settings",
+          element: <AdminSettingsView />,
           children: [
             {
-              index: true,
-              element: <AdminSettingsView />,
+              path: "",
+              element: <Navigate to="general" replace />,
+            },
+            {
+              path: "general",
+              element: <AdminGeneralSetting />,
+              loader: adminSettingsLoader(queryClient),
+            },
+            {
+              path: "alerting",
+              element: <AdminAlertingSettings />,
+              loader: adminSettingsLoader(queryClient),
             },
           ],
         },
@@ -230,11 +243,9 @@ const Routes: React.FC = () => {
   ]);
 
   return (
-    <AuthProvider>
-      <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
-      </QueryClientProvider>
-    </AuthProvider>
+    <QueryClientProvider client={queryClient}>
+      <RouterProvider router={router} />
+    </QueryClientProvider>
   );
 };
 

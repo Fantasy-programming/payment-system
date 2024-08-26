@@ -96,7 +96,7 @@ export function DataTable<TData, TValue>({
 
   return (
     <Card>
-      <div className="flex items-center">
+      <div className="flex items-center overflow-x-scroll overflow-y-scroll">
         <CardHeader>
           <CardTitle>Transactions</CardTitle>
           <CardDescription>Manage your transactions.</CardDescription>
