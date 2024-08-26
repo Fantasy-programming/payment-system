@@ -33,7 +33,7 @@ export const userExtractor = async (
       JWT_SECRET as string,
     ) as IJWT;
 
-    if (!decodedToken.id) {
+    if (!decodedToken?.id) {
       return response.status(401).json({ error: "token missing or invalid" });
     }
 

@@ -45,7 +45,7 @@ const create = async (user: IUserCreate) => {
   const newUser = new User({ ...user, password: passHash });
   const savedUser = await newUser.save();
 
-  // INFO: Send onboarding email to user
+  //Send onboarding email to user
   await sendWelcomeMail(
     user.email,
     user.firstName,

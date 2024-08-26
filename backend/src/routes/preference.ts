@@ -3,16 +3,25 @@ import { Router } from "express";
 import preferenceController from "../controllers/preferenceController";
 
 import { validateData } from "../middleware/validation";
-import { userAlertingRequestSchema } from "../types/Preference.type";
+import {
+  adminAlertingRequestSchema,
+  userAlertingRequestSchema,
+} from "../types/Preference.type";
 import { userExtractor } from "../middleware/jwt";
 
 const prefRouter = Router();
 
-// Get the user / admin preferences
+// Get the user preferences
 prefRouter.get(
   "/user",
   userExtractor,
   preferenceController.getUserAlertingSettings,
+);
+
+prefRouter.get(
+  "/admin",
+  userExtractor,
+  preferenceController.getAdminAlertingSettings,
 );
 
 // Update the user preferences
@@ -24,5 +33,12 @@ prefRouter.put(
 );
 
 // update the admin preferences
+
+prefRouter.put(
+  "/admin",
+  userExtractor,
+  validateData(adminAlertingRequestSchema),
+  preferenceController.updateAdminAlertingSettings,
+);
 
 export default prefRouter;

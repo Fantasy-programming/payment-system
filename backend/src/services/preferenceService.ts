@@ -1,9 +1,18 @@
 import type { ObjectId } from "mongoose";
-import type { UserAlertingRequest } from "../types/Preference.type";
+import type {
+  AdminAlertingRequest,
+  UserAlertingRequest,
+} from "../types/Preference.type";
 import { UserAlert } from "../models/UserPreference";
+import { AdminAlert } from "../models/AdminPreference";
 
 const getUserAlertingSettings = async (id: ObjectId) => {
   const settings = await UserAlert.findOne({ userId: id });
+  return settings;
+};
+
+const getAdminAlertingSettings = async (id: ObjectId) => {
+  const settings = await AdminAlert.findOne({ userId: id });
   return settings;
 };
 
@@ -27,4 +36,26 @@ const updateUserAlertingSettings = async (
   return updated;
 };
 
-export default { getUserAlertingSettings, updateUserAlertingSettings };
+const updateAdminAlertingSettings = async (
+  id: ObjectId,
+  data: AdminAlertingRequest,
+) => {
+  const updatedAt = new Date();
+  const settingsUpdate = { ...data, updatedAt };
+  const updated = await AdminAlert.findOneAndUpdate(
+    { userId: id },
+    { $set: settingsUpdate },
+    { new: true, runValidators: true },
+  );
+
+  //TODO: SETUP Schedulers and so in various services (based on preferences)
+
+  return updated;
+};
+
+export default {
+  getUserAlertingSettings,
+  getAdminAlertingSettings,
+  updateUserAlertingSettings,
+  updateAdminAlertingSettings,
+};
