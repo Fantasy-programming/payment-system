@@ -34,10 +34,11 @@ const getTransaction = async (request: Request, response: Response) => {
 const createTransaction = async (request: Request, response: Response) => {
   const userId = request?.user?.id;
   const body = request.body as ICreateTransaction;
+  const pulse = request.app.locals.scheduler;
 
   if (!userId) return response.status(401).json({ error: "Unauthorized" });
 
-  const data = await transactionService.create(body, userId);
+  const data = await transactionService.create(body, userId, pulse);
   return response.json(data);
 };
 

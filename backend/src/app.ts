@@ -17,35 +17,46 @@ import mistRouter from "./routes/mist";
 import { tokenExtractor } from "./middleware/jwt";
 import { errorHandler, unknownEndpoint } from "./middleware/errorHandler";
 
-import { initDB } from "./utils/mongo";
-import { initPulse } from "./utils/pulse";
+import type { DB } from "./utils/mongo";
+import type { Scheduler } from "./utils/pulse";
+import { stream } from "./logger";
 
-const app = express();
+type AppDependencies = {
+  db: DB;
+  scheduler: Scheduler;
+};
 
-// connect to the DB
-await initDB();
-await initPulse();
+export const createApp = async (dependencies: AppDependencies) => {
+  const app = express();
 
-// setup the middlewares
-app.use(morgan("tiny"));
-app.use(cors());
-app.use(helmet());
-app.use(express.json());
-app.use(cookies());
-app.use(express.static("static"));
-app.use(tokenExtractor);
+  // setup dependencies
+  await dependencies.db.init();
+  await dependencies.scheduler.init();
 
-// setup the routes (/api)
-app.use("/api/users", userRouter);
-app.use("/api/auth", authRouter);
-app.use("/api/transactions", transactionRouter);
-app.use("/api/products", productRouter);
-app.use("/api/support", supportRouter);
-app.use("/api/preferences", preferenceRouter);
-app.use("*", mistRouter);
+  // port dependency accross the app
+  app.locals.scheduler = dependencies.scheduler.pulse;
 
-// custom middlewares
-app.use(unknownEndpoint);
-app.use(errorHandler);
+  // setup the middlewares
+  app.use(morgan("tiny", { stream }));
+  app.use(cors());
+  app.use(helmet());
+  app.use(express.json());
+  app.use(cookies());
+  app.use(express.static("static"));
+  app.use(tokenExtractor);
 
-export default app;
+  // setup the routes (/api)
+  app.use("/api/users", userRouter);
+  app.use("/api/auth", authRouter);
+  app.use("/api/transactions", transactionRouter);
+  app.use("/api/products", productRouter);
+  app.use("/api/support", supportRouter);
+  app.use("/api/preferences", preferenceRouter);
+  app.use("*", mistRouter);
+
+  // custom middlewares
+  app.use(unknownEndpoint);
+  app.use(errorHandler);
+
+  return app;
+};

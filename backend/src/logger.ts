@@ -1,20 +1,42 @@
-const info = (...params: unknown[]): void => {
-  if (process.env.NODE_ENV !== "test") {
-    console.log(...params);
-  }
-};
+import winston from "winston";
 
-const error = (...params: unknown[]): void => {
-  if (process.env.NODE_ENV !== "test") {
-    if (params.length === 1) {
-      const err = params[0];
-      if (err instanceof Error) {
-        console.error(err.message);
-      }
+// TODO: Rotate to elasticsearch
+
+const logger = winston.createLogger({
+  level: "info",
+  format: winston.format.combine(
+    winston.format.timestamp({
+      format: "YYYY-MM-DD HH:mm:ss",
+    }),
+    winston.format.json(),
+  ),
+  transports: [
+    // Log to console
+    new winston.transports.Console({
+      format: winston.format.combine(
+        winston.format.colorize(),
+        winston.format.printf(({ level, message, timestamp }) => {
+          return `${timestamp} [${level}]: ${message}`;
+        }),
+      ),
+      silent: process.env.NODE_ENV === "test",
+    }),
+    // Log to file (optional)
+    new winston.transports.File({
+      filename: "api.log",
+      level: "error",
+    }),
+  ],
+});
+
+export const stream = {
+  write: (message: unknown) => {
+    if (typeof message === "string") {
+      logger.info(message.substring(0, message.lastIndexOf("\n")));
+    } else {
+      logger.info(message);
     }
-
-    console.error(...params);
-  }
+  },
 };
 
-export default { info, error };
+export default logger;

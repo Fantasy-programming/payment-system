@@ -43,6 +43,10 @@ const userSchema = new mongoose.Schema<IUser, UserModel>({
 // Middleware to create a preference when a user is created
 userSchema.post("save", async function (doc, next) {
   try {
+    if (doc.role === "admin") {
+      return;
+    }
+
     await UserAlert.create({ userId: doc._id });
     next();
   } catch (err) {

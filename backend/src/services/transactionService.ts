@@ -1,7 +1,7 @@
-import pulse from "../utils/pulse";
 import logger from "../logger";
 
 import { getPaymentMethod } from "../lib/paystack";
+import { adminPreferences } from "../utils/preferences";
 
 import { Transaction } from "../models/Transaction";
 import { UserAlert } from "../models/UserPreference";
@@ -10,7 +10,7 @@ import type { ObjectId } from "mongoose";
 import type { ICreateTransaction } from "../types/Transaction.type";
 import type { IUser } from "../types/User.type";
 import type { IProduct } from "../types/Product.type";
-import { adminPreferences } from "../utils/preferences";
+import type Pulse from "@pulsecron/pulse";
 
 const getAll = async (role: string, id: ObjectId) => {
   if (role === "admin") {
@@ -35,7 +35,11 @@ const getOne = async (id: string, role: string, userId: ObjectId) => {
   return transaction;
 };
 
-const create = async (trsc: ICreateTransaction, userId: ObjectId) => {
+const create = async (
+  trsc: ICreateTransaction,
+  userId: ObjectId,
+  pulse: Pulse,
+) => {
   const startDate = new Date();
   const endDate = new Date(
     new Date().setMonth(startDate.getMonth() + trsc.months),
