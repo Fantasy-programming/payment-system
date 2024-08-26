@@ -4,7 +4,7 @@ import "dotenv/config";
 export const ARKESEL_API_KEY = process.env.ARKESEL_API_KEY;
 
 // Server
-export const NODE_ENV = process.env.NODE_ENV || false;
+export const NODE_ENV = process.env.NODE_ENV || "development";
 export const PORT = process.env.PORT;
 export const MONGODB_URI =
   process.env.NODE_ENV === "production"

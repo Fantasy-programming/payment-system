@@ -19,6 +19,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@epegzz/winston-dev-console": "^1.3.4",
     "@pulsecron/pulse": "^1.6.3",
     "@react-email/components": "0.0.21",
     "@react-pdf/renderer": "^3.4.4",
@@ -64,5 +65,8 @@
     "supertest": "^7.0.0",
     "testcontainers": "^10.12.0",
     "typescript-eslint": "^7.18.0"
+  },
+  "patchedDependencies": {
+    "winston@3.14.2": "patches/winston@3.14.2.patch"
   }
 }
