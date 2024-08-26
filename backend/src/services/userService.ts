@@ -1,4 +1,7 @@
-import bcrypt from "bcrypt";
+import { User } from "../models/User";
+import { InternalError, UnauthorizedError } from "../utils/errors";
+import { sendWelcomeMail } from "../lib/mail";
+import { generatePassword } from "../utils/password";
 
 import type { ObjectId } from "mongoose";
 import type {
@@ -6,11 +9,6 @@ import type {
   IUserPersonalUpdate,
   IUserUpdate,
 } from "../types/User.type";
-
-import { User } from "../models/User";
-import { InternalError, UnauthorizedError } from "../utils/errors";
-import { sendWelcomeMail } from "../lib/mail";
-import { generatePassword } from "../utils/password";
 
 const getAll = async () => {
   const users = await User.find({
@@ -41,7 +39,7 @@ const create = async (user: IUserCreate) => {
     );
   }
 
-  const passHash = await bcrypt.hash(user.password, 10);
+  const passHash = await Bun.password.hash(user.password);
   const newUser = new User({ ...user, password: passHash });
   const savedUser = await newUser.save();
 
@@ -72,7 +70,7 @@ const updateUser = async (id: ObjectId, user: IUserPersonalUpdate) => {
   const updatedAt = new Date();
 
   if (user.password) {
-    const passHash = await bcrypt.hash(user.password, 10);
+    const passHash = await Bun.password.hash(user.password);
     user.password = passHash;
   }
 
@@ -91,8 +89,7 @@ const updateUser = async (id: ObjectId, user: IUserPersonalUpdate) => {
 
 const resetPassword = async (id: ObjectId) => {
   const password = generatePassword(8);
-
-  const passHash = await bcrypt.hash(password, 10);
+  const passHash = await Bun.password.hash(password);
 
   try {
     await User.findByIdAndUpdate(

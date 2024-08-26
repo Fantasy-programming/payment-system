@@ -28,6 +28,5 @@
 - [x] See all transactions + export to CSV
 - [x] See all active subscriptions
 - [x] Create plans (products)
-- [?] Setup alerting preferences
-- [?] See all the backend ??
+- [x] Setup alerting preferences
 - [x] View all invoices

@@ -1,0 +1,46 @@
+services:
+  mongo:
+    image: mongo:latest
+    container_name: mongo_ups
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ridy
+      MONGO_INITDB_ROOT_PASSWORD: tuestfou
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - ups_network
+  ups:
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile
+    container_name: "ups"
+    depends_on:
+      - mongo
+    env_file:
+      - ./.env
+    volumes:
+      - ./backend:/usr/src/app
+    expose:
+      - "3000"
+    networks:
+      - ups_network
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    container_name: "ups_nginx"
+    ports:
+      - "80:80"
+    depends_on:
+      - ups
+    networks:
+      - ups_network
+
+volumes:
+  mongo_data:
+    driver: local
+
+networks:
+  ups_network:
+    driver: bridge

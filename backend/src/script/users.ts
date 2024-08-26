@@ -1,4 +1,3 @@
-import bcrypt from "bcrypt";
 import logger from "../logger";
 import { User } from "../models/User";
 import { AdminAlert } from "../models/AdminPreference";
@@ -10,7 +9,7 @@ export async function createAdmin() {
 
   // Creating admin
   logger.info("Creating admin...");
-  const password = await bcrypt.hash("123456Admin@", 10);
+  const password = await Bun.password.hash("123456Admin@");
 
   const admin = new User({
     firstName: "Eric",
@@ -59,7 +58,7 @@ export async function createUser() {
 
   // creating user
   logger.info("Creating users...");
-  const password = await bcrypt.hash("123456User@", 10);
+  const password = await Bun.password.hash("123456User@");
 
   const user = new User({
     firstName: "John",

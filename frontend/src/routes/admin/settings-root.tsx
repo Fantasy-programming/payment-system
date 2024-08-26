@@ -9,17 +9,13 @@ export const AdminSettingsView = () => {
         <nav className="grid gap-4 text-sm text-muted-foreground">
           <Link
             to="general"
-            className={`
-${location.pathname === "/admin/settings/general" ? "font-semibold text-primary" : ""}    
-`}
+            className={`${location.pathname === "/admin/settings/general" ? "font-semibold text-primary" : ""}`}
           >
             General
           </Link>
           <Link
             to="alerting"
-            className={`
-${location.pathname === "/admin/settings/alerting" ? "font-semibold text-primary" : ""}    
-`}
+            className={`${location.pathname === "/admin/settings/alerting" ? "font-semibold text-primary" : ""}`}
           >
             Alerting
           </Link>

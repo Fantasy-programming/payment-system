@@ -6,11 +6,14 @@ import { NODE_ENV } from "./env";
 
 const transports: winston.transport[] = [];
 
-if (NODE_ENV === "production") {
+if (NODE_ENV !== "development") {
   transports.push(
     new winston.transports.Console({
       level: "http",
       format: winston.format.combine(
+        winston.format.timestamp({
+          format: "YYYY-MM-DD HH:mm:ss",
+        }),
         winston.format.colorize(),
         winston.format.simple(),
         winston.format.printf(({ level, message, timestamp }) => {
@@ -34,12 +37,15 @@ if (NODE_ENV === "production") {
 }
 
 let logger = winston.createLogger({
-  level: "debug",
+  level: "silly",
   silent: NODE_ENV === "test",
   transports: transports,
 });
 
-if (NODE_ENV === "development") {
+if (
+  NODE_ENV === "development" &&
+  typeof winstonDevConsole.init === "function"
+) {
   logger = winstonDevConsole.init(logger);
   logger.add(
     winstonDevConsole.transport({

@@ -1,53 +1,41 @@
-# Base stage
-FROM oven/bun:alpine AS base
-WORKDIR /usr/src/app
-RUN apk add --no-cache python3 make g++
+# Base stage - Build dependencies
+FROM oven/bun:1 as deps
 
-# Install all dependencies into temp
-FROM base AS install
-RUN mkdir -p /temp/dev
-COPY backend/package.json backend/bun.lockb /temp/dev/
-RUN cd /temp/dev && bun install --frozen-lockfile
+# RUN apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt/lists/*
 
-# Install production dependencies
-RUN mkdir -p /temp/prod
-COPY backend/package.json backend/bun.lockb /temp/prod/
-RUN cd /temp/prod && bun install --frozen-lockfile --production
-
-# install frontend  dependencies
-RUN mkdir -p /temp/frontend
-COPY frontend/package*.json /temp/frontend/
-RUN cd /temp/frontend && bun install --frozen-lockfile 
-
-
-# Backend build stage
-FROM base AS backend-build
-COPY --from=install /temp/dev/node_modules node_modules
-COPY backend .
-
-RUN bun run build
-
-# Frontend build stage
-FROM base AS frontend-build
-WORKDIR /usr/src/frontend
-COPY --from=install /temp/frontend/node_modules node_modules
-COPY frontend ./
-RUN bun run build
-
-
-# Final stage
-FROM oven/bun:distroless AS release
-WORKDIR /usr/src/app
-
+# Create non-root user
 ARG USERNAME=nonroot
 ARG USER_GROUP=nonroot
+RUN groupadd -g 10001 $USER_GROUP && useradd -m -u 10000 -g $USER_GROUP $USERNAME
 
+# Make directories
+RUN mkdir -p /temp/dev
+RUN mkdir -p /temp/frontend
 
-COPY --from=install /temp/prod/node_modules node_modules
-COPY --from=backend-build /usr/src/app/dist ./dist
-COPY --from=frontend-build /usr/src/frontend/dist ./static
-COPY backend/package.json .
+WORKDIR /temp/dev
+COPY backend/package.json backend/bun.lockb ./
+COPY backend/patches ./patches
+RUN bun install --frozen-lockfile --production --no-cache
 
-USER ${USERNAME}:${USER_GROUP}
-EXPOSE 3000
-CMD ["bun", "run", "dist/index.js"]
+WORKDIR /temp/frontend
+COPY frontend/package*.json ./
+RUN bun install --frozen-lockfile --no-cache
+
+# Build stage - Backend
+FROM deps as backend-builder
+WORKDIR /temp/dev
+COPY --chown=${USERNAME}:${USER_GROUP} backend/ .
+RUN bun build src/index.ts --compile --minify --sourcemap --outfile build/app
+
+# Build stage - Frontend
+FROM deps as frontend-builder
+WORKDIR /temp/frontend
+COPY frontend/ ./
+RUN bun run build
+
+# Final stage
+FROM gcr.io/distroless/base:nonroot
+COPY --from=backend-builder --chown=nonroot:nonroot /temp/dev/build ./dist/
+COPY --from=frontend-builder --chown=nonroot:nonroot /temp/frontend/dist ./static
+
+CMD ["./dist/app"]

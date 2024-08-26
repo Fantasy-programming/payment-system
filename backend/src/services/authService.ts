@@ -1,4 +1,3 @@
-import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import arkesel from "../lib/sms";
 import sms from "../constants/sms";
@@ -25,7 +24,7 @@ const emailLogin = async (email: string, password: string) => {
     throw new UnauthorizedError("Invalid email or password");
   }
 
-  const goodpass = await bcrypt.compare(password, user.password);
+  const goodpass = await Bun.password.verify(password, user.password);
 
   if (!goodpass) {
     throw new UnauthorizedError("Invalid email or password");

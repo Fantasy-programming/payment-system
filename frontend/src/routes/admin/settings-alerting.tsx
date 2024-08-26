@@ -24,15 +24,17 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { adminPrefQuery } from "@/queries/adminQueries";
 import {
   AdminAlertingRequest,
   adminAlertingRequestSchema,
 } from "@/services/preference.types";
+import preferenceService from "@/services/preference";
 
 export const AdminAlertingSettings = () => {
   const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
 
   const { data: preferences } = useSuspenseQuery(adminPrefQuery());
 
@@ -56,8 +58,10 @@ export const AdminAlertingSettings = () => {
   const onSubmit = async (data: AdminAlertingRequest) => {
     setLoading(true);
     try {
-      // Here you would typically send the data to your backend
-      console.log(data);
+      await preferenceService.updateAdminPrefs(data);
+      await queryClient.invalidateQueries({
+        queryKey: ["admin", "preferences"],
+      });
       toast.success("Admin preferences updated successfully.");
     } catch (error) {
       toast.error("Error updating admin preferences.");
@@ -89,7 +93,7 @@ export const AdminAlertingSettings = () => {
                     control={form.control}
                     name="emailAlerts"
                     render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                      <FormItem className="flex my-3 flex-row items-center justify-between rounded-lg border p-4">
                         <div className="space-y-0.5">
                           <FormLabel className="text-base">
                             Email Alerts
@@ -131,104 +135,108 @@ export const AdminAlertingSettings = () => {
                   />
                 </TabsContent>
                 <TabsContent value="email">
-                  <FormField
-                    control={form.control}
-                    name="leaveAlertEmail"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Leave Alert Email</FormLabel>
-                        <FormControl>
-                          <Input type="email" {...field} />
-                        </FormControl>
-                        <FormDescription>
-                          Email for leave alerts
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="problemAlertEmail"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Problem Alert Email</FormLabel>
-                        <FormControl>
-                          <Input type="email" {...field} />
-                        </FormControl>
-                        <FormDescription>
-                          Email for problem alerts
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="activationAlertEmail"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Activation Alert Email</FormLabel>
-                        <FormControl>
-                          <Input type="email" {...field} />
-                        </FormControl>
-                        <FormDescription>
-                          Email for activation alerts
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div className="space-y-6">
+                    <FormField
+                      control={form.control}
+                      name="leaveAlertEmail"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Leave Alert Email</FormLabel>
+                          <FormControl>
+                            <Input type="email" {...field} />
+                          </FormControl>
+                          <FormDescription>
+                            Email for leave alerts
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="problemAlertEmail"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Problem Alert Email</FormLabel>
+                          <FormControl>
+                            <Input type="email" {...field} />
+                          </FormControl>
+                          <FormDescription>
+                            Email for problem alerts
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="activationAlertEmail"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Activation Alert Email</FormLabel>
+                          <FormControl>
+                            <Input type="email" {...field} />
+                          </FormControl>
+                          <FormDescription>
+                            Email for activation alerts
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </TabsContent>
                 <TabsContent value="sms">
-                  <FormField
-                    control={form.control}
-                    name="leaveAlertPhone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Leave Alert Phone</FormLabel>
-                        <FormControl>
-                          <Input type="tel" {...field} />
-                        </FormControl>
-                        <FormDescription>
-                          Phone number for leave alerts
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="problemAlertPhone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Problem Alert Phone</FormLabel>
-                        <FormControl>
-                          <Input type="tel" {...field} />
-                        </FormControl>
-                        <FormDescription>
-                          Phone number for problem alerts
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="activationAlertPhone"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Activation Alert Phone</FormLabel>
-                        <FormControl>
-                          <Input type="tel" {...field} />
-                        </FormControl>
-                        <FormDescription>
-                          Phone number for activation alerts
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  <div className="space-y-6">
+                    <FormField
+                      control={form.control}
+                      name="leaveAlertPhone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Leave Alert Phone</FormLabel>
+                          <FormControl>
+                            <Input type="tel" {...field} />
+                          </FormControl>
+                          <FormDescription>
+                            Phone number for leave alerts
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="problemAlertPhone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Problem Alert Phone</FormLabel>
+                          <FormControl>
+                            <Input type="tel" {...field} />
+                          </FormControl>
+                          <FormDescription>
+                            Phone number for problem alerts
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="activationAlertPhone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Activation Alert Phone</FormLabel>
+                          <FormControl>
+                            <Input type="tel" {...field} />
+                          </FormControl>
+                          <FormDescription>
+                            Phone number for activation alerts
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />{" "}
+                  </div>
                 </TabsContent>
               </Tabs>
               <div className="space-y-4">

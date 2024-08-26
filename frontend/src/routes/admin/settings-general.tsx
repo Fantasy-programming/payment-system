@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
+import userService from "@/services/user";
 
 import {
   Card,
@@ -23,7 +24,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { PasswordInput } from "@/components/ui/passinput";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { userInfoQuery } from "@/queries/userQueries";
 import {
   UserPersonalUpdate,
@@ -55,6 +56,7 @@ import {
 
 export const AdminGeneralSetting = () => {
   const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
   const { data: info } = useSuspenseQuery(userInfoQuery());
 
   const form = useForm<UserPersonalUpdate>({
@@ -65,17 +67,16 @@ export const AdminGeneralSetting = () => {
     },
   });
 
-  //TODO: Implement onSubmit
   const handleSubmit = async (data: UserPersonalUpdate) => {
     setLoading(true);
     try {
-      // await onSubmit(data);
-      toast.success("Personal information updated successfully.");
-
-      // Clear password fields after successful update
-      form.reset({ ...data, password: "" });
-    } catch (error) {
-      toast.error("Error updating personal information.");
+      await userService.updateProfile(data);
+      await queryClient.invalidateQueries({
+        queryKey: ["user", "me"],
+      });
+      toast.success("Profile updated successfully.");
+    } catch {
+      toast.error("Error updating profile.");
     } finally {
       setLoading(false);
     }
