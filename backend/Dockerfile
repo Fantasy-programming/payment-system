@@ -1,41 +1,39 @@
-# Base stage - Build dependencies
-FROM oven/bun:1 as deps
+# Base stage
+FROM oven/bun:1 as base
+WORKDIR /usr/src/app
 
-# RUN apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt/lists/*
-
-# Create non-root user
-ARG USERNAME=nonroot
-ARG USER_GROUP=nonroot
-RUN groupadd -g 10001 $USER_GROUP && useradd -m -u 10000 -g $USER_GROUP $USERNAME
-
-# Make directories
+# Stage 1 (backend dev deps)
+FROM base AS dev-deps
 RUN mkdir -p /temp/dev
-RUN mkdir -p /temp/frontend
+COPY backend/package.json backend/bun.lockb /temp/dev/
+COPY backend/patches /temp/dev/patches
+RUN cd /temp/dev && bun install --frozen-lockfile
 
-WORKDIR /temp/dev
-COPY backend/package.json backend/bun.lockb ./
-COPY backend/patches ./patches
-RUN bun install --frozen-lockfile --production --no-cache
+# Stage 2 (production dev deps)
+FROM base AS prod-deps
+RUN mkdir -p /temp/prod
+COPY backend/package.json backend/bun.lockb /temp/prod/
+COPY backend/patches /temp/prod/patches
+RUN cd /temp/prod && bun install --frozen-lockfile --production
 
-WORKDIR /temp/frontend
-COPY frontend/package*.json ./
-RUN bun install --frozen-lockfile --no-cache
+# Stage 3 (Build frontend)
+FROM base AS frontend-build
+RUN mkdir -p /temp/front
+COPY frontend/ /temp/front/
+RUN cd /temp/front && ls
+RUN cd /temp/front && bun install --frozen-lockfile --no-cache
+RUN cd /temp/front && bun run build
 
-# Build stage - Backend
-FROM deps as backend-builder
-WORKDIR /temp/dev
-COPY --chown=${USERNAME}:${USER_GROUP} backend/ .
-RUN bun build src/index.ts --compile --minify --sourcemap --outfile build/app
+# Stage 4 (Pre-release  - build, test, etc...)
 
-# Build stage - Frontend
-FROM deps as frontend-builder
-WORKDIR /temp/frontend
-COPY frontend/ ./
-RUN bun run build
+# Stage 5 (Release)
+FROM base as release 
+COPY --from=prod-deps /temp/prod/node_modules node_modules
+COPY --from=prod-deps /temp/prod/package.json .
+COPY --from=frontend-build /temp/front/dist ./static
+COPY backend/src src
 
-# Final stage
-FROM gcr.io/distroless/base:nonroot
-COPY --from=backend-builder --chown=nonroot:nonroot /temp/dev/build ./dist/
-COPY --from=frontend-builder --chown=nonroot:nonroot /temp/frontend/dist ./static
-
-CMD ["./dist/app"]
+# run the app
+USER bun
+EXPOSE 3000/tcp
+ENTRYPOINT [ "bun", "run", "src/index.ts" ]
