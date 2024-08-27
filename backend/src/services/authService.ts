@@ -52,7 +52,7 @@ const verifyOTP = async (value: string, code: string) => {
     throw new UnauthorizedError("OTP invalid or has expired");
   }
 
-  const user = await User.findOne({ phone: value });
+  const user = await User.findOne({ phone: value, status: "active" });
 
   if (!user) {
     throw new UnauthorizedError("No user with this phone number");

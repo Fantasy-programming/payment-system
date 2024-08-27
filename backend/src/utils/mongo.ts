@@ -24,7 +24,8 @@ export class DB {
       await mongoose.connect(this.mongoUri);
       logger.info("🟢 Connected to MongoDB");
     } catch (error) {
-      logger.error("Error connecting to MongoDB", error);
+      logger.error("Error connecting to MongoDB");
+      logger.error(error);
       process.exit(1);
     }
   }

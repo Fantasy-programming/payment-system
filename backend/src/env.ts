@@ -1,5 +1,5 @@
 // SMS
-export const ARKESEL_API_KEY = Bun.env.ARKESEL_API_KEY;
+export const ARKESEL_API_KEY = Bun.env.ARKESEL_API_KEY || "";
 
 // Server
 export const NODE_ENV = Bun.env.NODE_ENV;

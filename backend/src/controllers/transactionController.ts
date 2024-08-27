@@ -11,6 +11,7 @@ const getAllTransactions = async (request: Request, response: Response) => {
   if (!role || !id) return response.status(401).json({ error: "Unauthorized" });
 
   const transactions = await transactionService.getAll(role, id);
+
   return response.json(transactions);
 };
 

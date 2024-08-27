@@ -1,6 +1,6 @@
-import axios from "axios";
 import sms from "../constants/sms";
 import logger from "../logger";
+import type { IArkeselVerify } from "../types/Repository.type.ts";
 
 import { InternalError } from "../utils/errors.ts";
 
@@ -18,11 +18,13 @@ const sendOTP = async (message: string, number: string) => {
   const body = { ...base, number, message };
 
   try {
-    const response = await axios.post(sms.OTP_ENDPOINT, body, {
+    const response = await fetch(sms.OTP_ENDPOINT, {
+      method: "POST",
       headers: sms.HEADER,
+      body: JSON.stringify(body),
     });
 
-    return response.data;
+    return response.json();
   } catch (error) {
     logger.error("Error sending OTP:", error);
     throw InternalError;
@@ -42,10 +44,13 @@ const sendSMS = async (message: string, number: string) => {
   const body = { message, recipients: [number], sender: sms.SENDER_ID };
 
   try {
-    const response = await axios.post(sms.SMS_ENDPOINT, body, {
+    const response = await fetch(sms.SMS_ENDPOINT, {
+      method: "POST",
       headers: sms.HEADER,
+      body: JSON.stringify(body),
     });
-    return response.data;
+
+    return response.json();
   } catch (error) {
     logger.error("Error sending SMS:", error);
     throw InternalError;
@@ -65,11 +70,17 @@ const verifyOTP = async (code: string, number: string) => {
   const body = { code, number };
 
   try {
-    const response = await axios.post(sms.OTP_VERIFY_ENDPOINT, body, {
+    const response = await fetch(sms.OTP_VERIFY_ENDPOINT, {
+      method: "POST",
       headers: sms.HEADER,
+      body: JSON.stringify(body),
     });
 
-    return response.data;
+    if (!response.ok) {
+      throw new Error("Invalid OTP");
+    }
+
+    return response.json() as Promise<IArkeselVerify>;
   } catch (error) {
     logger.error("Error verifying OTP:", error);
     throw InternalError;

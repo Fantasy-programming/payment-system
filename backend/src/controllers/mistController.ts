@@ -1,9 +1,7 @@
-import { fileURLToPath } from "url";
 import path, { dirname } from "path";
-
 import type { NextFunction, Request, Response } from "express";
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
+const __dirname = dirname(import.meta.dir);
 
 const mistController = (req: Request, res: Response, next: NextFunction) => {
   if (/(.css|.js|.png|.jpg|.jpeg|.svg|.gif|.ico)$/.test(req.path)) {
