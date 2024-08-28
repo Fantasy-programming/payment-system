@@ -1,6 +1,6 @@
 import { User } from "../models/User";
 import { InternalError, UnauthorizedError } from "../utils/errors";
-import { sendWelcomeMail } from "../lib/mail";
+import { sendNewPassEmail, sendWelcomeMail } from "../lib/mail";
 import { generatePassword } from "../utils/password";
 
 import type { ObjectId } from "mongoose";
@@ -92,16 +92,20 @@ const resetPassword = async (id: ObjectId) => {
   const passHash = await Bun.password.hash(password);
 
   try {
-    await User.findByIdAndUpdate(
+    const user = await User.findByIdAndUpdate(
       id,
       { password: passHash },
       { new: true, runValidators: true },
     );
+
+    if (!user) {
+      throw new UnauthorizedError("User not found");
+    }
+
+    sendNewPassEmail(user.email, password);
   } catch (error) {
     throw new InternalError("Error resetting password");
   }
-
-  //TODO: Send an email to the user with the new password
 };
 
 const remove = async (ids: ObjectId[] | ObjectId) => {

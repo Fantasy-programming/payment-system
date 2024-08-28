@@ -8,8 +8,6 @@ import { UserAlert } from "../models/UserPreference";
 
 import type { ObjectId } from "mongoose";
 import type { ICreateTransaction } from "../types/Transaction.type";
-import type { IUser } from "../types/User.type";
-import type { IProduct } from "../types/Product.type";
 import type Pulse from "@pulsecron/pulse";
 
 const getAll = async (role: string, id: ObjectId) => {
@@ -60,21 +58,17 @@ const create = async (
     endDate,
   });
 
-  const savedTransaction = await transaction.save();
-  const state1 = await savedTransaction.populate<{ user: IUser }>("user");
-  const state2 = await savedTransaction.populate<{ user: IProduct }>("product");
+  let savedTransaction = await transaction.save();
+  savedTransaction = await savedTransaction.toObject();
+  logger.debug("Transaction created", savedTransaction);
 
-  // TODO: Setup scheduled task for recurring transactions
+  // NOTE: Setup scheduled task for recurring transactions (subscription)
 
   UserAlert.findOne({ userId })
     .then((preferences) => {
       if (preferences?.receiptEmail) {
         // Send receipt email
-        pulse.schedule("now", "send receipt email", {
-          email: state1.user.email,
-          userId: userId.toString(),
-          userDetail: state1.user,
-          productDetail: state2.product,
+        pulse.now("send receipt email", {
           transactionDetail: savedTransaction,
         });
 
@@ -84,10 +78,8 @@ const create = async (
       if (preferences?.subscriptionAlert) {
         if (preferences?.emailAlerts) {
           pulse.schedule("in 28 days", "send subscription reminder", {
-            email: state1.user.email,
-            number: state1.user.phone,
+            userDetail: savedTransaction.user,
             alertType: "email",
-            userId: userId.toString(),
           });
 
           logger.info("🟢 Subscription reminder scheduled");
@@ -95,10 +87,8 @@ const create = async (
 
         if (preferences?.smsAlerts) {
           pulse.schedule("in 28 days", "send subscription reminder", {
-            email: state1.user.email,
-            number: state1.user.phone,
+            userDetail: savedTransaction.user,
             alertType: "sms",
-            userId: userId.toString(),
           });
 
           logger.info("🟢 Subscription reminder scheduled");
@@ -115,25 +105,17 @@ const create = async (
   // Alert the admin of the new subscription
   if (adminPreferences?.activationAlert) {
     if (adminPreferences?.emailAlerts) {
-      pulse.schedule("now", "subscription Alert", {
-        email: adminPreferences?.activationAlertEmail,
-        number: adminPreferences?.activationAlertPhone,
+      pulse.now("subscription Alert", {
         alertType: "email",
-        userDetail: state1.user,
         transactionDetail: savedTransaction,
-        userId: userId.toString(),
       });
       logger.info("🟢 Subscription Alert scheduled");
     }
 
     if (adminPreferences?.smsAlerts) {
-      pulse.schedule("now", "subscription Alert", {
-        email: adminPreferences?.activationAlertEmail,
-        number: adminPreferences?.activationAlertPhone,
-        userDetail: state1.user,
-        transactionDetail: savedTransaction,
+      pulse.now("subscription Alert", {
         alertType: "sms",
-        userId: userId.toString(),
+        transactionDetail: savedTransaction,
       });
       logger.info("🟢 Subscription Alert scheduled");
     }

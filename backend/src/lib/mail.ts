@@ -1,12 +1,16 @@
 import logger from "../logger";
 import nodemailer from "nodemailer";
-
 import { render } from "@react-email/components";
+
+import Receipt from "../templates/pdf/PDFReceipt";
 import { MikronetWelcomeEmail } from "../templates/mikronet-welcome";
+import { MikronetSupportEmail } from "../templates/mikronet-support";
+import { MikronetResetPassEmail } from "../templates/mikronet-reset-pass";
+import { MikronetReceiptEmail } from "../templates/mikronet-receipt";
+import { MikronetSubAlertEmail } from "../templates/mikronet-sub-alert";
+import { MikronetReminderEmail } from "../templates/mikronet-reminder-user";
 
 import { oauth2Client } from "../constants/mail";
-import { type Options } from "nodemailer/lib/smtp-transport/index.js";
-
 import {
   MAIL_SERVICE,
   MAIL_USERNAME,
@@ -14,6 +18,11 @@ import {
   MAIL_REFRESH_TOKEN,
   MAIL_CLIENT_SECRET,
 } from "../env.ts";
+
+import type { Options } from "nodemailer/lib/smtp-transport/index.js";
+import type { IFullTransaction } from "../types/Transaction.type.ts";
+import type { IUser } from "../types/User.type.ts";
+import { renderToBuffer } from "@react-pdf/renderer";
 
 const createTransporter = async () => {
   oauth2Client.setCredentials({
@@ -56,8 +65,8 @@ export async function sendMailAttachment(
   email: string,
   title: string,
   body: string,
-  path: string,
-  name: string,
+  content: Buffer,
+  filename: string,
 ) {
   try {
     const transporter = await createTransporter();
@@ -69,8 +78,9 @@ export async function sendMailAttachment(
       html: body,
       attachments: [
         {
-          filename: name,
-          path: path,
+          filename,
+          content: content,
+          contentType: "application/pdf",
         },
       ],
     });
@@ -89,4 +99,61 @@ export async function sendWelcomeMail(
   const body = render(MikronetWelcomeEmail({ firstName, lastName, password }));
   await sendMail(email, title, body);
   logger.info("Welcome email sent successfully");
+}
+
+export async function sendSupportMail(
+  email: string,
+  firstName: string,
+  lastName: string,
+  phone: string,
+  address: string,
+  message: string,
+  reason: "support" | "transfer",
+) {
+  const name = `${firstName} ${lastName}`;
+
+  const title =
+    reason === "support" ? "Request for support" : "Request for leave";
+
+  const body = render(
+    MikronetSupportEmail({ name, phone, email, address, message, reason }),
+  );
+  await sendMail(email, title, body);
+
+  logger.info(`${reason} requested by user with email ${email}`);
+}
+
+export async function sendNewPassEmail(email: string, password: string) {
+  const title = "New Password";
+
+  const body = render(MikronetResetPassEmail({ password }));
+
+  await sendMail(email, title, body);
+  logger.info("New password email sent successfully");
+}
+
+// TODO: Test This
+export async function sendReceiptEmail(transaction: IFullTransaction) {
+  const title = "Mikronet Receipt";
+  const name = `${transaction.user.firstName} ${transaction.user.lastName}`;
+  const body = render(MikronetReceiptEmail({ name }));
+  const pdf = await renderToBuffer(Receipt({ orderData: transaction }));
+  const filename = `receipt-${transaction.trxRef}.pdf`;
+
+  await sendMailAttachment(transaction.user.email, title, body, pdf, filename);
+}
+
+export async function sendSubAlertEmail(
+  transaction: IFullTransaction,
+  email: string,
+) {
+  const title = "Subscription Alert";
+  const body = render(MikronetSubAlertEmail({ transaction }));
+  await sendMail(email, title, body);
+}
+
+export async function sendSubEndReminderEmail(user: IUser) {
+  const title = "Subscription Reminder";
+  const body = render(MikronetReminderEmail({ user }));
+  await sendMail(user.email, title, body);
 }

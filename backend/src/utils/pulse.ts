@@ -1,35 +1,33 @@
 import { Pulse } from "@pulsecron/pulse";
 
-import { sendMail } from "../lib/mail";
+import {
+  sendReceiptEmail,
+  sendSubAlertEmail,
+  sendSubEndReminderEmail,
+} from "../lib/mail";
+import { adminPreferences } from "../utils/preferences";
+
 import sms from "../lib/sms";
 import logger from "../logger";
 
 import type { DB } from "./mongo";
 import type { IUser } from "../types/User.type";
-import type { IProduct } from "../types/Product.type";
-import type { ITransaction } from "../types/Transaction.type";
-
-interface SubReminderJob {
-  email: string;
-  number: string;
-  alertType: string;
-  userId: string;
-}
-
-interface AdminAlertJob {
-  email: string;
-  number: string;
-  alertType: string;
-  transactionDetail: ITransaction;
-  userDetail: IUser;
-  userId: string;
-}
+import type { IFullTransaction } from "../types/Transaction.type";
+import { InternalError } from "./errors";
 
 interface ReceiptJob {
-  email: string;
+  transactionDetail: IFullTransaction;
+}
+
+interface SubEndReminderJob {
   userDetail: IUser;
-  productDetail: IProduct;
-  transactionDetail: ITransaction;
+  alertType: string;
+}
+
+// NOTE: We will freshly fetch the admin pref
+interface SubAlertJob {
+  transactionDetail: IFullTransaction;
+  alertType: string;
 }
 
 export class Scheduler {
@@ -61,6 +59,7 @@ export class Scheduler {
     this.pulse.mongo(connection, "jobs");
     logger.info("🟢 Setting up Pulse...");
     this.setupJobs();
+    this.setupHooks();
     await this.pulse.start();
     logger.info("🟢 Pulse started");
   }
@@ -70,58 +69,66 @@ export class Scheduler {
     logger.info("🔴 Pulse stopped");
   }
 
+  setupHooks() {
+    this.pulse.on("success", (job) => {
+      logger.info(`🟢 Job ${job.attrs.name} completed successfully`);
+    });
+
+    this.pulse.on("fail", (error, job) => {
+      logger.error(`🔴 Job <${job.attrs.name}> failed`, error);
+    });
+  }
+
   /**
    * Sets up Pulse jobs.
    */
 
   setupJobs() {
-    // Send Subscription Reminder
-    this.pulse.define<SubReminderJob>(
+    //NOTE: We may want to fetch the maybe updated user prefs
+    this.pulse.define<SubEndReminderJob>(
       "send subscription reminder",
       async (job) => {
-        const { email, number, alertType } = job.attrs.data;
+        const { userDetail, alertType } = job.attrs.data;
 
         if (alertType === "email") {
-          await sendMail(
-            email,
-            "Subscription Alert",
-            "Your subscription is ending in 2 days",
-          );
+          await sendSubEndReminderEmail(userDetail);
         } else if (alertType === "sms") {
-          await sms.sendSMS("Your subscription is ending in 2 days", number);
+          await sms.sendSMS(
+            "Your subscription is ending in 2 days, login to renew and avoid service disruption",
+            userDetail.phone,
+          );
         }
       },
     );
 
-    //TODO: Render the email with the transaction detail
-
     // Send Receipt + attachment to Email
     this.pulse.define<ReceiptJob>("send receipt email", async (job) => {
-      const { email, userDetail, productDetail, transactionDetail } =
-        job.attrs.data;
-
-      await sendMail(
-        email,
-        "Receipt",
-        `Hello ${userDetail.firstName} ${userDetail.lastName}, 
-      Your transaction for ${productDetail.name} was successful. 
-      Transaction ID: ${transactionDetail?.id}`,
-      );
+      const { transactionDetail } = job.attrs.data;
+      await sendReceiptEmail(transactionDetail);
     });
 
-    //TODO: Render a good mail template
     // Send Subscription Alert to the admin
-    this.pulse.define<AdminAlertJob>("subscription Alert", async (job) => {
-      const { email, number, alertType } = job.attrs.data;
+    this.pulse.define<SubAlertJob>("subscription Alert", async (job) => {
+      const { transactionDetail, alertType } = job.attrs.data;
 
-      if (alertType === "email") {
-        await sendMail(
-          email,
-          "Subscription Alert",
-          "The user with routerID: abcd has purchased a subscription",
+      const email = adminPreferences?.activationAlertEmail;
+      const phone = adminPreferences?.activationAlertPhone;
+
+      // if the alert type is of a type but the needed medium is missing throw an error
+
+      if (alertType === "email" && !email) {
+        throw new InternalError("Email is missing");
+      } else if (alertType === "sms" && !phone) {
+        throw new InternalError("SMS number is missing");
+      }
+
+      if (alertType === "email" && email) {
+        sendSubAlertEmail(transactionDetail, email);
+      } else if (alertType === "sms" && phone) {
+        await sms.sendSMS(
+          `The user ${transactionDetail.user.firstName} ${transactionDetail.user.lastName} has purchased a subscription package, see bellow the details\nPlan: ${transactionDetail.product.name}\nDuration: ${transactionDetail.months}\nRouterID:${transactionDetail.user.routerID}\nZone: ${transactionDetail.user.zone}\nstartDate: ${transactionDetail.startDate.toString()}\nendDate: ${transactionDetail.endDate.toString()} `,
+          phone,
         );
-      } else if (alertType === "sms") {
-        await sms.sendSMS("Your subscription is ending in 2 days", number);
       }
     });
   }
