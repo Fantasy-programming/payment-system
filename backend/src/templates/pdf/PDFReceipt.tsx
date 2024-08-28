@@ -1,5 +1,3 @@
-import { formatDate } from "@/lib/utils";
-import { Transaction } from "@/services/transaction.types";
 import {
   Document,
   Page,
@@ -8,8 +6,10 @@ import {
   StyleSheet,
   Image,
 } from "@react-pdf/renderer";
+import { formatDate } from "../../utils/format";
 
-// Define styles
+import type { IFullTransaction } from "../../types/Transaction.type";
+
 const styles = StyleSheet.create({
   page: {
     flexDirection: "column",
@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
 });
 
 // Receipt component
-const PDFReceipt = ({ orderData }: { orderData: Transaction }) => (
+const PDFReceipt = ({ orderData }: { orderData: IFullTransaction }) => (
   <Document>
     <Page size="A4" style={styles.page}>
       <View style={styles.section}>
@@ -58,7 +58,7 @@ const PDFReceipt = ({ orderData }: { orderData: Transaction }) => (
           </View>
           <Image
             style={styles.logo}
-            src="/Mikronet.png" // Replace with your logo path
+            src="https://payment-system-e1dm.onrender.com/Mikronet.png"
           />
         </View>
       </View>
@@ -71,9 +71,7 @@ const PDFReceipt = ({ orderData }: { orderData: Transaction }) => (
             {orderData.recurring ? (
               "Plan (Recurring)"
             ) : (
-              <>
-                data plan x <span>{orderData.months} month</span>
-              </>
+              <>{`data plan x ${orderData.months} month`}</>
             )}
           </Text>
           <Text>¢{orderData.finalPrice.toFixed(2)}</Text>
