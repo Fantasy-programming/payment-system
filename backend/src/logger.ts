@@ -2,7 +2,7 @@ import winston from "winston";
 import winstonDevConsole from "@epegzz/winston-dev-console";
 import { NODE_ENV } from "./env";
 
-// TODO: Rotate to elasticsearch
+// NOTE: Rotate to elasticsearch (overkill mode)
 
 const transports: winston.transport[] = [];
 

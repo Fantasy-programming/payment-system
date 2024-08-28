@@ -3,9 +3,9 @@
 - [x] Pay plan
   - [ ] Make it look & act nice
   - [x] Add all of the plans
-  - [ ] Automatic renewal
+  - [-] Automatic renewal
   - [x] Pay for many months
-  - [ ] Receipt is sent to him + admin
+  - [x] Receipt is sent to him + admin
 - [x] Top up current plan
   - [ ] Make it look & act nice
 - [x] Setup request for move
@@ -18,9 +18,9 @@
 
 - [x] Change password, phone and email
 - [x] Setup alerting preferences
-  - [ ] Remind me when my plan is about to expire
-  - [ ] Remind me when my payment fails
-  - [ ] Reminder vector (email, sms)
+  - [x] Remind me when my plan is about to expire
+  - [-] Remind me when my payment fails
+  - [x] Reminder vector (email, sms)
 
 # ADMIN
 

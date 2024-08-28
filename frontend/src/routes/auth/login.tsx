@@ -211,7 +211,7 @@ export function Login() {
       </div>
       <div className="hidden max-h-screen bg-muted lg:block overflow-hidden">
         <img
-          src="https://images.unsplash.com/photo-1692927406364-fef8bba6ec86?q=80&w=1888&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+          src="/hero.webp"
           alt="Image"
           className="h-full w-full object-cover dark:brightness-[0.2] dark:grayscale"
         />
