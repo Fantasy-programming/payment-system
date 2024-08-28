@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import logger from "../logger";
 
 import { MONGODB_URI } from "../env";
+import { loadAdminPreferences } from "./preferences";
 
 export const getConnection = async () => {
   return mongoose.connection.db;
@@ -23,6 +24,8 @@ export class DB {
     try {
       await mongoose.connect(this.mongoUri);
       logger.info("🟢 Connected to MongoDB");
+      await loadAdminPreferences();
+      logger.info("🟢 Admin preferences loaded");
     } catch (error) {
       logger.error("Error connecting to MongoDB");
       logger.error(error);

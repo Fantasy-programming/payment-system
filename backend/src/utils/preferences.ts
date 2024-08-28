@@ -1,11 +1,11 @@
 import logger from "../logger";
 import { AdminAlert } from "../models/AdminPreference";
-import type { AdminAlertingSettings } from "../types/Preference.type";
+import type { AdminAlertingRequest } from "../types/Preference.type";
 
 /**
  * Holds the admin preferences settings. It's initially null and gets populated on server startup.
  */
-export let adminPreferences: AdminAlertingSettings | null = null;
+export let adminPreferences: AdminAlertingRequest | null = null;
 
 /**
  * Loads the admin preferences from the database.
@@ -25,9 +25,15 @@ export async function loadAdminPreferences() {
     }
 
     logger.info("🟢 Admin preferences loaded successfully");
-    adminPreferences = preferences;
+    adminPreferences = preferences.toObject();
   } catch (error) {
     logger.error("🔴 Error loading admin preferences:", error);
     throw error;
   }
+}
+
+export async function updateAdminPreferences(
+  preferences: AdminAlertingRequest,
+) {
+  adminPreferences = preferences;
 }

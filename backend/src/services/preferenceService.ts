@@ -5,6 +5,7 @@ import type {
 } from "../types/Preference.type";
 import { UserAlert } from "../models/UserPreference";
 import { AdminAlert } from "../models/AdminPreference";
+import { updateAdminPreferences } from "../utils/preferences";
 
 const getUserAlertingSettings = async (id: ObjectId) => {
   const settings = await UserAlert.findOne({ userId: id });
@@ -48,7 +49,8 @@ const updateAdminAlertingSettings = async (
     { new: true, runValidators: true },
   );
 
-  //TODO: SETUP Schedulers and so in various services (based on preferences)
+  // Update the preferences app-wide
+  updateAdminPreferences(data);
 
   return updated;
 };
