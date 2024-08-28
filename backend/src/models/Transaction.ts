@@ -30,6 +30,12 @@ transactionSchema.pre("find", function (next) {
   next();
 });
 
+transactionSchema.post("save", async function (doc, next) {
+  await doc.populate("product");
+  await doc.populate("user");
+  next();
+});
+
 transactionSchema.set("toJSON", {
   transform: (_, returnedObject) => {
     returnedObject.id = returnedObject._id.toString();
