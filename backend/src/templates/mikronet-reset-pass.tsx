@@ -9,25 +9,25 @@ import {
   Preview,
   Text,
 } from "@react-email/components";
-import * as React from "react";
 
-interface MikronetOTPProps {
-  loginCode?: string;
+interface ResetPassProps {
+  password?: string;
 }
 
 const baseUrl = process.env.LIVE_URL;
 
-export const MikronetOTPEmail = ({ loginCode }: MikronetOTPProps) => (
+export const MikronetResetPassEmail = ({ password }: ResetPassProps) => (
   <Html>
     <Head />
-    <Preview>Reset password OTP code</Preview>
+    <Preview>Password has been reset</Preview>
     <Body style={main}>
       <Container style={container}>
         <Heading style={h1}>Reset Password</Heading>
         <Text style={{ ...text, marginBottom: "14px" }}>
-          copy and paste this one time passcode to reset your password:
+          This temporary password has been generated for you. Please login and
+          update it.
         </Text>
-        <code style={code}>{loginCode}</code>
+        <code style={code}>{password}</code>
         <Text
           style={{
             ...text,
@@ -49,7 +49,7 @@ export const MikronetOTPEmail = ({ loginCode }: MikronetOTPProps) => (
         />
         <Text style={footer}>
           <Link
-            href="https://notion.so"
+            href={baseUrl}
             target="_blank"
             style={{ ...link, color: "#898989" }}
           >
@@ -64,11 +64,11 @@ export const MikronetOTPEmail = ({ loginCode }: MikronetOTPProps) => (
   </Html>
 );
 
-MikronetOTPEmail.PreviewProps = {
-  loginCode: "020202",
-} as MikronetOTPProps;
+MikronetResetPassEmail.PreviewProps = {
+  password: "020202",
+} as ResetPassProps;
 
-export default MikronetOTPEmail;
+export default MikronetResetPassEmail;
 
 const main = {
   backgroundColor: "#ffffff",

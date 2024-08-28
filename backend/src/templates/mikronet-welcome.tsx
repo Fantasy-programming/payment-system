@@ -57,8 +57,7 @@ export const MikronetWelcomeEmail = ({
           <Hr style={hr} />
           <Text style={paragraph}>
             In case you forgot here is the password that has been setup by our
-            engineers.
-            <CodeInline>{password}</CodeInline>
+            engineers. <CodeInline>{password}</CodeInline>
           </Text>
           <Text style={paragraph}>
             We'll be here to help you with any step along the way. You can find

@@ -1,6 +1,5 @@
 import {
   Body,
-  Button,
   Container,
   Head,
   Hr,
@@ -12,18 +11,28 @@ import {
   Text,
 } from "@react-email/components";
 
-import type { IUser } from "../types/User.type";
-
-interface MikronetReminderProps {
-  user?: IUser;
+interface MikronetSupportProps {
+  name?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  message?: string;
+  reason?: "support" | "transfer";
 }
 
 const baseUrl = process.env.LIVE_URL;
 
-export const MikronetReminderEmail = ({ user }: MikronetReminderProps) => (
+export const MikronetSupportEmail = ({
+  name,
+  email,
+  phone,
+  address,
+  message,
+  reason,
+}: MikronetSupportProps) => (
   <Html>
     <Head />
-    <Preview>Your Mikronet subsciption ends soon!</Preview>
+    <Preview>Welcome to Mikronet!</Preview>
     <Body style={main}>
       <Container style={container}>
         <Section style={box}>
@@ -38,23 +47,26 @@ export const MikronetReminderEmail = ({ user }: MikronetReminderProps) => (
           />
           <Hr style={hr} />
           <Text style={paragraph}>
-            Hi {user?.firstName} {user?.lastName}, this is a friendly reminder
-            to renew your Mikronet subscription. Your subscription will end in 2
-            days exaclty.
+            The user {name?.toLowerCase()} with the email address{" "}
+            <Link style={anchor} href={`mailto:${email}`}>
+              {email}
+            </Link>{" "}
+            and the phone number{" "}
+            <Link style={anchor} href={`tel:${phone}`}>
+              {phone}
+            </Link>
+            , living at {address} has requested{" "}
+            {reason === "support" ? "support" : "help for a transfer"}. See
+            below the {reason === "support" ? "message" : "new address"}
           </Text>
-          <Button style={button} href={baseUrl}>
-            Renew your Mikronet Subscription
-          </Button>
+          <Hr style={hr} />
+          <code style={paragraph}>{message}</code>
           <Hr style={hr} />
           <Text style={paragraph}>
-            We'll be here to help you with any step along the way. You can find
-            answers to most questions and get in touch with us on our{" "}
-            <Link style={anchor} href="mailto:cafemelon8@gmail.com">
-              support email
-            </Link>
-            .
+            Try to reach out to the user as soon as possible to resolve the
+            issue.
           </Text>
-          <Text style={paragraph}>— The Mikronet team</Text>
+          <Text style={paragraph}>— mikronet system</Text>
           <Hr style={hr} />
           <Text style={footer}>
             Mikronet, 24 Blohum Rd, Dzorwulu, Accra, Ghana
@@ -65,14 +77,16 @@ export const MikronetReminderEmail = ({ user }: MikronetReminderProps) => (
   </Html>
 );
 
-MikronetReminderEmail.PreviewProps = {
-  user: {
-    firstName: "John",
-    lastName: "Doe",
-  },
-} as MikronetReminderProps;
+MikronetSupportEmail.PreviewProps = {
+  name: "John Does",
+  reason: "transfer",
+  phone: "233 123 456 789",
+  email: "cafe@gmail.com",
+  address: "24 Blohum Rd, Dzorwulu, Accra, Ghana",
+  message: "I need help with my account",
+} as MikronetSupportProps;
 
-export default MikronetReminderEmail;
+export default MikronetSupportEmail;
 
 const main = {
   backgroundColor: "#f6f9fc",
@@ -106,19 +120,6 @@ const paragraph = {
 
 const anchor = {
   color: "#f8b697",
-};
-
-const button = {
-  backgroundColor: "#36b4ce",
-  borderRadius: "5px",
-  color: "#fff",
-  fontSize: "16px",
-  fontWeight: "bold",
-  textDecoration: "none",
-  textAlign: "center" as const,
-  display: "block",
-  width: "100%",
-  padding: "10px",
 };
 
 const footer = {

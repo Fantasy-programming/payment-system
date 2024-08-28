@@ -1,29 +1,28 @@
 import {
   Body,
-  Button,
   Container,
   Head,
   Hr,
   Html,
   Img,
-  Link,
   Preview,
   Section,
   Text,
 } from "@react-email/components";
+import type { IFullTransaction } from "../types/Transaction.type";
 
-import type { IUser } from "../types/User.type";
-
-interface MikronetReminderProps {
-  user?: IUser;
+interface MikronetSubAlertProps {
+  transaction: IFullTransaction;
 }
 
 const baseUrl = process.env.LIVE_URL;
 
-export const MikronetReminderEmail = ({ user }: MikronetReminderProps) => (
+export const MikronetSubAlertEmail = ({
+  transaction,
+}: MikronetSubAlertProps) => (
   <Html>
     <Head />
-    <Preview>Your Mikronet subsciption ends soon!</Preview>
+    <Preview>Request for Activation</Preview>
     <Body style={main}>
       <Container style={container}>
         <Section style={box}>
@@ -38,23 +37,25 @@ export const MikronetReminderEmail = ({ user }: MikronetReminderProps) => (
           />
           <Hr style={hr} />
           <Text style={paragraph}>
-            Hi {user?.firstName} {user?.lastName}, this is a friendly reminder
-            to renew your Mikronet subscription. Your subscription will end in 2
-            days exaclty.
+            The user {transaction?.user?.firstName?.toLowerCase()}{" "}
+            {transaction?.user?.lastName?.toLowerCase()} has purchased a
+            subscription. Please proceed with the activation protocol. See below
+            the activation details:
           </Text>
-          <Button style={button} href={baseUrl}>
-            Renew your Mikronet Subscription
-          </Button>
+          <Hr style={hr} />
+          <code style={paragraph}>
+            Plan: {transaction?.product?.name} <br />
+            Duration: {transaction?.months} <br />
+            RouterID: {transaction?.user?.routerID} <br />
+            Zone: {transaction?.user?.zone} <br />
+            startDate: {transaction?.startDate?.toString()} <br />
+            endDate: {transaction?.endDate?.toString()} <br />
+          </code>
           <Hr style={hr} />
           <Text style={paragraph}>
-            We'll be here to help you with any step along the way. You can find
-            answers to most questions and get in touch with us on our{" "}
-            <Link style={anchor} href="mailto:cafemelon8@gmail.com">
-              support email
-            </Link>
-            .
+            Proceed with account activation as soon as possible.
           </Text>
-          <Text style={paragraph}>— The Mikronet team</Text>
+          <Text style={paragraph}>— mikronet system</Text>
           <Hr style={hr} />
           <Text style={footer}>
             Mikronet, 24 Blohum Rd, Dzorwulu, Accra, Ghana
@@ -65,14 +66,9 @@ export const MikronetReminderEmail = ({ user }: MikronetReminderProps) => (
   </Html>
 );
 
-MikronetReminderEmail.PreviewProps = {
-  user: {
-    firstName: "John",
-    lastName: "Doe",
-  },
-} as MikronetReminderProps;
+MikronetSubAlertEmail.PreviewProps = {} as MikronetSubAlertProps;
 
-export default MikronetReminderEmail;
+export default MikronetSubAlertEmail;
 
 const main = {
   backgroundColor: "#f6f9fc",
@@ -102,23 +98,6 @@ const paragraph = {
   fontSize: "16px",
   lineHeight: "24px",
   textAlign: "left" as const,
-};
-
-const anchor = {
-  color: "#f8b697",
-};
-
-const button = {
-  backgroundColor: "#36b4ce",
-  borderRadius: "5px",
-  color: "#fff",
-  fontSize: "16px",
-  fontWeight: "bold",
-  textDecoration: "none",
-  textAlign: "center" as const,
-  display: "block",
-  width: "100%",
-  padding: "10px",
 };
 
 const footer = {

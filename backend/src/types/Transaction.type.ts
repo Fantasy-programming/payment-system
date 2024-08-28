@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { Model } from "mongoose";
 import { createObjectId } from "./Api.type";
+import { userSchema } from "./User.type";
+import { productSchema } from "./Product.type";
 
 export const transactionSchema = z.object({
   id: createObjectId("invalid ID"),
@@ -19,6 +21,11 @@ export const transactionSchema = z.object({
   updatedAt: z.date(),
 });
 
+export const fullTransactionSchema = transactionSchema.extend({
+  user: userSchema,
+  product: productSchema,
+});
+
 export const createTransactionSchema = transactionSchema
   .omit({
     id: true,
@@ -35,5 +42,6 @@ export const createTransactionSchema = transactionSchema
   });
 
 export type ITransaction = z.infer<typeof transactionSchema>;
+export type IFullTransaction = z.infer<typeof fullTransactionSchema>;
 export type ICreateTransaction = z.infer<typeof createTransactionSchema>;
 export type TransactionModel = Model<ITransaction>;
