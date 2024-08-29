@@ -22,3 +22,8 @@ export const userTransactionsQuery = () => ({
   queryKey: ["user", "transactions"],
   queryFn: trscService.getTransactions,
 });
+
+export const userTransactionQuery = (id: string) => ({
+  queryKey: ["user", "transaction", id],
+  queryFn: async () => trscService.getTransaction(id),
+});

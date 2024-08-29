@@ -84,11 +84,10 @@ export function DataTable<TData, TValue>({
         creditor: "Mikronet",
         plan: transaction.product.name,
         price: transaction.finalPrice,
-        duration: transaction.months,
+        duration: transaction.duration,
         type: transaction.type,
         medium: transaction.medium,
         reference: transaction.reference,
-        recurring: transaction.recurring,
         startDate: transaction.startDate,
         endDate: transaction.endDate,
       };
@@ -98,7 +97,7 @@ export function DataTable<TData, TValue>({
   }, [exportToCSV, data]);
 
   const hideit = (str: string) => {
-    return str !== "trxRef" && str !== "product_price";
+    return str !== "trxRef" && str !== "finalPrice";
   };
 
   return (

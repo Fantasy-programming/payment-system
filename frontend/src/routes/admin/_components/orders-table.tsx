@@ -81,11 +81,10 @@ export function DataTable<TData, TValue>({
         plan: transaction.product.name,
         "product price": transaction.product.price,
         price: transaction.finalPrice,
-        duration: transaction.months,
+        duration: transaction.duration,
         type: transaction.type,
         medium: transaction.medium,
         reference: transaction.reference,
-        recurring: transaction.recurring,
         startDate: transaction.startDate,
         endDate: transaction.endDate,
       };

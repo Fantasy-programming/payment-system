@@ -26,6 +26,7 @@ import {
   historyLoader,
   productsLoader,
   settingsLoader,
+  historyDetailLoader,
 } from "./user/loaders";
 
 import { AdminDashboardLayout } from "./admin/root";
@@ -80,12 +81,11 @@ const Routes: React.FC = () => {
         },
         {
           path: "subscribe",
-          element: <SubscribeView type="subscription" />,
-          loader: productsLoader(queryClient),
+          element: <Navigate to="home" replace />,
         },
         {
-          path: "top-up",
-          element: <SubscribeView type="top-up" />,
+          path: "subscribe/:paymentContext",
+          element: <SubscribeView />,
           loader: productsLoader(queryClient),
         },
         {
@@ -100,7 +100,7 @@ const Routes: React.FC = () => {
             {
               path: ":id",
               element: <HistoryDetailView />,
-              loader: homeLoader(queryClient),
+              loader: historyDetailLoader(queryClient),
             },
           ],
         },

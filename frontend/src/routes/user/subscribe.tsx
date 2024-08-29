@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
+import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { usePaystackPayment } from "react-paystack";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -32,21 +32,30 @@ import {
 
 import { Product } from "@/services/product.types";
 
-interface SubscribeViewProps {
-  type: "subscription" | "top-up";
-}
+type PaymentType = "onetime" | "top-up" | "prepaid";
 
-type PaymentFrequency = "onetime" | "monthly";
-
-export const SubscribeView = ({ type }: SubscribeViewProps) => {
-  const [paymentFrequency, setPaymentFrequency] =
-    useState<PaymentFrequency>("onetime");
-  const [paymentMonths, setPaymentMonths] = useState(1);
-
+export const SubscribeView = () => {
+  const { paymentContext } = useParams<"paymentContext">();
   const { data: plans } = useSuspenseQuery(userProductsQuery());
+
+  const [contractDuration, setContractDuration] = useState(1);
+  const [paymentType, setPaymentType] = useState<PaymentType>(() => {
+    if (paymentContext === "top-up") return "top-up";
+    if (paymentContext === "prepaid") return "prepaid";
+    return "onetime";
+  });
+
+  if (!paymentContext) {
+    return <Navigate to="/dashboard" />;
+  }
 
   const onClose = () => {
     console.log("failure");
+  };
+
+  const onSwitch = (value: PaymentType) => {
+    setPaymentType(value);
+    setContractDuration(1);
   };
 
   return (
@@ -54,32 +63,46 @@ export const SubscribeView = ({ type }: SubscribeViewProps) => {
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 md:mb-12">
         <div className="space-y-2">
           <h1 className="text-3xl md:text-4xl font-bold">
-            {type === "top-up" ? "Top-Up" : "Subscription"} Plans
+            {paymentType === "top-up"
+              ? "Top-Up"
+              : paymentContext === "onetime"
+                ? "Subscription"
+                : "Prepaid"}{" "}
+            Plans
           </h1>
           <p className="text-muted-foreground">
-            Choose the plan that best fits your needs.
+            {paymentType === "onetime"
+              ? "Choose the plan that best fits your needs."
+              : paymentType === "top-up"
+                ? "Upgrade your current plan for better service."
+                : "Pay for your next subscription in advance."}
           </p>
         </div>
-        <div className="flex flex-col gap-4">
+        <div className="flex md:flex-row-reverse flex-col gap-4">
           <div className="flex items-center gap-2 mt-4 md:mt-0">
-            <Label htmlFor="payment-frequency">Payment Frequency:</Label>
+            <Label htmlFor="payment-frequency">Payment Type:</Label>
             <Select
               defaultValue="onetime"
-              value={paymentFrequency}
-              onValueChange={(value: PaymentFrequency) =>
-                setPaymentFrequency(value)
-              }
+              disabled={paymentContext === "onetime"}
+              value={paymentType}
+              onValueChange={onSwitch}
             >
               <SelectTrigger className="w-32">
                 <SelectValue placeholder="Select" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="onetime">One-Time</SelectItem>
-                <SelectItem value="monthly">Monthly</SelectItem>
+                {paymentContext === "top-up" ? (
+                  <>
+                    <SelectItem value="top-up">Top-Up</SelectItem>
+                    <SelectItem value="prepaid">Prepaid</SelectItem>
+                  </>
+                ) : (
+                  <SelectItem value="onetime">One-Time</SelectItem>
+                )}
               </SelectContent>
             </Select>
           </div>
-          {paymentFrequency === "onetime" && (
+          {paymentType !== "top-up" && (
             <div className="flex items-center gap-2">
               <Label htmlFor="payment-months">Months:</Label>
               <Slider
@@ -88,11 +111,11 @@ export const SubscribeView = ({ type }: SubscribeViewProps) => {
                 min={1}
                 max={24}
                 step={1}
-                value={[paymentMonths]}
-                onValueChange={(value) => setPaymentMonths(value[0])}
+                value={[contractDuration]}
+                onValueChange={(value) => setContractDuration(value[0])}
                 className="w-32"
               />
-              <span>{paymentMonths} months</span>
+              <span>{contractDuration} months</span>
             </div>
           )}
         </div>
@@ -101,9 +124,8 @@ export const SubscribeView = ({ type }: SubscribeViewProps) => {
         {plans?.map((plan) => (
           <SubsribeCard
             key={plan.id}
-            type={type}
-            frequency={paymentFrequency}
-            months={paymentMonths}
+            type={paymentType}
+            duration={contractDuration}
             plan={plan}
             onClose={onClose}
           />
@@ -115,9 +137,8 @@ export const SubscribeView = ({ type }: SubscribeViewProps) => {
 
 interface SubscribeCardProps {
   plan: Product;
-  frequency: PaymentFrequency;
-  months: number;
-  type: "subscription" | "top-up";
+  duration: number;
+  type: PaymentType;
   onClose: () => void;
 }
 
@@ -133,24 +154,23 @@ interface TransactionInfo {
 
 const SubsribeCard = ({
   plan,
-  months,
+  duration,
   type,
-  frequency,
   onClose,
 }: SubscribeCardProps) => {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
 
   const initializePayment = usePaystackPayment({
     publicKey: PAYSTACK_PUBLIC_KEY,
   });
 
-  const recurring = frequency === "monthly" ? true : false;
-  const upgradeTax = type === "subscription" ? 0 : 0.3;
-  const price = !recurring
-    ? plan.price * months + plan.price * upgradeTax
-    : plan.price + plan.price * upgradeTax;
-  const finalPrice = price * 100;
+  const upgradeTax = 0.3;
+  const basePrice = plan.price * duration;
+  const price =
+    type !== "top-up" ? basePrice : basePrice + plan.price * upgradeTax;
+  const systemPrice = price * 100;
 
   const onSuccess = (reference: TransactionInfo) => {
     try {
@@ -159,13 +179,15 @@ const SubsribeCard = ({
           productID: plan.id,
           reference: reference.reference,
           trxRef: reference.trxref,
-          months: months,
+          duration,
           finalPrice: price,
-          type: type,
-          recurring: recurring,
+          type,
         })
         .then(() => {
           toast.success("Operation succeeded");
+          queryClient.invalidateQueries({
+            queryKey: ["user", "transactions"],
+          });
           navigate("/dashboard");
         });
     } catch (error) {
@@ -223,7 +245,7 @@ const SubsribeCard = ({
               config: {
                 reference: new Date().getTime().toString(),
                 email: user.email,
-                amount: finalPrice,
+                amount: systemPrice,
                 currency: "GHS",
               },
             })

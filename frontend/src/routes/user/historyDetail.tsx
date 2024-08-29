@@ -1,8 +1,7 @@
-import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { useSuspenseQuery } from "@tanstack/react-query";
 
-import { userTransactionsQuery } from "@/queries/userQueries";
+import { userTransactionQuery } from "@/queries/userQueries";
 import { formatDate } from "@/lib/utils";
 
 import {
@@ -29,23 +28,16 @@ import {
 } from "@/components/ui/pagination";
 import { Separator } from "@/components/ui/separator";
 
-import type { Transaction } from "@/services/transaction.types";
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import PDFReceipt from "@/components/pdf/PDFReceipt";
 
+// NOTE: Maybe we can pass the previous and after as route state then move based on that
+
 export const HistoryDetailView = () => {
-  const [transaction, setTransaction] = useState<Transaction | null>();
-
   const { id } = useParams<"id">();
-  const { data: transactions } = useSuspenseQuery(userTransactionsQuery());
-
-  //TODO: Get rid of the effect and fetch the transaction directly from the query
-  useEffect(() => {
-    if (transactions) {
-      const result = transactions.find((t) => t.id === id);
-      if (result) setTransaction(result);
-    }
-  }, [transactions, id]);
+  const { data: transaction } = useSuspenseQuery(
+    userTransactionQuery(id ?? ""),
+  );
 
   return (
     <>
@@ -88,23 +80,17 @@ export const HistoryDetailView = () => {
               <ul className="grid gap-3">
                 <li className="flex items-center justify-between">
                   <span className="text-muted-foreground">
-                    {transaction.product.name}{" "}
-                    {transaction.recurring ? (
-                      "Plan (Recurring)"
-                    ) : (
-                      <>
-                        data plan x <span>{transaction.months} month</span>
-                      </>
-                    )}
+                    {transaction.product.name} data plan x{" "}
+                    <span>{transaction.duration} month</span>
                   </span>
-                  <span>₵{transaction.finalPrice.toFixed(2)}</span>
+                  <span>₵{transaction?.finalPrice?.toFixed(2)}</span>
                 </li>
               </ul>
               <Separator className="my-2" />
               <ul className="grid gap-3">
                 <li className="flex items-center justify-between">
                   <span className="text-muted-foreground">Subtotal</span>
-                  <span>₵{transaction.product.price.toFixed(2)}</span>
+                  <span>₵{transaction.product?.price?.toFixed(2)}</span>
                 </li>
                 <li className="flex items-center justify-between">
                   <span className="text-muted-foreground">Tax</span>
@@ -112,7 +98,7 @@ export const HistoryDetailView = () => {
                 </li>
                 <li className="flex items-center justify-between font-semibold">
                   <span className="text-muted-foreground">Total</span>
-                  <span>₵{transaction.finalPrice.toFixed(2)}</span>
+                  <span>₵{transaction?.finalPrice?.toFixed(2)}</span>
                 </li>
               </ul>
             </div>
@@ -121,9 +107,9 @@ export const HistoryDetailView = () => {
               <div className="grid gap-3">
                 <div className="font-semibold">Address</div>
                 <address className="grid gap-0.5 not-italic text-muted-foreground">
-                  {transaction.user.address.split(",").map((line, index) => (
-                    <span key={index}>{line}</span>
-                  ))}
+                  {transaction.user.address
+                    ?.split(",")
+                    .map((line, index) => <span key={index}>{line}</span>)}
                 </address>
               </div>
               <div className="grid auto-rows-max gap-3">

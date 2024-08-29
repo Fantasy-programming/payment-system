@@ -23,24 +23,38 @@ import { formatDate } from "@/lib/utils";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { differenceInDays, isBefore, parseISO } from "date-fns";
+import { differenceInDays, isAfter, isBefore, parseISO } from "date-fns";
 import { Skeleton } from "@/components/ui/skeleton";
 import { userInfoQuery, userTransactionsQuery } from "@/queries/userQueries";
 import { RequestTransferModal } from "./_components/RequetTransfertModal";
 import RequestSupportModal from "./_components/RequestSupportModal";
+import { Transaction } from "@/services/transaction.types";
 
 export const UserHomeView = () => {
-  const [isSubscribed, setIsSubscribed] = useState(false);
-  const [percentagePassed, setPercentagePassed] = useState<number>(0);
-
-  const navigate = useNavigate();
-
   const { data: user } = useSuspenseQuery(userInfoQuery());
   const { data: transactions } = useSuspenseQuery(userTransactionsQuery());
 
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [percentagePassed, setPercentagePassed] = useState<number>(0);
+  const [daysLeft, setDaysLeft] = useState<number>(0);
+  const [mostRecentTransaction, setMostRecentTransaction] =
+    useState<Transaction>(transactions[0] ?? []);
+
+  const navigate = useNavigate();
+
   useEffect(() => {
     if (transactions && transactions.length > 0) {
-      const mostRecentTransaction = transactions[0];
+      let mostRecentTransaction = transactions[0];
+
+      if (
+        mostRecentTransaction.type === "prepaid" &&
+        isAfter(parseISO(mostRecentTransaction.startDate), new Date())
+      ) {
+        mostRecentTransaction = transactions[1];
+      }
+
+      console.log(transactions[0]);
+
       const endDate = parseISO(mostRecentTransaction.endDate);
       const startDate = parseISO(mostRecentTransaction.startDate);
       const currentDate = new Date();
@@ -51,6 +65,7 @@ export const UserHomeView = () => {
 
       const totalDays = differenceInDays(endDate, startDate);
       const daysPassed = differenceInDays(currentDate, startDate);
+      const daysLeft = differenceInDays(endDate, currentDate);
 
       const percentage = Math.max(
         0,
@@ -59,6 +74,8 @@ export const UserHomeView = () => {
 
       setIsSubscribed(true);
       setPercentagePassed(percentage);
+      setMostRecentTransaction(mostRecentTransaction);
+      setDaysLeft(daysLeft);
     }
   }, [transactions]);
 
@@ -80,17 +97,14 @@ export const UserHomeView = () => {
               <Button
                 onClick={() =>
                   navigate(
-                    isSubscribed ? "/dashboard/top-up" : "/dashboard/subscribe",
+                    isSubscribed
+                      ? "/dashboard/subscribe/top-up"
+                      : "/dashboard/subscribe/onetime",
                   )
                 }
               >
                 {isSubscribed ? "Top-Up Subscription" : "Subscribe Now"}
               </Button>
-              {transactions[0]?.recurring ? (
-                <Button variant="destructiveOutline">
-                  Cancel Subscription
-                </Button>
-              ) : null}
             </CardFooter>
           </Card>
           <Card>
@@ -99,7 +113,7 @@ export const UserHomeView = () => {
               <CardTitle className="text-4xl">
                 {transactions ? (
                   isSubscribed ? (
-                    transactions[0]?.product.name
+                    mostRecentTransaction?.product.name
                   ) : (
                     "No Plan"
                   )
@@ -110,7 +124,7 @@ export const UserHomeView = () => {
             </CardHeader>
             <CardContent>
               <div className="text-xs text-muted-foreground">
-                Days left before end
+                {daysLeft} Days left before end
               </div>
             </CardContent>
             <CardFooter>
@@ -120,13 +134,13 @@ export const UserHomeView = () => {
               />
             </CardFooter>
           </Card>
-          <Card x-chunk="dashboard-05-chunk-2">
+          <Card>
             <CardHeader className="pb-6 gap-y-5 items-center">
               <CardDescription>Data Rate</CardDescription>
               <CardTitle className="text-4xl">
                 {transactions ? (
                   isSubscribed ? (
-                    `${transactions[0]?.product.rate} MBS`
+                    `${mostRecentTransaction?.product.rate} MBS`
                   ) : (
                     "No Plan"
                   )
@@ -172,10 +186,10 @@ export const UserHomeView = () => {
                           </div>
                         </TableCell>
                         <TableCell className="hidden sm:table-cell">
-                          {transaction?.recurring
-                            ? "Recurring"
-                            : `${transaction?.months} month`}{" "}
-                          {transaction?.type}
+                          {`${transaction?.duration} month`}{" "}
+                          {transaction?.type === "onetime"
+                            ? "subscription"
+                            : transaction?.type}
                         </TableCell>
                         <TableCell className="hidden sm:table-cell">
                           <Badge className="text-xs" variant="secondary">

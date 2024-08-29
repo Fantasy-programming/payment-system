@@ -1,15 +1,14 @@
 # USER
 
 - [x] Pay plan
-  - [ ] Make it look & act nice
   - [x] Add all of the plans
   - [-] Automatic renewal
   - [x] Pay for many months
   - [x] Receipt is sent to him + admin
 - [x] Top up current plan
-  - [ ] Make it look & act nice
 - [x] Setup request for move
 - [x] Setup request for support
+- [ ] Add colors and personality
 
 - [x] See all transactions
 - [x] Export transactions to CSV
@@ -30,3 +29,10 @@
 - [x] Create plans (products)
 - [x] Setup alerting preferences
 - [x] View all invoices
+- [ ] The admin can print receipts for all transactions
+- [ ] The admin can see a specific user's transactions details
+- [ ] Export selected transactions as CSV
+- [ ] Export all transactions as CSV
+- [ ] Export transaction in a specific time range
+- [ ] Remove all of the subscription (recurring) stuff
+- [-] The admin can setup auto export of transactions (mail)
