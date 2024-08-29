@@ -45,7 +45,6 @@ const create = async (
   let endDate = add(startDate, { months: trsc.duration });
   const medium = await getPaymentMethod(trsc.reference);
 
-  // TODO: Adjust the scheduling to take all path into account
   if (trsc.type !== "onetime") {
     const activeSubscription = await Transaction.findOne({
       user: userId,
@@ -53,20 +52,13 @@ const create = async (
     });
 
     if (activeSubscription) {
-      // Extend the current prepaid subscription (it hasn't started)
-
       if (trsc.type === "prepaid") {
         if (
           activeSubscription.type === "prepaid" &&
           isAfter(activeSubscription.startDate, new Date())
         ) {
-          activeSubscription.endDate = add(activeSubscription.endDate, {
-            months: trsc.duration,
-          });
-
-          activeSubscription.duration += trsc.duration;
-          await activeSubscription.save();
-          return activeSubscription;
+          startDate = activeSubscription.endDate;
+          endDate = add(activeSubscription.endDate, { months: trsc.duration });
         } else if (
           activeSubscription.type === "prepaid" &&
           activeSubscription.startDate <= new Date()
@@ -82,16 +74,16 @@ const create = async (
           });
 
           if (currentSubscription) {
-            currentSubscription.endDate = add(currentSubscription.endDate, {
+            startDate = currentSubscription.endDate;
+            endDate = add(currentSubscription.endDate, {
               months: trsc.duration,
             });
-            currentSubscription.duration += trsc.duration;
-            await currentSubscription.save();
-            return currentSubscription;
+          } else {
+            startDate = activeSubscription.endDate;
+            endDate = add(activeSubscription.endDate, {
+              months: trsc.duration,
+            });
           }
-
-          startDate = activeSubscription.endDate;
-          endDate = add(activeSubscription.endDate, { months: trsc.duration });
         }
       } else if (trsc.type === "top-up") {
         if (

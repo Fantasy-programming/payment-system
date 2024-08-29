@@ -53,8 +53,6 @@ export const UserHomeView = () => {
         mostRecentTransaction = transactions[1];
       }
 
-      console.log(transactions[0]);
-
       const endDate = parseISO(mostRecentTransaction.endDate);
       const startDate = parseISO(mostRecentTransaction.startDate);
       const currentDate = new Date();
