@@ -9,7 +9,7 @@ import {
   Section,
   Text,
 } from "@react-email/components";
-import type { IFullTransaction } from "../types/Transaction.type";
+import type { IFullTransaction } from "../types/transaction.type";
 
 interface MikronetSubAlertProps {
   transaction: IFullTransaction;
@@ -45,7 +45,7 @@ export const MikronetSubAlertEmail = ({
           <Hr style={hr} />
           <code style={paragraph}>
             Plan: {transaction?.product?.name} <br />
-            Duration: {transaction?.months} <br />
+            Duration: {transaction?.duration} <br />
             RouterID: {transaction?.user?.routerID} <br />
             Zone: {transaction?.user?.zone} <br />
             startDate: {transaction?.startDate?.toString()} <br />

@@ -12,7 +12,7 @@ import {
   Text,
 } from "@react-email/components";
 
-import type { IUser } from "../types/User.type";
+import type { IUser } from "../types/user.type";
 
 interface MikronetReminderProps {
   user?: IUser;

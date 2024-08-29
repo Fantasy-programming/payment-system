@@ -10,6 +10,14 @@ services:
       - mongo_data:/data/db
     networks:
       - ups_network
+
+  redis:
+    image: redis:alpine
+    container_name: redis_ups
+    restart: always
+    networks:
+      - ups_network
+
   ups:
     build:
       context: .

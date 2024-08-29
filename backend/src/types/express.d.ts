@@ -1,6 +1,6 @@
 import type { Redis } from "ioredis";
 import type Pulse from "@pulsecron/pulse";
-import type { IUser } from "./User.type";
+import type { IUser } from "./user.type";
 
 declare global {
   namespace Express {

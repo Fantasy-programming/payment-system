@@ -1,6 +1,6 @@
 import logger from "../src/logger";
-import { User } from "../src/models/User";
-import { AdminAlert } from "../src/models/AdminPreference";
+import { User } from "../src/models/user.model";
+import { AdminAlert } from "../src/models/admin-preference.model";
 
 export async function createAdmin() {
   // Clean up the old admin

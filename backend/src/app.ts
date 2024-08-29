@@ -6,24 +6,24 @@ import helmet from "helmet";
 
 import "express-async-errors";
 
-import userRouter from "./routes/user";
-import authRouter from "./routes/auth";
-import productRouter from "./routes/product";
-import transactionRouter from "./routes/transaction";
-import supportRouter from "./routes/support";
-import preferenceRouter from "./routes/preference";
-import mistRouter from "./routes/mist";
+import userRouter from "./routes/user.route";
+import authRouter from "./routes/auth.route";
+import productRouter from "./routes/product.route";
+import transactionRouter from "./routes/transaction.route";
+import supportRouter from "./routes/support.route";
+import preferenceRouter from "./routes/preference.route";
+import mistRouter from "./routes/misc.route";
 
-import { tokenExtractor } from "./middlewares/jwt";
-import { errorHandler, unknownEndpoint } from "./middlewares/errorHandler";
-
-import type { DB } from "./adapters/mongo";
-import type { Scheduler } from "./adapters/pulse";
-import type { Cache } from "./adapters/redis";
+import { tokenExtractor } from "./middlewares/jwt.middleware";
+import { errorHandler, unknownEndpoint } from "./middlewares/error.middleware";
 import { stream } from "./logger";
 
+import type { Db } from "./adapters/mongo.adapter";
+import type { Scheduler } from "./adapters/pulse.adapter";
+import type { Cache } from "./adapters/redis.adapter";
+
 type AppDependencies = {
-  db: DB;
+  db: Db;
   scheduler: Scheduler;
   cache: Cache;
 };

@@ -1,6 +1,6 @@
 import logger from "../logger";
-import { AdminAlert } from "../models/AdminPreference";
-import type { AdminAlertingRequest } from "../types/Preference.type";
+import { AdminAlert } from "../models/admin-preference.model";
+import type { AdminAlertingRequest } from "../types/preference.type";
 
 /**
  * Holds the admin preferences settings. It's initially null and gets populated on server startup.
