@@ -1,11 +1,17 @@
+import http from "node:http";
+import cluster from "node:cluster";
+
 import { createApp } from "./app";
 import { DB } from "./adapters/mongo";
 import { Scheduler } from "./adapters/pulse";
 import { PORT } from "./env";
-import http from "node:http";
 import logger from "./logger";
 
+const cpus = navigator.hardwareConcurrency;
+let isShuttingDown = false;
+
 async function startServer() {
+  // Dependencies
   const db = new DB();
   const scheduler = new Scheduler(db);
 
@@ -16,13 +22,13 @@ async function startServer() {
     server.listen(PORT);
     server.on("error", onError);
     server.on("listening", onListening);
-    server.on("close", onClosing);
+    server.on("close", onClose);
 
     function onListening() {
       const addr = server.address();
       const bind =
         typeof addr === "string" ? `pipe ${addr}` : `port ${addr?.port}`;
-      logger.info(`🚀 Server listening on ${bind}`);
+      logger.info(`🚀 Worker process ${process.pid} listening on ${bind}`);
     }
 
     function onError(error: NodeJS.ErrnoException) {
@@ -42,7 +48,7 @@ async function startServer() {
       }
     }
 
-    function onClosing() {
+    function onClose() {
       db.close();
       scheduler.pulse.stop();
       logger.info("🔌 Closing server connections");
@@ -51,8 +57,10 @@ async function startServer() {
     // Handle graceful shutdown
     process.on("SIGTERM", () => {
       logger.info("SIGTERM signal received: closing HTTP server");
+      isShuttingDown = true;
       server.close(() => {
         logger.info("HTTP server closed");
+        process.exit(0);
       });
     });
   } catch (error) {
@@ -61,7 +69,37 @@ async function startServer() {
   }
 }
 
-startServer().catch((error) => {
-  logger.error("Unhandled error during server startup", error);
-  process.exit(1);
-});
+if (cluster.isPrimary) {
+  logger.debug(`Primary worker ${process.pid} is running`);
+
+  for (let i = 0; i < cpus; i++) {
+    cluster.fork();
+  }
+
+  cluster.on("exit", (worker, code, signal) => {
+    if (isShuttingDown) {
+      logger.debug(`Worker ${worker.process.pid} exited during shutdown`);
+    } else {
+      logger.error(
+        `Worker ${worker.process.pid} died with code ${code} or signal ${signal}. Restarting...`,
+      );
+      cluster.fork();
+    }
+  });
+
+  process.on("SIGTERM", () => {
+    logger.info("SIGTERM signal received: shutting down primary process");
+    isShuttingDown = true;
+
+    // Disconnect all workers and stop respawning
+    cluster.disconnect(() => {
+      logger.info("All workers disconnected, shutting down primary process");
+      process.exit(0);
+    });
+  });
+} else {
+  startServer().catch((error) => {
+    logger.error("Unhandled error during server startup", error);
+    process.exit(1);
+  });
+}
