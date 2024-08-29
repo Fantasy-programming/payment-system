@@ -6,7 +6,7 @@ import type { Ids } from "../types/Api.type";
 
 const getAllTransactions = async (request: Request, response: Response) => {
   const role = request?.user?.role;
-  const id = request?.user?.id;
+  const id = request?.user?._id;
 
   if (!role || !id) return response.status(401).json({ error: "Unauthorized" });
 
@@ -17,7 +17,7 @@ const getAllTransactions = async (request: Request, response: Response) => {
 
 const getTransaction = async (request: Request, response: Response) => {
   const role = request?.user?.role;
-  const userId = request?.user?.id;
+  const userId = request?.user?._id;
   const id = request.params.id;
 
   if (!role || !userId)
@@ -33,7 +33,7 @@ const getTransaction = async (request: Request, response: Response) => {
 };
 
 const createTransaction = async (request: Request, response: Response) => {
-  const userId = request?.user?.id;
+  const userId = request?.user?._id;
   const body = request.body as ICreateTransaction;
   const pulse = request.app.locals.scheduler;
 

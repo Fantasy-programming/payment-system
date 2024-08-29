@@ -12,8 +12,6 @@
 - [x] The users can pay their bills
 - [x] The users can upgrade their plan
 - [ ] The user can (not topup) but pay for next month
-- [-] The users can subscribe for auto payments
-- [-] The users can cancel auto payments
 
 - [x] The admin can register new user.
 - [x] The admin (only) can view all users (and crud them)
@@ -25,3 +23,5 @@
 - [-] The admin can change customers plan ?
 - [-] The admin can setup auto export of transactions (mail)
 - [-] The admin are mailed on system errors
+- [-] The users can subscribe for auto payments
+- [-] The users can cancel auto payments

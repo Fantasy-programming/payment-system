@@ -16,8 +16,6 @@ const userSchema = new mongoose.Schema<IUser, UserModel>({
   zone: { type: String, required: true },
   address: { type: String, required: true },
   routerID: { type: String, required: true },
-  emailVerified: { type: Boolean, default: false },
-  phoneVerified: { type: Boolean, default: false },
   status: { type: String, enum: ["active", "inactive"], default: "active" },
   role: {
     type: String,
@@ -27,18 +25,6 @@ const userSchema = new mongoose.Schema<IUser, UserModel>({
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
-
-// userSchema.pre("find", function () {
-//   if (this.model.modelName === "User") {
-//     this.where({ status: { $ne: "inactive" } });
-//   }
-// });
-//
-// userSchema.pre("findOne", function () {
-//   if (this.model.modelName === "User") {
-//     this.where({ status: { $ne: "inactive" } });
-//   }
-// });
 
 // Middleware to create a preference when a user is created
 userSchema.post("save", async function (doc, next) {

@@ -10,7 +10,7 @@ const getUserAlertingSettings = async (
   request: Request,
   response: Response,
 ) => {
-  const id = request.user?.id;
+  const id = request.user?._id;
 
   const data = await preferenceService.getUserAlertingSettings(id!);
   return response.status(200).json(data);
@@ -20,7 +20,7 @@ const getAdminAlertingSettings = async (
   request: Request,
   response: Response,
 ) => {
-  const id = request.user?.id;
+  const id = request.user?._id;
 
   const data = await preferenceService.getAdminAlertingSettings(id!);
   return response.status(200).json(data);
@@ -30,7 +30,7 @@ const updateUserAlertingSettings = async (
   request: Request,
   response: Response,
 ) => {
-  const id = request.user?.id;
+  const id = request.user?._id;
 
   const body = request.body as UserAlertingRequest;
   const data = await preferenceService.updateUserAlertingSettings(id!, body);
@@ -41,7 +41,7 @@ const updateAdminAlertingSettings = async (
   request: Request,
   response: Response,
 ) => {
-  const id = request.user?.id;
+  const id = request.user?._id;
 
   const body = request.body as AdminAlertingRequest;
   const data = await preferenceService.updateAdminAlertingSettings(id!, body);

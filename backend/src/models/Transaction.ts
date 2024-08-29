@@ -1,6 +1,7 @@
 import { Schema, model } from "mongoose";
 import type { ITransaction, TransactionModel } from "../types/Transaction.type";
 
+// TODO: Scout the app to reflect the schema changes
 const transactionSchema = new Schema<ITransaction, TransactionModel>({
   user: {
     type: Schema.Types.ObjectId,
@@ -12,20 +13,31 @@ const transactionSchema = new Schema<ITransaction, TransactionModel>({
     ref: "Product",
     required: true,
   },
-  months: { type: Number, required: true },
+  duration: { type: Number, required: true },
   finalPrice: { type: Number, required: true },
   reference: { type: String, required: true },
   trxRef: { type: String, required: true },
-  type: { type: String, enum: ["subscription", "top-up"], required: true },
+  type: {
+    type: String,
+    enum: ["onetime", "top-up", "prepaid"],
+    required: true,
+  },
   medium: { type: String, required: true },
-  recurring: { type: Boolean, default: false },
   startDate: { type: Date, required: true },
   endDate: { type: Date, required: true },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
+  deletedAt: { type: Date, default: null },
+  createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
+  updatedBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
 });
 
 transactionSchema.pre("find", function (next) {
+  this.populate("product").populate("user").sort({ createdAt: -1 });
+  next();
+});
+
+transactionSchema.pre("findOne", function (next) {
   this.populate("product").populate("user").sort({ createdAt: -1 });
   next();
 });
@@ -41,6 +53,9 @@ transactionSchema.set("toJSON", {
     returnedObject.id = returnedObject._id.toString();
     delete returnedObject._id;
     delete returnedObject.__v;
+    delete returnedObject.deletedAt;
+    delete returnedObject.createdBy;
+    delete returnedObject.updatedBy;
   },
 });
 

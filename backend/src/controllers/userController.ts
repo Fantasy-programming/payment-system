@@ -42,7 +42,7 @@ const updateUser = async (request: Request, response: Response) => {
 };
 
 const updateCurrentUser = async (request: Request, response: Response) => {
-  const userId = request.user?.id;
+  const userId = request.user?._id;
 
   const body = request.body as IUserPersonalUpdate;
   const data = await userService.updateUser(userId!, body);

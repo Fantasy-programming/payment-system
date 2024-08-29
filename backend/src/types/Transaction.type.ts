@@ -5,20 +5,22 @@ import { userSchema } from "./User.type";
 import { productSchema } from "./Product.type";
 
 export const transactionSchema = z.object({
-  id: createObjectId("invalid ID"),
+  _id: createObjectId("invalid ID"),
   user: createObjectId("invalid user ID"),
   product: createObjectId("invalid product ID"),
-  reference: z.string({ required_error: "Reference is required" }),
-  months: z.number(),
   finalPrice: z.number(),
+  duration: z.number(),
+  reference: z.string({ required_error: "Reference is required" }),
   trxRef: z.string(),
-  type: z.enum(["subscription", "top-up"]),
+  type: z.enum(["onetime", "top-up", "prepaid"]),
   medium: z.string(),
-  recurring: z.boolean(),
   startDate: z.date(),
   endDate: z.date(),
   createdAt: z.date(),
   updatedAt: z.date(),
+  deletedAt: z.date().nullable(),
+  createdBy: createObjectId("invalid user ID"),
+  updatedBy: createObjectId("invalid user ID"),
 });
 
 export const fullTransactionSchema = transactionSchema.extend({
@@ -28,7 +30,7 @@ export const fullTransactionSchema = transactionSchema.extend({
 
 export const createTransactionSchema = transactionSchema
   .omit({
-    id: true,
+    _id: true,
     user: true,
     product: true,
     startDate: true,
@@ -36,6 +38,9 @@ export const createTransactionSchema = transactionSchema
     endDate: true,
     createdAt: true,
     updatedAt: true,
+    deletedAt: true,
+    createdBy: true,
+    updatedBy: true,
   })
   .extend({
     productID: createObjectId("invalid product ID"),

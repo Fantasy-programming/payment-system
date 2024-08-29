@@ -4,7 +4,6 @@ import { createObjectId } from "./Api.type";
 
 export const userSchema = z.object({
   _id: createObjectId("invalid ID"),
-  id: createObjectId("invalid ID"),
   firstName: z.string().min(1, "Enter a valid first name"),
   lastName: z.string().min(1, "Enter a valid last name"),
   email: z.string().min(1, "Enter a valid email address").email(),
@@ -17,8 +16,6 @@ export const userSchema = z.object({
     .min(1, "Select a zone"),
   routerID: z.string().min(1, "Enter a valid router ID"),
   address: z.string().min(1, "Enter a valid address"),
-  emailVerified: z.boolean(),
-  phoneVerified: z.boolean(),
   status: z.enum(["active", "inactive"]),
   role: z.enum(["user", "admin"]),
   createdAt: z.coerce.date(),
@@ -45,15 +42,11 @@ export const userPersonalUpdateSchema = userSchema
 
 export const updateUserSchema = userSchema.omit({
   _id: true,
-  id: true,
   password: true,
 });
 
 export const createUserSchema = userSchema.omit({
   _id: true,
-  id: true,
-  emailVerified: true,
-  phoneVerified: true,
   status: true,
   role: true,
   createdAt: true,

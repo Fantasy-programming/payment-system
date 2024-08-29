@@ -132,7 +132,6 @@ export async function sendNewPassEmail(email: string, password: string) {
   logger.info("New password email sent successfully");
 }
 
-// TODO: Test This
 export async function sendReceiptEmail(transaction: IFullTransaction) {
   const title = "Mikronet Receipt";
   const name = `${transaction.user.firstName} ${transaction.user.lastName}`;
