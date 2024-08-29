@@ -4,6 +4,7 @@ import { JWT_SECRET } from "../env";
 
 import type { Request, Response, NextFunction } from "express";
 import type { IJWT } from "../types/Jwt.type";
+import type { IUser } from "../types/User.type";
 
 export const tokenExtractor = (
   request: Request,
@@ -37,13 +38,25 @@ export const userExtractor = async (
       return response.status(401).json({ error: "token missing or invalid" });
     }
 
-    const res = await User.findById(decodedToken.id);
+    let user: IUser | null = null;
+    const redis = request.app.locals.cache;
+    const key = `user:${decodedToken.id}`;
+    const cachedUser = await redis.get(key);
 
-    if (!res) {
+    if (cachedUser) {
+      user = JSON.parse(cachedUser);
+      // @ts-expect-error: change id into _id
+      user._id = user.id;
+    } else {
+      user = await User.findById(decodedToken.id);
+      redis.setex(key, 24 * 60 * 60, JSON.stringify(user));
+    }
+
+    if (!user) {
       return response.status(401).json({ error: "user not found" });
     }
 
-    request.user = res;
+    request.user = user;
 
     return next();
   } catch (error) {

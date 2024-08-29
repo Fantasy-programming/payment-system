@@ -4,8 +4,9 @@ import cluster from "node:cluster";
 import { createApp } from "./app";
 import { DB } from "./adapters/mongo";
 import { Scheduler } from "./adapters/pulse";
-import { PORT } from "./env";
+import { PORT, REDIS_URI } from "./env";
 import logger from "./logger";
+import { Cache } from "./adapters/redis";
 
 const cpus = navigator.hardwareConcurrency;
 let isShuttingDown = false;
@@ -14,9 +15,10 @@ async function startServer() {
   // Dependencies
   const db = new DB();
   const scheduler = new Scheduler(db);
+  const cache = new Cache(REDIS_URI as string);
 
   try {
-    const app = await createApp({ db, scheduler });
+    const app = await createApp({ db, scheduler, cache });
     const server = http.createServer(app);
 
     server.listen(PORT);

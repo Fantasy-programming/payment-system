@@ -2,8 +2,10 @@ import { Router } from "express";
 
 import preferenceController from "../controllers/preferenceController";
 
+import { checkCache } from "../middlewares/cache";
 import { userExtractor } from "../middlewares/jwt";
 import { validateData } from "../middlewares/validation";
+
 import {
   adminAlertingRequestSchema,
   userAlertingRequestSchema,
@@ -15,12 +17,14 @@ const prefRouter = Router();
 prefRouter.get(
   "/user",
   userExtractor,
+  checkCache,
   preferenceController.getUserAlertingSettings,
 );
 
 prefRouter.get(
   "/admin",
   userExtractor,
+  checkCache,
   preferenceController.getAdminAlertingSettings,
 );
 

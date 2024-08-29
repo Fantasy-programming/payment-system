@@ -16,6 +16,7 @@ export const errorHandler = (
   } else if (error.name === "SyntaxError") {
     return response.status(400).json({ error: "malformatted request" });
   } else if (error.name === "UnauthorizedError") {
+    logger.error(error);
     return response.status(401).json({ error: error.message });
   } else if (error.name === "InternalError") {
     return response.status(500).json({ error: error.message });

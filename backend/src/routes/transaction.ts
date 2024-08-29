@@ -6,16 +6,23 @@ import { idparam, idsSchema } from "../types/Api.type";
 import { createTransactionSchema } from "../types/Transaction.type";
 
 import trscController from "../controllers/transactionController";
+import { checkCache } from "../middlewares/cache";
 
 const transactionRouter = Router();
 
 // Get all transactions
-transactionRouter.get("/", userExtractor, trscController.getAllTransactions);
+transactionRouter.get(
+  "/",
+  userExtractor,
+  checkCache,
+  trscController.getAllTransactions,
+);
 
 // Get a single transaction detail
 transactionRouter.get(
   "/:id",
   userExtractor,
+  checkCache,
   validateParams(idparam),
   trscController.getTransaction,
 );

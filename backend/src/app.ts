@@ -19,11 +19,13 @@ import { errorHandler, unknownEndpoint } from "./middlewares/errorHandler";
 
 import type { DB } from "./adapters/mongo";
 import type { Scheduler } from "./adapters/pulse";
+import type { Cache } from "./adapters/redis";
 import { stream } from "./logger";
 
 type AppDependencies = {
   db: DB;
   scheduler: Scheduler;
+  cache: Cache;
 };
 
 export const createApp = async (dependencies: AppDependencies) => {
@@ -35,6 +37,7 @@ export const createApp = async (dependencies: AppDependencies) => {
 
   // port dependency accross the app
   app.locals.scheduler = dependencies.scheduler.pulse;
+  app.locals.cache = dependencies.cache.redis;
 
   // setup the middlewares
   app.use(morgan("tiny", { stream }));

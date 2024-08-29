@@ -4,16 +4,18 @@ import productController from "../controllers/productController";
 import { validateData, validateParams } from "../middlewares/validation";
 import { idparam, idsSchema } from "../types/Api.type";
 import { createProductSchema } from "../types/Product.type";
+import { checkCache } from "../middlewares/cache";
 
 const productRouter = Router();
 
 // Get all products
-productRouter.get("/", productController.getAllProducts);
+productRouter.get("/", checkCache, productController.getAllProducts);
 
 // Get a single product detail
 productRouter.get(
   "/:id",
   validateParams(idparam),
+  checkCache,
   productController.getProduct,
 );
 

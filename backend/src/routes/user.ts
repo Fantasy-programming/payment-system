@@ -10,14 +10,15 @@ import {
 } from "../types/User.type";
 
 import userController from "../controllers/userController";
+import { checkCache } from "../middlewares/cache";
 
 const userRouter = Router();
 
 // Get all users
-userRouter.get("/", userExtractor, userController.getUsers);
+userRouter.get("/", userExtractor, checkCache, userController.getUsers);
 
 // Get current user info
-userRouter.get("/me", userExtractor, userController.getCurrentUser);
+userRouter.get("/me", userExtractor, checkCache, userController.getCurrentUser);
 
 // Update current user info
 userRouter.put(
@@ -31,6 +32,7 @@ userRouter.put(
 userRouter.get(
   "/:id",
   userExtractor,
+  checkCache,
   validateParams(idparam),
   userController.getUser,
 );

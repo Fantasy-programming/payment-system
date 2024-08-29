@@ -1,4 +1,5 @@
 import preferenceService from "../services/preferenceService";
+import { invalidateCache } from "../middlewares/cache";
 
 import type { Request, Response } from "express";
 import type {
@@ -31,9 +32,11 @@ const updateUserAlertingSettings = async (
   response: Response,
 ) => {
   const id = request.user?._id;
+  const redis = request.app.locals.cache;
 
   const body = request.body as UserAlertingRequest;
   const data = await preferenceService.updateUserAlertingSettings(id!, body);
+  await invalidateCache(redis, "preferences", id!);
   return response.status(200).json(data);
 };
 
@@ -42,9 +45,11 @@ const updateAdminAlertingSettings = async (
   response: Response,
 ) => {
   const id = request.user?._id;
+  const redis = request.app.locals.cache;
 
   const body = request.body as AdminAlertingRequest;
   const data = await preferenceService.updateAdminAlertingSettings(id!, body);
+  await invalidateCache(redis, "preferences", id!);
   return response.status(200).json(data);
 };
 

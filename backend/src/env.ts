@@ -5,6 +5,7 @@ export const ARKESEL_API_KEY = Bun.env.ARKESEL_API_KEY || "";
 export const NODE_ENV = Bun.env.NODE_ENV;
 export const PORT = Bun.env.PORT;
 export const MONGODB_URI = Bun.env.MONGODB_URI;
+export const REDIS_URI = Bun.env.REDIS_URI;
 export const JWT_SECRET = Bun.env.SECRET || "";
 export const JWT_REFRESH_SECRET = Bun.env.REFRESH_SECRET || "";
 

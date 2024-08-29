@@ -1,3 +1,4 @@
+import type { Redis } from "ioredis";
 import type Pulse from "@pulsecron/pulse";
 import type { IUser } from "./User.type";
 
@@ -10,6 +11,7 @@ declare global {
 
     interface Locals {
       scheduler: Pulse;
+      cache: Redis;
     }
   }
 }
