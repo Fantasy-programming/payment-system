@@ -1,4 +1,5 @@
 import logger from "../logger";
+import { add, isAfter, subDays } from "date-fns";
 
 import { getPaymentMethod } from "../lib/paystack";
 import { adminPreferences } from "../utils/preferences";
@@ -16,7 +17,9 @@ const getAll = async (role: string, id: ObjectId) => {
     return transactions;
   }
 
-  const transactions = await Transaction.find({ user: id });
+  const transactions = await Transaction.find({ user: id }).sort({
+    createdAt: -1,
+  });
   return transactions;
 };
 
@@ -38,31 +41,106 @@ const create = async (
   userId: ObjectId,
   pulse: Pulse,
 ) => {
-  const startDate = new Date();
-  const endDate = new Date(
-    new Date().setMonth(startDate.getMonth() + trsc.months),
-  );
+  let startDate = new Date();
+  let endDate = add(startDate, { months: trsc.duration });
   const medium = await getPaymentMethod(trsc.reference);
+
+  // TODO: Adjust the scheduling to take all path into account
+  if (trsc.type !== "onetime") {
+    const activeSubscription = await Transaction.findOne({
+      user: userId,
+      endDate: { $gt: new Date() },
+    });
+
+    if (activeSubscription) {
+      // Extend the current prepaid subscription (it hasn't started)
+
+      if (trsc.type === "prepaid") {
+        if (
+          activeSubscription.type === "prepaid" &&
+          isAfter(activeSubscription.startDate, new Date())
+        ) {
+          activeSubscription.endDate = add(activeSubscription.endDate, {
+            months: trsc.duration,
+          });
+
+          activeSubscription.duration += trsc.duration;
+          await activeSubscription.save();
+          return activeSubscription;
+        } else if (
+          activeSubscription.type === "prepaid" &&
+          activeSubscription.startDate <= new Date()
+        ) {
+          startDate = activeSubscription.endDate;
+          endDate = add(activeSubscription.endDate, { months: trsc.duration });
+        } else if (activeSubscription.type !== "prepaid") {
+          // check if there is a prepaid subscription that hasn't started
+          const currentSubscription = await Transaction.findOne({
+            user: userId,
+            type: "prepaid",
+            endDate: { $gt: new Date() },
+          });
+
+          if (currentSubscription) {
+            currentSubscription.endDate = add(currentSubscription.endDate, {
+              months: trsc.duration,
+            });
+            currentSubscription.duration += trsc.duration;
+            await currentSubscription.save();
+            return currentSubscription;
+          }
+
+          startDate = activeSubscription.endDate;
+          endDate = add(activeSubscription.endDate, { months: trsc.duration });
+        }
+      } else if (trsc.type === "top-up") {
+        if (
+          activeSubscription.type === "prepaid" &&
+          isAfter(activeSubscription.startDate, new Date())
+        ) {
+          const currentSubscription = await Transaction.findOne({
+            user: userId,
+            endDate: { $gt: new Date() },
+          })
+            .sort({ endDate: -1 })
+            .skip(1);
+
+          if (currentSubscription) {
+            startDate = currentSubscription.startDate;
+            endDate = currentSubscription.endDate;
+          }
+        } else if (
+          activeSubscription.type === "prepaid" &&
+          activeSubscription.startDate <= new Date()
+        ) {
+          startDate = activeSubscription.startDate;
+          endDate = activeSubscription.endDate;
+        } else if (activeSubscription.type !== "prepaid") {
+          startDate = activeSubscription.startDate;
+          endDate = activeSubscription.endDate;
+        }
+      }
+    }
+  }
 
   const transaction = new Transaction({
     user: userId,
     product: trsc.productID,
+    duration: trsc.duration,
+    finalPrice: trsc.finalPrice,
     reference: trsc.reference,
     trxRef: trsc.trxRef,
     type: trsc.type,
-    finalPrice: trsc.finalPrice,
-    months: trsc.months,
     medium,
-    recurring: trsc.recurring,
     startDate,
     endDate,
+    createdBy: userId,
+    updatedBy: userId,
   });
 
   let savedTransaction = await transaction.save();
   savedTransaction = await savedTransaction.toObject();
   logger.debug("Transaction created", savedTransaction);
-
-  // NOTE: Setup scheduled task for recurring transactions (subscription)
 
   UserAlert.findOne({ userId })
     .then((preferences) => {
@@ -77,19 +155,27 @@ const create = async (
 
       if (preferences?.subscriptionAlert) {
         if (preferences?.emailAlerts) {
-          pulse.schedule("in 28 days", "send subscription reminder", {
-            userDetail: savedTransaction.user,
-            alertType: "email",
-          });
+          pulse.schedule(
+            subDays(savedTransaction.endDate, 2),
+            "send subscription reminder",
+            {
+              userDetail: savedTransaction.user,
+              alertType: "email",
+            },
+          );
 
           logger.info("🟢 Subscription reminder scheduled");
         }
 
         if (preferences?.smsAlerts) {
-          pulse.schedule("in 28 days", "send subscription reminder", {
-            userDetail: savedTransaction.user,
-            alertType: "sms",
-          });
+          pulse.schedule(
+            subDays(savedTransaction.endDate, 2),
+            "send subscription reminder",
+            {
+              userDetail: savedTransaction.user,
+              alertType: "sms",
+            },
+          );
 
           logger.info("🟢 Subscription reminder scheduled");
         }
