@@ -14,11 +14,11 @@ import supportRouter from "./routes/support";
 import preferenceRouter from "./routes/preference";
 import mistRouter from "./routes/mist";
 
-import { tokenExtractor } from "./middleware/jwt";
-import { errorHandler, unknownEndpoint } from "./middleware/errorHandler";
+import { tokenExtractor } from "./middlewares/jwt";
+import { errorHandler, unknownEndpoint } from "./middlewares/errorHandler";
 
-import type { DB } from "./utils/mongo";
-import type { Scheduler } from "./utils/pulse";
+import type { DB } from "./adapters/mongo";
+import type { Scheduler } from "./adapters/pulse";
 import { stream } from "./logger";
 
 type AppDependencies = {
