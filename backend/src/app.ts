@@ -39,7 +39,21 @@ export const createApp = async (dependencies: AppDependencies) => {
   // setup the middlewares
   app.use(morgan("tiny", { stream }));
   app.use(cors());
-  app.use(helmet());
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        useDefaults: true,
+        directives: {
+          "script-src": [
+            "'self'",
+            "https://js.paystack.co/v1/inline.js",
+            "https://checkout.paystack.com/cdn-cgi/challenge-platform/scripts/jsd/main.js",
+          ],
+          "frame-src": ["'self'", "https://checkout.paystack.com/"],
+        },
+      },
+    }),
+  );
   app.use(express.json());
   app.use(cookies());
   app.use(express.static("static"));

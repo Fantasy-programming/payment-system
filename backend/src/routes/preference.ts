@@ -2,12 +2,12 @@ import { Router } from "express";
 
 import preferenceController from "../controllers/preferenceController";
 
-import { validateData } from "../middleware/validation";
+import { userExtractor } from "../middlewares/jwt";
+import { validateData } from "../middlewares/validation";
 import {
   adminAlertingRequestSchema,
   userAlertingRequestSchema,
 } from "../types/Preference.type";
-import { userExtractor } from "../middleware/jwt";
 
 const prefRouter = Router();
 

@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import logger from "../logger";
 
 import { MONGODB_URI } from "../env";
-import { loadAdminPreferences } from "./preferences";
+import { loadAdminPreferences } from "../utils/preferences";
 
 export const getConnection = async () => {
   return mongoose.connection.db;

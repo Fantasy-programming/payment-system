@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { userExtractor } from "../middleware/jwt";
+import { userExtractor } from "../middlewares/jwt";
 
-import { validateData, validateParams } from "../middleware/validation";
+import { validateData, validateParams } from "../middlewares/validation";
 import { idparam, idsSchema } from "../types/Api.type";
 import {
   createUserSchema,

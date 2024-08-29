@@ -1,7 +1,7 @@
 import { createApp } from "./app";
-import { DB } from "./utils/mongo";
+import { DB } from "./adapters/mongo";
+import { Scheduler } from "./adapters/pulse";
 import { PORT } from "./env";
-import { Scheduler } from "./utils/pulse";
 import http from "node:http";
 import logger from "./logger";
 

@@ -1,7 +1,7 @@
 import { Router } from "express";
 
 import productController from "../controllers/productController";
-import { validateData, validateParams } from "../middleware/validation";
+import { validateData, validateParams } from "../middlewares/validation";
 import { idparam, idsSchema } from "../types/Api.type";
 import { createProductSchema } from "../types/Product.type";
 

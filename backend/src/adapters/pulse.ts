@@ -13,7 +13,7 @@ import logger from "../logger";
 import type { DB } from "./mongo";
 import type { IUser } from "../types/User.type";
 import type { IFullTransaction } from "../types/Transaction.type";
-import { InternalError } from "./errors";
+import { InternalError } from "../utils/errors";
 
 interface ReceiptJob {
   transactionDetail: IFullTransaction;
@@ -24,7 +24,6 @@ interface SubEndReminderJob {
   alertType: string;
 }
 
-// NOTE: We will freshly fetch the admin pref
 interface SubAlertJob {
   transactionDetail: IFullTransaction;
   alertType: string;
@@ -126,7 +125,7 @@ export class Scheduler {
         sendSubAlertEmail(transactionDetail, email);
       } else if (alertType === "sms" && phone) {
         await sms.sendSMS(
-          `The user ${transactionDetail.user.firstName} ${transactionDetail.user.lastName} has purchased a subscription package, see bellow the details\nPlan: ${transactionDetail.product.name}\nDuration: ${transactionDetail.months}\nRouterID:${transactionDetail.user.routerID}\nZone: ${transactionDetail.user.zone}\nstartDate: ${transactionDetail.startDate.toString()}\nendDate: ${transactionDetail.endDate.toString()} `,
+          `The user ${transactionDetail.user.firstName} ${transactionDetail.user.lastName} has purchased a subscription package, see bellow the details\nPlan: ${transactionDetail.product.name}\nDuration: ${transactionDetail.duration}\nRouterID:${transactionDetail.user.routerID}\nZone: ${transactionDetail.user.zone}\nstartDate: ${transactionDetail.startDate.toString()}\nendDate: ${transactionDetail.endDate.toString()} `,
           phone,
         );
       }

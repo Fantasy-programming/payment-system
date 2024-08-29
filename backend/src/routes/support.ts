@@ -1,9 +1,9 @@
 import { Router } from "express";
 
-import { validateData } from "../middleware/validation";
+import { validateData } from "../middlewares/validation";
 import supportController from "../controllers/supportController";
 import { supportReqSchema, transferReqSchema } from "../types/Support.type";
-import { userExtractor } from "../middleware/jwt";
+import { userExtractor } from "../middlewares/jwt";
 
 const supportRouter = Router();
 
