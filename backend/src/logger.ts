@@ -22,32 +22,6 @@ if (NODE_ENV !== "development") {
       ),
     }),
   );
-
-  transports.push(
-    new winston.transports.File({
-      level: "warn",
-      filename: "/logs/app.log",
-      format: winston.format.combine(
-        winston.format.timestamp({
-          format: "YYYY-MM-DD HH:mm:ss",
-        }),
-        winston.format.json(),
-      ),
-    }),
-  );
-
-  transports.push(
-    new winston.transports.File({
-      level: "error",
-      filename: "/logs/error.log",
-      format: winston.format.combine(
-        winston.format.timestamp({
-          format: "YYYY-MM-DD HH:mm:ss",
-        }),
-        winston.format.json(),
-      ),
-    }),
-  );
 }
 
 let logger = winston.createLogger({
