@@ -37,15 +37,23 @@ const verifyOTP = async (request: Request, response: Response) => {
 };
 
 const refreshToken = async (request: Request, response: Response) => {
-  const token: string = request.cookies.refreshToken;
+  const oldToken = request.token;
+  const refreshToken: string = request.cookies.refreshToken;
 
-  if (!token) {
+  if (!refreshToken || !oldToken) {
     return response.status(400).json({ error: "refresh token missing" });
   }
 
-  const data = await authService.refreshToken(token);
+  const data = await authService.refreshToken(refreshToken, oldToken);
 
-  return response.status(200).json(data);
+  response.cookie("refreshToken", data.refreshToken, {
+    httpOnly: true,
+    secure: NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  });
+
+  return response.status(200).json(data.newToken);
 };
 
 export default { login, mobileLogin, verifyOTP, refreshToken, logout };

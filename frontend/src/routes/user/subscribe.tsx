@@ -121,15 +121,19 @@ export const SubscribeView = () => {
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {plans?.map((plan) => (
-          <SubsribeCard
-            key={plan.id}
-            type={paymentType}
-            duration={contractDuration}
-            plan={plan}
-            onClose={onClose}
-          />
-        ))}
+        {plans?.map((plan) => {
+          return (
+            plan.status === "active" && (
+              <SubsribeCard
+                key={plan.id}
+                type={paymentType}
+                duration={contractDuration}
+                plan={plan}
+                onClose={onClose}
+              />
+            )
+          );
+        })}
       </div>
     </div>
   );

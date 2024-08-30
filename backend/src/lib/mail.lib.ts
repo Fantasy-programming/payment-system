@@ -2,13 +2,13 @@ import logger from "../logger.ts";
 import nodemailer from "nodemailer";
 import { render } from "@react-email/components";
 
-import Receipt from "../templates/pdf/PDFReceipt.tsx";
-import { MikronetWelcomeEmail } from "../templates/mikronet-welcome.tsx";
-import { MikronetSupportEmail } from "../templates/mikronet-support.tsx";
-import { MikronetResetPassEmail } from "../templates/mikronet-reset-pass.tsx";
-import { MikronetReceiptEmail } from "../templates/mikronet-receipt.tsx";
-import { MikronetSubAlertEmail } from "../templates/mikronet-sub-alert.tsx";
-import { MikronetReminderEmail } from "../templates/mikronet-reminder-user.tsx";
+import { MikronetReceiptPDF } from "../templates/pdf/pdf-receipt";
+import { MikronetWelcomeEmail } from "../templates/mikronet-welcome";
+import { MikronetSupportEmail } from "../templates/mikronet-support";
+import { MikronetResetPassEmail } from "../templates/mikronet-reset-pass";
+import { MikronetReceiptEmail } from "../templates/mikronet-receipt";
+import { MikronetSubAlertEmail } from "../templates/mikronet-sub-alert";
+import { MikronetReminderEmail } from "../templates/mikronet-reminder-user";
 
 import { oauth2Client } from "../constants/mail.const.ts";
 import {
@@ -136,7 +136,9 @@ export async function sendReceiptEmail(transaction: IFullTransaction) {
   const title = "Mikronet Receipt";
   const name = `${transaction.user.firstName} ${transaction.user.lastName}`;
   const body = render(MikronetReceiptEmail({ name }));
-  const pdf = await renderToBuffer(Receipt({ orderData: transaction }));
+  const pdf = await renderToBuffer(
+    MikronetReceiptPDF({ orderData: transaction }),
+  );
   const filename = `receipt-${transaction.trxRef}.pdf`;
 
   await sendMailAttachment(transaction.user.email, title, body, pdf, filename);

@@ -18,4 +18,15 @@ const createTransaction = async (data: TransactionRequest) => {
   return response.data;
 };
 
-export default { getTransactions, getTransaction, createTransaction };
+const deleteTransaction = async (id: string | string[]) => {
+  await axios.delete(`${BASEURI}`, {
+    data: { ids: id },
+  });
+};
+
+export default {
+  getTransactions,
+  getTransaction,
+  createTransaction,
+  deleteTransaction,
+};

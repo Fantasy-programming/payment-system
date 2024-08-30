@@ -29,7 +29,7 @@ const requestTransfert = async (id: ObjectId, message: TransferRequest) => {
     throw new Error("User not found");
   }
 
-  await sendSupportMail(
+  sendSupportMail(
     user?.email,
     user?.firstName,
     user?.lastName,

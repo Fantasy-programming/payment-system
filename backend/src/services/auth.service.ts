@@ -6,10 +6,12 @@ import { User } from "../models/user.model";
 import { JWT_REFRESH_SECRET, JWT_SECRET } from "../env";
 import { UnauthorizedError } from "../utils/errors";
 import type { ObjectId } from "mongoose";
+import type { IJWT } from "../types/Jwt.type";
+import logger from "../logger";
 
 const generateAccessToken = (email: string, role: string, id: ObjectId) => {
   return jwt.sign({ email, role, id }, JWT_SECRET, {
-    expiresIn: "1h",
+    expiresIn: "15m",
   });
 };
 
@@ -39,6 +41,7 @@ const mobileLogin = async (phone: string) => {
   const user = await User.findOne({ phone, status: "active" });
 
   if (!user) {
+    logger.warn("Failed login attempt, no user with this phone");
     throw new UnauthorizedError("No user with this phone number");
   }
 
@@ -49,12 +52,14 @@ const verifyOTP = async (value: string, code: string) => {
   const res = await arkesel.verifyOTP(code, value);
 
   if (res.code !== "1100") {
+    logger.warn("Failed login attempt, invalid or expired OTP");
     throw new UnauthorizedError("OTP invalid or has expired");
   }
 
   const user = await User.findOne({ phone: value, status: "active" });
 
   if (!user) {
+    logger.warn("Failed login attempt, no user with this phone");
     throw new UnauthorizedError("No user with this phone number");
   }
 
@@ -72,18 +77,38 @@ const verifyOTP = async (value: string, code: string) => {
   return { token, role: user.role, email: user.email };
 };
 
-const refreshToken = async (token: string) => {
+const refreshToken = async (refreshToken: string, oldToken: string) => {
   try {
-    const decoded = jwt.verify(token, JWT_REFRESH_SECRET) as { email: string };
-    const user = await User.findOne({ email: decoded.email, status: "active" });
+    const oldRefresh = jwt.verify(refreshToken, JWT_REFRESH_SECRET) as {
+      email: string;
+    };
+    const oldAccess = jwt.decode(oldToken) as IJWT;
+
+    if (oldRefresh.email !== oldAccess.email) {
+      logger.warn("Token does not match");
+      throw new UnauthorizedError("Token does not match");
+    }
+
+    const user = await User.findOne({
+      email: oldRefresh.email,
+      status: "active",
+    });
 
     if (!user) {
       throw new UnauthorizedError("User not found");
     }
 
-    const newToken = generateAccessToken(user.email, user.role, user._id);
+    const newAccessToken = generateAccessToken(user.email, user.role, user._id);
+    const newRefreshToken = generateRefreshToken(user.email);
 
-    return { token: newToken, role: user.role, email: user.email };
+    return {
+      newToken: {
+        token: newAccessToken,
+        role: user.role,
+        email: user.email,
+      },
+      refreshToken: newRefreshToken,
+    };
   } catch (error) {
     throw new UnauthorizedError("Invalid token");
   }

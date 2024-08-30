@@ -29,19 +29,25 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setUser(newJwt);
   }, []);
 
-  const refreshToken = useCallback(async () => {
-    const response = await fetch("/api/auth/refresh", {
-      method: "POST",
-      credentials: "include",
-    });
+  const refreshToken = useCallback(
+    async (oldToken: string) => {
+      const response = await fetch("/api/auth/refresh", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          Authorization: `Bearer ${oldToken}`,
+        },
+      });
 
-    if (!response.ok) logout();
+      if (!response.ok) logout();
 
-    const data: AuthResponse = await response.json();
-    storeUser(data);
+      const data: AuthResponse = await response.json();
+      storeUser(data);
 
-    return data.token;
-  }, [storeUser, logout]);
+      return data.token;
+    },
+    [storeUser, logout],
+  );
 
   useEffect(() => {
     const storedUser = localStorage.getItem("user");

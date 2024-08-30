@@ -67,14 +67,7 @@ const PDFReceipt = ({ orderData }: { orderData: Transaction }) => (
         <Text style={styles.subheader}>Order Details</Text>
         <View style={styles.row}>
           <Text>
-            {orderData.product.name}{" "}
-            {orderData.recurring ? (
-              "Plan (Recurring)"
-            ) : (
-              <>
-                data plan x <span>{orderData.months} month</span>
-              </>
-            )}
+            {orderData.product.name} data plan x {orderData.duration} month
           </Text>
           <Text>¢{orderData.finalPrice.toFixed(2)}</Text>
         </View>

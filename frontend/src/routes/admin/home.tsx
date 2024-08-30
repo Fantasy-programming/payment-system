@@ -31,6 +31,7 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { adminHomeLoader } from "./loaders";
 import { timeAgo } from "@/lib/utils";
+import { isAfter } from "date-fns";
 
 export const AdminHomeView = () => {
   const initialData = useLoaderData() as Awaited<
@@ -51,10 +52,9 @@ export const AdminHomeView = () => {
     return acc + transaction.finalPrice;
   }, 0);
 
-  const totalSubscriptions = transactions?.filter(
-    (transaction) =>
-      transaction.recurring && new Date(transaction.endDate) > new Date(),
-  ).length;
+  const totalSubscriptions = transactions?.filter((transaction) => {
+    return isAfter(transaction.endDate, new Date());
+  }).length;
 
   const activeNow = users.length;
 
@@ -99,7 +99,7 @@ export const AdminHomeView = () => {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Now</CardTitle>
+            <CardTitle className="text-sm font-medium">Active Users</CardTitle>
             <Activity className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -142,7 +142,7 @@ export const AdminHomeView = () => {
               <TableBody>
                 {transactions && transactions.length > 0 ? (
                   transactions.slice(-5).map((transaction) => (
-                    <TableRow>
+                    <TableRow key={transaction.id}>
                       <TableCell>
                         <div className="font-medium">
                           {transaction.user.firstName}{" "}
@@ -186,7 +186,7 @@ export const AdminHomeView = () => {
           <CardContent className="grid gap-8">
             {users && users.length > 0 ? (
               users.slice(-5).map((user) => (
-                <div className="flex items-center gap-4">
+                <div key={user.id} className="flex items-center gap-4">
                   <Avatar className="hidden h-9 w-9 sm:flex">
                     <AvatarImage src="/avatars/01.png" alt="Avatar" />
                     <AvatarFallback>

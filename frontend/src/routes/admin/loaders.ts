@@ -7,8 +7,8 @@ import {
   adminUserQuery,
   adminPrefQuery,
 } from "@/queries/adminQueries";
-import type { Params } from "react-router-dom";
 import { userInfoQuery } from "@/queries/userQueries";
+import type { Params } from "react-router-dom";
 
 export const adminHomeLoader = (queryClient: QueryClient) => async () => {
   const usersQuery = adminUsersQuery();
@@ -31,8 +31,8 @@ export const ordersLoader = (queryClient: QueryClient) => async () => {
 
 export const usersLoader = (queryClient: QueryClient) => async () => {
   const usersQuery = adminUsersQuery();
-
   const users = await queryClient.ensureQueryData(usersQuery);
+
   return users;
 };
 

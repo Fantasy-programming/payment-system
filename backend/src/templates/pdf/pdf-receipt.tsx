@@ -45,7 +45,11 @@ const styles = StyleSheet.create({
 });
 
 // Receipt component
-const PDFReceipt = ({ orderData }: { orderData: IFullTransaction }) => (
+export const MikronetReceiptPDF = ({
+  orderData,
+}: {
+  orderData: IFullTransaction;
+}) => (
   <Document>
     <Page size="A4" style={styles.page}>
       <View style={styles.section}>
@@ -67,12 +71,7 @@ const PDFReceipt = ({ orderData }: { orderData: IFullTransaction }) => (
         <Text style={styles.subheader}>Order Details</Text>
         <View style={styles.row}>
           <Text>
-            {orderData.product.name}{" "}
-            {orderData.recurring ? (
-              "Plan (Recurring)"
-            ) : (
-              <>{`data plan x ${orderData.months} month`}</>
-            )}
+            {orderData.product.name} data plan x {orderData.duration} month
           </Text>
           <Text>¢{orderData.finalPrice.toFixed(2)}</Text>
         </View>
@@ -135,5 +134,3 @@ const PDFReceipt = ({ orderData }: { orderData: IFullTransaction }) => (
     </Page>
   </Document>
 );
-
-export default PDFReceipt;
