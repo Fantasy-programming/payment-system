@@ -17,8 +17,9 @@ export const AdminOrdersView = () => {
   });
 
   return (
-    <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
-      <div className="py-6">
+    // <main className="grid flex-1 items-start gap-4 p-4 sm:px-6 sm:py-0 md:gap-8">
+    <main className="flex flex-col h-full overflow-hidden py-0 sm:py-2 ">
+      <div className="flex-1 overflow-auto p-4 sm:px-6">
         <>{orders && <DataTable columns={columns} data={orders} />}</>
       </div>
     </main>

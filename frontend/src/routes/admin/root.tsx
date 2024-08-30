@@ -9,11 +9,20 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Link, Outlet, useLocation } from "react-router-dom";
+import {
+  Form,
+  Link,
+  Outlet,
+  useLocation,
+  useSearchParams,
+  useSubmit,
+} from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 
 export function AdminDashboardLayout() {
   const location = useLocation();
+  const submit = useSubmit();
+  const [searchParams] = useSearchParams();
   const { logout } = useAuth();
 
   return (
@@ -124,16 +133,26 @@ export function AdminDashboardLayout() {
           </SheetContent>
         </Sheet>
         <div className="flex w-full items-center gap-4 md:ml-auto md:gap-2 lg:gap-4">
-          <form className="ml-auto flex-1 sm:flex-initial">
+          <Form
+            className="ml-auto flex-1 sm:flex-initial"
+            role="search"
+            action="/admin/customers"
+          >
             <div className="relative">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
+                id="q"
                 type="search"
+                name="q"
                 placeholder="Search customer..."
+                defaultValue={searchParams.get("q") || ""}
                 className="pl-8 sm:w-[300px] md:w-[200px] lg:w-[300px]"
+                onChange={(e) => {
+                  submit(e.currentTarget.form);
+                }}
               />
             </div>
-          </form>
+          </Form>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="secondary" size="icon" className="rounded-full">

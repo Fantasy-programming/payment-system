@@ -5,7 +5,7 @@ import { AuthResponse } from "@/services/auth.types";
 let refreshTokenPromise: Promise<string> | null = null;
 
 const createAPI = (
-  refreshTokenFn: () => Promise<string>,
+  refreshTokenFn: (oldToken: string) => Promise<string>,
   logoutFn: () => void,
 ): AxiosInstance => {
   const api = axios.create({
@@ -21,7 +21,7 @@ const createAPI = (
       if (storedUser) {
         const parsedUser: AuthResponse = JSON.parse(storedUser);
         if (isTokenExpired(parsedUser.token)) {
-          const newToken = await refreshTokenFn();
+          const newToken = await refreshTokenFn(parsedUser.token);
           config.headers["Authorization"] = `Bearer ${newToken}`;
         } else {
           config.headers["Authorization"] = `Bearer ${parsedUser.token}`;
@@ -48,7 +48,15 @@ const createAPI = (
           originalRequest._retry = true;
           try {
             if (!refreshTokenPromise) {
-              refreshTokenPromise = refreshTokenFn();
+              const storedUser = localStorage.getItem("user");
+
+              if (!storedUser) {
+                logoutFn();
+                return Promise.reject(error);
+              }
+              const parsedUser: AuthResponse = JSON.parse(storedUser);
+
+              refreshTokenPromise = refreshTokenFn(parsedUser.token);
             }
             const newToken = await refreshTokenPromise;
             refreshTokenPromise = null;
@@ -70,7 +78,7 @@ const createAPI = (
 export let api: AxiosInstance;
 
 export const initAPI = (
-  refreshTokenFn: () => Promise<string>,
+  refreshTokenFn: (oldToken: string) => Promise<string>,
   logoutFn: () => void,
 ) => {
   api = createAPI(refreshTokenFn, logoutFn);

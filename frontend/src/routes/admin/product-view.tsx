@@ -343,19 +343,7 @@ export const SelectedProductView = () => {
                   </div>
                 </CardContent>
               </Card>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Archive Product</CardTitle>
-                  <CardDescription>
-                    Archive this product if it's no longer active.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Button size="sm" variant="secondary">
-                    Archive Product
-                  </Button>
-                </CardContent>
-              </Card>
+              <div className="w-[350px]" />
             </div>
           </div>
           <div className="flex items-center justify-center gap-2 md:hidden">

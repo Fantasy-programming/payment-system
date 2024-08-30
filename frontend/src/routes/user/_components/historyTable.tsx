@@ -128,11 +128,14 @@ export function DataTable<TData, TValue>({
                 }}
               >
                 <DropdownMenuRadioItem value="">All</DropdownMenuRadioItem>
-                <DropdownMenuRadioItem value="subscription">
-                  subscription
+                <DropdownMenuRadioItem value="onetime">
+                  Onetime
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="prepaid">
+                  Prepaid
                 </DropdownMenuRadioItem>
                 <DropdownMenuRadioItem value="top-up">
-                  top-up
+                  Top-up
                 </DropdownMenuRadioItem>
               </DropdownMenuRadioGroup>
             </DropdownMenuContent>

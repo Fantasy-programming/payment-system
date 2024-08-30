@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -202,10 +202,8 @@ export function Login() {
             )}
           </Button>
           <div className="mt-4 text-center text-sm">
-            Forgot your password?{" "}
-            <Link to="/recover" className="underline">
-              recover it
-            </Link>
+            Forgot your password & lost your phone? Contact support to recover
+            it
           </div>
         </div>
       </div>

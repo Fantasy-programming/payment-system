@@ -13,8 +13,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
 import { MetaProps } from "./orders-table";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import PDFReceipt from "@/components/pdf/PDFReceipt";
+import { Receipt } from "@/components/ui/receipt";
 
 // This type is used to define the shape of our data.
 // You can use a Zod schema here if you want.
@@ -55,6 +58,7 @@ export const columns: ColumnDef<Transaction>[] = [
     },
   },
   {
+    id: "email",
     accessorKey: "user.email",
     header: "Email",
   },
@@ -83,35 +87,45 @@ export const columns: ColumnDef<Transaction>[] = [
     cell: ({ table, row }) => {
       const payment = row.original;
       const goto = (table.options.meta as MetaProps)?.gotoPage;
+      const deleteTransaction = (table.options.meta as MetaProps)
+        ?.deleteTransaction;
 
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <PDFDownloadLink
-              document={<PDFReceipt orderData={payment} />}
-              fileName={`receipt-${payment.trxRef}.pdf`}
-            >
-              <DropdownMenuItem>Print Receipt</DropdownMenuItem>
-            </PDFDownloadLink>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => goto(payment.id)}>
-              View payment details
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => goto(`/admin/customers/${payment.user.id}`)}
-            >
-              View customer details
-            </DropdownMenuItem>
-            <DropdownMenuItem>Delete</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <Sheet>
+          <DropdownMenu modal={false}>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <PDFDownloadLink
+                document={<PDFReceipt orderData={payment} />}
+                fileName={`receipt-${payment.trxRef}.pdf`}
+              >
+                <DropdownMenuItem>Download Receipt</DropdownMenuItem>
+              </PDFDownloadLink>
+              <DropdownMenuSeparator />
+              <SheetTrigger asChild>
+                <DropdownMenuItem>View payment details</DropdownMenuItem>
+              </SheetTrigger>
+
+              <DropdownMenuItem
+                onClick={() => goto(`/admin/customers/${payment.user.id}`)}
+              >
+                View customer details
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => deleteTransaction(payment.id)}>
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <SheetContent>
+            <Receipt mode="compact" transaction={payment} className="text-sm" />
+          </SheetContent>
+        </Sheet>
       );
     },
   },
