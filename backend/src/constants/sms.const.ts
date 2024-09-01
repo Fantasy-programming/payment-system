@@ -1,4 +1,4 @@
-import { ARKESEL_API_KEY } from "../env";
+import env from "../env";
 
 const EXPIRY = 5; // in minutes
 const LENGTH = 6; // OTP length
@@ -15,7 +15,7 @@ const OTP_MESSAGE =
 
 const HEADER = {
   "Content-Type": "application/json",
-  "api-key": ARKESEL_API_KEY,
+  "api-key": env.ARKESEL_API_KEY,
 };
 
 const OTPBODYBASE = {

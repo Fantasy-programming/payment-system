@@ -1,22 +1,22 @@
 import jwt from "jsonwebtoken";
 import arkesel from "../lib/sms.lib";
 import sms from "../constants/sms.const";
+import env from "../env";
 
 import { User } from "../models/user.model";
-import { JWT_REFRESH_SECRET, JWT_SECRET } from "../env";
 import { UnauthorizedError } from "../utils/errors";
 import type { ObjectId } from "mongoose";
-import type { IJWT } from "../types/Jwt.type";
+import type { IJWT } from "../types/jwt.type";
 import logger from "../logger";
 
 const generateAccessToken = (email: string, role: string, id: ObjectId) => {
-  return jwt.sign({ email, role, id }, JWT_SECRET, {
+  return jwt.sign({ email, role, id }, env.JWT_SECRET, {
     expiresIn: "15m",
   });
 };
 
 const generateRefreshToken = (email: string) => {
-  return jwt.sign({ email }, JWT_REFRESH_SECRET, { expiresIn: "7d" });
+  return jwt.sign({ email }, env.JWT_REFRESH_SECRET, { expiresIn: "7d" });
 };
 
 const emailLogin = async (email: string, password: string) => {
@@ -70,7 +70,7 @@ const verifyOTP = async (value: string, code: string) => {
   };
 
   // Token expires in 1 hour 60s x 60s
-  const token = jwt.sign(userForToken, JWT_SECRET, {
+  const token = jwt.sign(userForToken, env.JWT_SECRET, {
     expiresIn: 60 * 60,
   });
 
@@ -79,7 +79,7 @@ const verifyOTP = async (value: string, code: string) => {
 
 const refreshToken = async (refreshToken: string, oldToken: string) => {
   try {
-    const oldRefresh = jwt.verify(refreshToken, JWT_REFRESH_SECRET) as {
+    const oldRefresh = jwt.verify(refreshToken, env.JWT_REFRESH_SECRET) as {
       email: string;
     };
     const oldAccess = jwt.decode(oldToken) as IJWT;

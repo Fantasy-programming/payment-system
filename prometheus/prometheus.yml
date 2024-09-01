@@ -5,4 +5,4 @@ scrape_configs:
   - job_name: "nodejs"
     metrics_path: "/api/metrics"
     static_configs:
-      - targets: ["localhost:3000"]
+      - targets: ["ups:3000"]

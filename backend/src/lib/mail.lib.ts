@@ -11,13 +11,7 @@ import { MikronetSubAlertEmail } from "../templates/mikronet-sub-alert";
 import { MikronetReminderEmail } from "../templates/mikronet-reminder-user";
 
 import { oauth2Client } from "../constants/mail.const.ts";
-import {
-  MAIL_SERVICE,
-  MAIL_USERNAME,
-  MAIL_CLIENTID,
-  MAIL_REFRESH_TOKEN,
-  MAIL_CLIENT_SECRET,
-} from "../env.ts";
+import env from "../env.ts";
 
 import type { Options } from "nodemailer/lib/smtp-transport/index.js";
 import type { IFullTransaction } from "../types/transaction.type.ts";
@@ -26,20 +20,20 @@ import { renderToBuffer } from "@react-pdf/renderer";
 
 const createTransporter = async () => {
   oauth2Client.setCredentials({
-    refresh_token: MAIL_REFRESH_TOKEN,
+    refresh_token: env.MAIL_REFRESH_TOKEN,
   });
 
   const accessToken = await oauth2Client.getAccessToken();
 
   const SMTPCONFIG: Options = {
-    service: MAIL_SERVICE,
+    service: env.MAIL_SERVICE,
     auth: {
       type: "OAUTH2",
-      user: MAIL_USERNAME,
-      clientId: MAIL_CLIENTID,
+      user: env.MAIL_USERNAME,
+      clientId: env.MAIL_CLIENTID,
       accessToken: accessToken as string,
-      clientSecret: MAIL_CLIENT_SECRET,
-      refreshToken: MAIL_REFRESH_TOKEN,
+      clientSecret: env.MAIL_CLIENT_SECRET,
+      refreshToken: env.MAIL_REFRESH_TOKEN,
     },
   };
 

@@ -1,12 +1,15 @@
 import winston from "winston";
 import winstonDevConsole from "@epegzz/winston-dev-console";
-import { NODE_ENV } from "./env";
+import LokiTransport from "winston-loki";
+import safeJsonStringify from "safe-json-stringify";
+import env from "./env";
 
 // NOTE: Rotate to elasticsearch (overkill mode)
 
 const transports: winston.transport[] = [];
 
-if (NODE_ENV !== "development") {
+// but good practice say you should not couple with this specific nya nya nya (not time bro)
+if (env.NODE_ENV !== "development") {
   transports.push(
     new winston.transports.Console({
       level: "http",
@@ -22,42 +25,27 @@ if (NODE_ENV !== "development") {
       ),
     }),
   );
-
-  transports.push(
-    new winston.transports.File({
-      level: "warn",
-      filename: "/logs/app.log",
-      format: winston.format.combine(
-        winston.format.timestamp({
-          format: "YYYY-MM-DD HH:mm:ss",
-        }),
-        winston.format.json(),
-      ),
-    }),
-  );
-
-  transports.push(
-    new winston.transports.File({
-      level: "error",
-      filename: "/logs/error.log",
-      format: winston.format.combine(
-        winston.format.timestamp({
-          format: "YYYY-MM-DD HH:mm:ss",
-        }),
-        winston.format.json(),
-      ),
-    }),
-  );
 }
+
+transports.push(
+  new LokiTransport({
+    host: env.LOKI_URI,
+    format: winston.format.combine(
+      winston.format.printf((info) => {
+        return typeof info === "object" ? safeJsonStringify(info) : info;
+      }),
+    ),
+  }),
+);
 
 let logger = winston.createLogger({
   level: "silly",
-  silent: NODE_ENV === "test",
+  silent: env.NODE_ENV === "testing",
   transports: transports,
 });
 
 if (
-  NODE_ENV === "development" &&
+  env.NODE_ENV === "development" &&
   typeof winstonDevConsole.init === "function"
 ) {
   logger = winstonDevConsole.init(logger);
@@ -73,7 +61,7 @@ if (
 export const stream = {
   write: (message: unknown) => {
     if (typeof message === "string") {
-      logger.http(message.substring(0, message.lastIndexOf("\n")));
+      logger.http(message.trim());
     } else {
       logger.http(message);
     }

@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import { User } from "../models/user.model";
-import { JWT_SECRET } from "../env";
+import env from "../env";
 
 import type { Request, Response, NextFunction } from "express";
 import type { IJWT } from "../types/jwt.type";
@@ -29,10 +29,7 @@ export const userExtractor = async (
     if (!request.token) {
       return response.status(401).json({ error: "token missing or invalid" });
     }
-    const decodedToken = jwt.verify(
-      request.token,
-      JWT_SECRET as string,
-    ) as IJWT;
+    const decodedToken = jwt.verify(request.token, env.JWT_SECRET) as IJWT;
 
     if (!decodedToken?.id) {
       return response.status(401).json({ error: "token missing or invalid" });
@@ -40,7 +37,7 @@ export const userExtractor = async (
 
     let user: IUser | null = null;
     const redis = request.app.locals.cache;
-    const key = `user:${decodedToken.id}`;
+    const key = `cache:user:${decodedToken.id}:me`;
     const cachedUser = await redis.get(key);
 
     if (cachedUser) {
@@ -50,6 +47,7 @@ export const userExtractor = async (
     } else {
       user = await User.findById(decodedToken.id);
       redis.setex(key, 24 * 60 * 60, JSON.stringify(user));
+      redis.sadd(`tag:users`, key);
     }
 
     if (!user) {

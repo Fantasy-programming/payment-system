@@ -34,7 +34,6 @@ export class Metrics {
 
     this.register.registerMetric(this.requestCounter);
 
-    //NOTE: How tf can i track that
     this.loginUsersGauge = new this.prometheus.Gauge({
       name: "ups_logged_in_users",
       help: "Number of currently logged in users",

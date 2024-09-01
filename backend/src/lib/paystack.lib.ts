@@ -1,10 +1,10 @@
 import logger from "../logger";
+import env from "../env";
 
 import { Paystack } from "paystack-sdk";
-import { PAYSTACK_SECRET_KEY } from "../env";
 import { InternalError } from "../utils/errors";
 
-const paystack = new Paystack(PAYSTACK_SECRET_KEY || "");
+const paystack = new Paystack(env.PAYSTACK_SECRET_KEY);
 
 /**
  * Asynchronously retrieves the payment method for a specified transaction.

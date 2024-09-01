@@ -12,8 +12,9 @@ import productRouter from "./routes/product.route";
 import transactionRouter from "./routes/transaction.route";
 import supportRouter from "./routes/support.route";
 import preferenceRouter from "./routes/preference.route";
-import mistRouter from "./routes/misc.route";
+import metricRouter from "./routes/metric.route";
 
+import { requestCounter } from "./middlewares/metric.middleware";
 import { tokenExtractor } from "./middlewares/jwt.middleware";
 import { errorHandler, unknownEndpoint } from "./middlewares/error.middleware";
 import { stream } from "./logger";
@@ -21,11 +22,13 @@ import { stream } from "./logger";
 import type { Db } from "./adapters/mongo.adapter";
 import type { Scheduler } from "./adapters/pulse.adapter";
 import type { Cache } from "./adapters/redis.adapter";
+import type { Metrics } from "./adapters/prometheus.adapter";
 
 type AppDependencies = {
   db: Db;
   scheduler: Scheduler;
   cache: Cache;
+  metrics: Metrics;
 };
 
 export const createApp = async (dependencies: AppDependencies) => {
@@ -38,8 +41,10 @@ export const createApp = async (dependencies: AppDependencies) => {
   // port dependency accross the app
   app.locals.scheduler = dependencies.scheduler.pulse;
   app.locals.cache = dependencies.cache.redis;
+  app.locals.metrics = dependencies.metrics;
 
   // setup the middlewares
+  app.use(requestCounter);
   app.use(morgan("tiny", { stream }));
   app.use(cors());
   app.use(
@@ -59,7 +64,6 @@ export const createApp = async (dependencies: AppDependencies) => {
   );
   app.use(express.json());
   app.use(cookies());
-  app.use(express.static("static"));
   app.use(tokenExtractor);
 
   // setup the routes (/api)
@@ -69,7 +73,7 @@ export const createApp = async (dependencies: AppDependencies) => {
   app.use("/api/products", productRouter);
   app.use("/api/support", supportRouter);
   app.use("/api/preferences", preferenceRouter);
-  app.use("*", mistRouter);
+  app.use("/api/metrics", metricRouter);
 
   // custom middlewares
   app.use(unknownEndpoint);

@@ -1,7 +1,6 @@
 import { Schema, model } from "mongoose";
 import type { ITransaction, TransactionModel } from "../types/transaction.type";
 
-// TODO: Scout the app to reflect the schema changes
 const transactionSchema = new Schema<ITransaction, TransactionModel>({
   user: {
     type: Schema.Types.ObjectId,

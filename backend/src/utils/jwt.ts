@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 
 import type { ObjectId } from "mongoose";
-import { JWT_REFRESH_SECRET, JWT_SECRET } from "../env";
+import env from "../env";
 
 /**
  * Generates an access token for a user.
@@ -18,7 +18,7 @@ export const generateAccessToken = (
   role: string,
   id: ObjectId,
 ) => {
-  return jwt.sign({ email, role, id }, JWT_SECRET, {
+  return jwt.sign({ email, role, id }, env.JWT_SECRET, {
     expiresIn: "1h",
   });
 };
@@ -32,5 +32,5 @@ export const generateAccessToken = (
  */
 
 export const generateRefreshToken = (email: string) => {
-  return jwt.sign({ email }, JWT_REFRESH_SECRET, { expiresIn: "7d" });
+  return jwt.sign({ email }, env.JWT_REFRESH_SECRET, { expiresIn: "7d" });
 };

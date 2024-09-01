@@ -2,7 +2,7 @@ import authService from "../services/auth.service";
 
 import type { Request, Response } from "express";
 import type { LOGINREQ, OTPREQ } from "../types/auth.type";
-import { NODE_ENV } from "../env";
+import env from "../env";
 
 const login = async (request: Request, response: Response) => {
   const { email, password } = request.body as LOGINREQ;
@@ -11,11 +11,12 @@ const login = async (request: Request, response: Response) => {
 
   response.cookie("refreshToken", refreshToken, {
     httpOnly: true,
-    secure: NODE_ENV === "production",
+    secure: env.NODE_ENV === "production",
     sameSite: "strict",
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   });
 
+  request.app.locals.metrics.loginUsersGauge.inc();
   return response.status(200).json(data);
 };
 
@@ -25,7 +26,8 @@ const mobileLogin = async (request: Request, response: Response) => {
   return response.status(200).json({ message: "OTP sent to phone number" });
 };
 
-const logout = async (_request: Request, response: Response) => {
+const logout = async (request: Request, response: Response) => {
+  request.app.locals.metrics.loginUsersGauge.dec();
   response.clearCookie("refreshToken");
   return response.status(200).json({ message: "Logged out" });
 };
@@ -33,6 +35,7 @@ const logout = async (_request: Request, response: Response) => {
 const verifyOTP = async (request: Request, response: Response) => {
   const { value, token } = request.body as OTPREQ;
   const data = await authService.verifyOTP(value, token);
+  request.app.locals.metrics.loginUsersGauge.inc();
   return response.status(200).json(data);
 };
 
@@ -48,7 +51,7 @@ const refreshToken = async (request: Request, response: Response) => {
 
   response.cookie("refreshToken", data.refreshToken, {
     httpOnly: true,
-    secure: NODE_ENV === "production",
+    secure: env.NODE_ENV === "production",
     sameSite: "strict",
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   });

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { createObjectId } from "./Api.type";
+import { createObjectId } from "./api.type";
 
 export const jwtTokenSchema = z.object({
   email: z.string().email(),

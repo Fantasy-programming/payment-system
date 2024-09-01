@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import logger from "../logger";
 
-import { MONGODB_URI } from "../env";
+import env from "../env";
 import { loadAdminPreferences } from "../utils/preferences";
 
 export const getConnection = async () => {
@@ -12,7 +12,7 @@ export class Db {
   private mongoUri: string;
 
   constructor() {
-    this.mongoUri = MONGODB_URI as string;
+    this.mongoUri = env.MONGODB_URI;
   }
 
   /**

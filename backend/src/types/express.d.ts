@@ -1,6 +1,7 @@
 import type { Redis } from "ioredis";
 import type Pulse from "@pulsecron/pulse";
 import type { IUser } from "./user.type";
+import type { Metrics } from "../adapters/prometheus.adapter";
 
 declare global {
   namespace Express {
@@ -12,6 +13,7 @@ declare global {
     interface Locals {
       scheduler: Pulse;
       cache: Redis;
+      metrics: Metrics;
     }
   }
 }

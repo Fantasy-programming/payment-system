@@ -1,13 +1,14 @@
 import http from "node:http";
 import cluster from "node:cluster";
 import logger from "./logger";
+import env from "./env";
 
 import { createApp } from "./app";
 import { Db } from "./adapters/mongo.adapter";
 import { Scheduler } from "./adapters/pulse.adapter";
 import { Cache } from "./adapters/redis.adapter";
 
-import { PORT, REDIS_URI } from "./env";
+import { Metrics } from "./adapters/prometheus.adapter";
 
 const cpus = navigator.hardwareConcurrency;
 let isShuttingDown = false;
@@ -16,13 +17,14 @@ async function startServer() {
   // Dependencies
   const db = new Db();
   const scheduler = new Scheduler(db);
-  const cache = new Cache(REDIS_URI as string);
+  const cache = new Cache(env.REDIS_URI);
+  const metrics = new Metrics();
 
   try {
-    const app = await createApp({ db, scheduler, cache });
+    const app = await createApp({ db, scheduler, cache, metrics });
     const server = http.createServer(app);
 
-    server.listen(PORT);
+    server.listen(env.PORT);
     server.on("error", onError);
     server.on("listening", onListening);
     server.on("close", onClose);
@@ -36,7 +38,7 @@ async function startServer() {
 
     function onError(error: NodeJS.ErrnoException) {
       if (error.syscall !== "listen") throw error;
-      const bind = typeof PORT === "string" ? `Pipe ${PORT}` : `Port ${PORT}`;
+      const bind = `Port ${env.PORT}`;
       switch (error.code) {
         case "EACCES":
           logger.error(`${bind} requires elevated privileges`);
@@ -72,7 +74,7 @@ async function startServer() {
   }
 }
 
-if (cluster.isPrimary) {
+if (cluster.isPrimary && env.NODE_ENV === "production") {
   logger.debug(`Primary worker ${process.pid} is running`);
 
   for (let i = 0; i < cpus; i++) {
