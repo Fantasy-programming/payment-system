@@ -67,6 +67,6 @@
     "typescript-eslint": "^7.18.0"
   },
   "patchedDependencies": {
-    "winston@3.14.2": "patches/winston@3.14.2.patch"
+    "winston@3.14.2": "apps/backend/patches/winston@3.14.2.patch"
   }
 }

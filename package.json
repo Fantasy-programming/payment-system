@@ -1,0 +1,8 @@
+{
+  "name": "mikronet-ups",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*",
+  ]
+}
