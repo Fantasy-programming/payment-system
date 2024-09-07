@@ -1,18 +1,16 @@
-import mongoose from "mongoose";
-import logger from "../logger";
+import mongoose from "mongoose"
 
-import env from "../env";
-import { loadAdminPreferences } from "../utils/preferences";
-
-export const getConnection = async () => {
-  return mongoose.connection.db;
-};
+import env from "../env"
+import { loadAdminPreferences } from "../utils/preferences"
+import type { Logger, LogInstance } from "@mikronet/logger"
 
 export class Db {
-  private mongoUri: string;
+  private mongoUri: string
+  private logger: LogInstance
 
-  constructor() {
-    this.mongoUri = env.MONGODB_URI;
+  constructor(logger: Logger) {
+    this.mongoUri = env.MONGODB_URI
+    this.logger = logger.logger
   }
 
   /**
@@ -22,14 +20,14 @@ export class Db {
 
   async init() {
     try {
-      await mongoose.connect(this.mongoUri);
-      logger.info("🟢 Connected to MongoDB");
-      await loadAdminPreferences();
-      logger.info("🟢 Admin preferences loaded");
+      await mongoose.connect(this.mongoUri)
+      this.logger.info("🟢 Connected to MongoDB")
+      await loadAdminPreferences()
+      this.logger.info("🟢 Admin preferences loaded")
     } catch (error) {
-      logger.error("Error connecting to MongoDB");
-      logger.error(error);
-      process.exit(1);
+      this.logger.error("Error connecting to MongoDB")
+      this.logger.error(error)
+      process.exit(1)
     }
   }
 
@@ -38,7 +36,7 @@ export class Db {
    * @returns The MongoDB database instance.
    */
   getCon() {
-    return mongoose.connection.db;
+    return mongoose.connection.db
   }
 
   /**
@@ -48,7 +46,7 @@ export class Db {
    */
 
   setMongoUri(uri: string) {
-    this.mongoUri = uri;
+    this.mongoUri = uri
   }
 
   /**
@@ -56,7 +54,7 @@ export class Db {
    * @throws Will throw an error if the connection cannot be closed.
    */
   async close() {
-    await mongoose.disconnect();
-    logger.info("🔴 Disconnected from MongoDB");
+    await mongoose.disconnect()
+    this.logger.info("🔴 Disconnected from MongoDB")
   }
 }

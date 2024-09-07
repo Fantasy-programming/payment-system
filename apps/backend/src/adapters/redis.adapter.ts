@@ -1,18 +1,19 @@
-import { Redis } from "ioredis";
-import logger from "../logger";
+import { Redis } from "ioredis"
+import type { Logger } from "@mikronet/logger"
 
 export class Cache {
-  public redis: Redis;
+  public redis: Redis
 
-  constructor(redisUri: string) {
-    this.redis = new Redis(redisUri);
+  constructor(redisUri: string, logger: Logger) {
+    this.redis = new Redis(redisUri)
+    const log = logger.logger
 
     this.redis.on("error", (err) => {
-      logger.error(`🔴 Redis failed to connect: ${err}`);
-    });
+      log.error(`🔴 Redis failed to connect: ${err}`)
+    })
 
     this.redis.on("connect", () => {
-      logger.info("🟢 Redis connected");
-    });
+      log.info("🟢 Redis connected")
+    })
   }
 }

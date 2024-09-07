@@ -18,7 +18,7 @@
   };
 
   languages.typescript.enable = true;
-
+  languages.go.enable = true;
 
   # https://devenv.sh/processes/
   # processes.cargo-watch.exec = "cargo-watch";
@@ -29,11 +29,6 @@
   # https://devenv.sh/scripts/
   scripts.hello.exec = ''
     echo hello from $GREET
-  '';
-
-  enterShell = ''
-    hello
-    git --version
   '';
 
   # https://devenv.sh/tests/

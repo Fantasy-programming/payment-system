@@ -1,9 +1,28 @@
 {
-  "name": "routeros",
-  "module": "src/index.ts",
+  "name": "@mikronet/routeros",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "description": "A package to handle interactions with Mikrotik RouterOS",
+  "keywords": ["routeros", "mikrotik"],
+  "license": "MIT",
+  "bugs": {
+    "url": "??"
+  },
+  "author": "Ngobo ibara ridy franck rich <rocket_1@tutanota.com> (Fantasy programming)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fantasy-programming/tt-package-demo.git"
+  },
+  "scripts": {
+    "build": "bun run build.mjs",
+    "prepublishOnly": "bun run build"
+  },
+  "files": ["dist"],
   "type": "module",
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "bun-plugin-dts": "^0.2.3"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"

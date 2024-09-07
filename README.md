@@ -1,6 +1,14 @@
-# Mikronet Subscription management 'system'
+# ISP Management system
 
 This is a project work for the course "Computer science" at the University of Helsinki, Department of Computer Science. You will see a bunch of over-engineering (to my standard) in this project. I'm sorry.
+
+- features
+- repository stats
+- emojis
+- thanks people that stared
+- project name & logo
+- images
+
 
 - [Mikronet Subscription management 'system'](#mikronet-subscription-management-system)
   - [Documentation](#documentation)

@@ -1,4 +1,4 @@
-# routeros
+# ROUTER-OS
 
 To install dependencies:
 

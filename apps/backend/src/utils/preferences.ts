@@ -1,12 +1,11 @@
-import logger from "../logger";
-import { AdminAlert } from "../models/admin-preference.model";
-import { User } from "../models/user.model";
-import type { AdminAlertingRequest } from "../types/preference.type";
+import { AdminAlert } from "../models/admin-preference.model"
+import { User } from "../models/user.model"
+import type { AdminAlertingRequest } from "../types/preference.type"
 
 /**
  * Holds the admin preferences settings. It's initially null and gets populated on server startup.
  */
-export let adminPreferences: AdminAlertingRequest | null = null;
+export let adminPreferences: AdminAlertingRequest | null = null
 
 /**
  * Loads the admin preferences from the database.
@@ -18,25 +17,25 @@ export let adminPreferences: AdminAlertingRequest | null = null;
 
 export async function loadAdminPreferences() {
   try {
-    const preferences = await AdminAlert.findOne({});
+    const preferences = await AdminAlert.findOne({})
 
     if (!preferences) {
-      logger.info("Admin preferences not found. Creating new admin...");
-      await createAdmin();
-      throw new Error("Admin preferences not found. Created new admin.");
+      console.info("Admin preferences not found. Creating new admin...")
+      await createAdmin()
+      throw new Error("Admin preferences not found. Created new admin.")
     }
 
-    logger.info("🟢 Admin preferences loaded successfully");
-    adminPreferences = preferences.toObject();
+    console.info("🟢 Admin preferences loaded successfully")
+    adminPreferences = preferences.toObject()
   } catch (error) {
-    logger.error("🔴 Error loading admin preferences:", error);
-    throw error;
+    console.error("🔴 Error loading admin preferences:", error)
+    throw error
   }
 }
 
 async function createAdmin() {
-  logger.info("Creating admin...");
-  const password = await Bun.password.hash("123456Admin@");
+  console.info("Creating admin...")
+  const password = await Bun.password.hash("123456Admin@")
 
   const admin = new User({
     firstName: "Eric",
@@ -51,12 +50,12 @@ async function createAdmin() {
     emailVerified: true,
     phoneVerified: true,
     role: "admin",
-  });
+  })
 
-  const data = await admin.save();
+  const data = await admin.save()
 
-  logger.info("Admin created successfully!");
-  logger.info("Setting up preferences...");
+  console.info("Admin created successfully!")
+  console.info("Setting up preferences...")
 
   const preference = new AdminAlert({
     userId: data._id,
@@ -71,15 +70,13 @@ async function createAdmin() {
     leaveAlert: true,
     problemAlert: true,
     activationAlert: true,
-  });
+  })
 
-  await preference.save();
+  await preference.save()
 
-  logger.info("Preferences set up successfully!");
+  console.info("Preferences set up successfully!")
 }
 
-export async function updateAdminPreferences(
-  preferences: AdminAlertingRequest,
-) {
-  adminPreferences = preferences;
+export async function updateAdminPreferences(preferences: AdminAlertingRequest) {
+  adminPreferences = preferences
 }
