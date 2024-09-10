@@ -214,10 +214,15 @@ const SubsribeCard = ({
               {plan.rate} mbs
             </li>
           )}
-          {plan.hasCap && (
+          {plan?.hasCap ? (
             <li>
               <CheckIcon className="mr-2 inline-block h-4 w-4 text-green-500" />
               {plan.cap} GB Cap
+            </li>
+          ) : (
+            <li>
+              <CheckIcon className="mr-2 inline-block h-4 w-4 text-green-500" />
+              No data cap
             </li>
           )}
           {plan.capDownTo && (

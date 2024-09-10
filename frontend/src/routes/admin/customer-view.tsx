@@ -190,9 +190,16 @@ export const UserCreationPage = () => {
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="zone1">Zone 1</SelectItem>
-                          <SelectItem value="zone2">Zone 2</SelectItem>
-                          <SelectItem value="zone3">Zone 3</SelectItem>
+                          <SelectItem value="Alajo">Alajo</SelectItem>
+                          <SelectItem value="Kotobabi">Kotobabi</SelectItem>
+                          <SelectItem value="Lapaz">Lapaz</SelectItem>
+                          <SelectItem value="Caprice">Caprice</SelectItem>
+                          <SelectItem value="Industrial Area">
+                            Industrial Area
+                          </SelectItem>
+                          <SelectItem value="Abelenkpe">Abelenkpe</SelectItem>
+                          <SelectItem value="Tesano">Tesano</SelectItem>
+                          <SelectItem value="Kokomlemle">Kokomlemle</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
