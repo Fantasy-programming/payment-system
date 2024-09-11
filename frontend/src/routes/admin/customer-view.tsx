@@ -104,7 +104,7 @@ export const UserCreationPage = () => {
                     <FormItem>
                       <FormLabel>First Name</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input placeholder="Enter first name" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -117,7 +117,7 @@ export const UserCreationPage = () => {
                     <FormItem>
                       <FormLabel>Last Name</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input placeholder="Enter last name" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -130,7 +130,11 @@ export const UserCreationPage = () => {
                     <FormItem>
                       <FormLabel>Email</FormLabel>
                       <FormControl>
-                        <Input type="email" {...field} />
+                        <Input
+                          type="email"
+                          placeholder="Enter email"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -143,7 +147,11 @@ export const UserCreationPage = () => {
                     <FormItem>
                       <FormLabel>Phone</FormLabel>
                       <FormControl>
-                        <Input type="tel" {...field} />
+                        <Input
+                          type="tel"
+                          placeholder="Enter Phone"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -164,7 +172,11 @@ export const UserCreationPage = () => {
                     <FormItem>
                       <FormLabel>Password</FormLabel>
                       <FormControl>
-                        <PasswordInput {...field} />
+                        <PasswordInput
+                          placeholder="Enter Password"
+                          autoComplete="true"
+                          {...field}
+                        />
                       </FormControl>
                       <FormDescription>
                         Must be at least 8 characters with 1 lowercase, 1
@@ -213,7 +225,7 @@ export const UserCreationPage = () => {
                     <FormItem>
                       <FormLabel>Address</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input {...field} placeholder="Enter address" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -226,7 +238,7 @@ export const UserCreationPage = () => {
                     <FormItem>
                       <FormLabel>Router ID</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <Input {...field} placeholder="Enter router ID" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

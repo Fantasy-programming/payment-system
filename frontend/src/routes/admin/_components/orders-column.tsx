@@ -3,6 +3,8 @@ import { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,7 +15,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Checkbox } from "@/components/ui/checkbox";
 import { MetaProps } from "./orders-table";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetDescription,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 import { PDFDownloadLink } from "@react-pdf/renderer";
 import PDFReceipt from "@/components/pdf/PDFReceipt";
@@ -111,7 +120,6 @@ export const columns: ColumnDef<Transaction>[] = [
               <SheetTrigger asChild>
                 <DropdownMenuItem>View payment details</DropdownMenuItem>
               </SheetTrigger>
-
               <DropdownMenuItem
                 onClick={() => goto(`/admin/customers/${payment.user.id}`)}
               >
@@ -123,6 +131,14 @@ export const columns: ColumnDef<Transaction>[] = [
             </DropdownMenuContent>
           </DropdownMenu>
           <SheetContent>
+            <VisuallyHidden.Root>
+              <SheetHeader>
+                <SheetTitle>Transaction Details</SheetTitle>
+                <SheetDescription>
+                  See the details of the current transaction
+                </SheetDescription>
+              </SheetHeader>
+            </VisuallyHidden.Root>
             <Receipt mode="compact" transaction={payment} className="text-sm" />
           </SheetContent>
         </Sheet>
