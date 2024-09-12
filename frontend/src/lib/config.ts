@@ -1,2 +1,2 @@
 export const PAYSTACK_PUBLIC_KEY =
-  "pk_test_57f5373d184bf7827df46440a899cfa83b63455c";
+  "pk_live_fcdf56452eb47d37b801891610ceac80082295ac";
