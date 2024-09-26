@@ -1,16 +1,20 @@
 {
-  "name": "mikronet-admin",
+  "name": "@mikcloud/ros-server",
+  "version": "0.0.1",
+  "description": "",
+  "main": "dist/index.js",
   "module": "src/index.ts",
   "type": "module",
-  "devDependencies": {
-    "@types/bun": "latest"
-  },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
+  "scripts": {
+    "start": "cross-env NODE_ENV=production bun run dist/index.js",
+    "dev": "cross-env NODE_ENV=development bun run --watch src/index.ts",
+    "test": "cross-env NODE_ENV=test bun test",
+    "lint": "eslint --ext .ts .",
+    "build": "cross-env NODE_ENV=production bun build --entrypoint src/index.ts --minify --outdir ./dist --target=bun"
   },
   "dependencies": {
-    "@mikronet/routeros": "workspace:*",
-    "@mikronet/logger": "workspace:*",
+    "@mikcloud/routeros": "workspace:*",
+    "@mikcloud/logger": "workspace:*",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "cross-env": "^7.0.3",

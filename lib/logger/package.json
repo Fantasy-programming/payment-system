@@ -1,5 +1,5 @@
 {
-  "name": "@mikronet/logger",
+  "name": "@mikcloud/logger",
   "version": "1.0.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -13,7 +13,6 @@
     "prepublishOnly": "bun run build"
   },
   "devDependencies": {
-    "@types/bun": "latest",
     "@epegzz/winston-dev-console": "^1.3.4",
     "bun-plugin-dts": "^0.2.3",
     "@types/safe-json-stringify": "^1.1.5"

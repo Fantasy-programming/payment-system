@@ -32,7 +32,7 @@ async function startServer() {
     function onListening() {
       const addr = server.address()
       const bind = typeof addr === "string" ? `pipe ${addr}` : `port ${addr?.port}`
-      log.info(`🚀 Worker process ${process.pid} listening on ${bind}`)
+      log.info(`🚀 Process ${process.pid} listening on ${bind}`)
     }
 
     function onError(error: NodeJS.ErrnoException) {

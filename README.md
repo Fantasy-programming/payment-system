@@ -1,4 +1,4 @@
-# ISP Management system
+# MIKCLOUD: ISP Management system
 
 This is a project work for the course "Computer science" at the University of Helsinki, Department of Computer Science. You will see a bunch of over-engineering (to my standard) in this project. I'm sorry.
 

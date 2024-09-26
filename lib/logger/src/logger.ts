@@ -4,7 +4,6 @@ import LokiTransport from "winston-loki"
 import safeJsonStringify from "safe-json-stringify"
 
 interface LoggerOptions {
-  env: "development" | "test" | "production"
   lokiUri: string
 }
 
@@ -13,8 +12,9 @@ type LogInstance = winston.Logger
 export class Logger {
   public logger: LogInstance
 
-  constructor({ env, lokiUri }: LoggerOptions) {
+  constructor({ lokiUri }: LoggerOptions) {
     const transports: winston.transport[] = []
+    const env = process.env.NODE_ENV ?? "development"
 
     if (env !== "development") {
       transports.push(
