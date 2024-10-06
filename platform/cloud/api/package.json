@@ -1,0 +1,27 @@
+{
+  "name": "@mikcloud/cloud-api",
+  "version": "0.0.1",
+  "description": "",
+  "main": "dist/index.js",
+  "module": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "start": "cross-env NODE_ENV=production bun dist/index.js",
+    "dev": "cross-env NODE_ENV=development bun --watch src/index.ts",
+    "test": "cross-env NODE_ENV=test bun test",
+    "lint": "eslint --ext .ts .",
+    "tunnel": "ngrok http http://localhost:3000",
+    "build": "cross-env NODE_ENV=production bun build src/index.ts --target=bun --minify --outdir ./dist"
+  },
+  "dependencies": {
+    "@bogeychan/elysia-logger": "^0.1.2",
+    "@elysiajs/swagger": "^1.1.1",
+    "@mikcloud/logger": "workspace:*",
+    "@mikcloud/routeros": "workspace:*",
+    "cross-env": "^7.0.3",
+    "elysia": "^1.1.16",
+    "ioredis": "^5.4.1",
+    "elysia-autoload": "^1.4.0",
+    "jsonwebtoken": "^9.0.2"
+  }
+}

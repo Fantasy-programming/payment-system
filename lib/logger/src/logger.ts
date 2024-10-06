@@ -1,76 +1,49 @@
-import winston from "winston"
-import winstonDevConsole from "@epegzz/winston-dev-console"
-import LokiTransport from "winston-loki"
-import safeJsonStringify from "safe-json-stringify"
+import pino, { type LoggerOptions } from "pino"
+import type { LokiOptions } from "pino-loki"
 
-interface LoggerOptions {
+interface MikcloudLoggerOpts extends LoggerOptions {
   lokiUri: string
 }
 
-type LogInstance = winston.Logger
+type LogInstance = pino.Logger
 
+// TODO: Add auth
 export class Logger {
   public logger: LogInstance
 
-  constructor({ lokiUri }: LoggerOptions) {
-    const transports: winston.transport[] = []
-    const env = process.env.NODE_ENV ?? "development"
+  constructor({ lokiUri, formatters, serializers, level }: MikcloudLoggerOpts) {
+    const isProduction = process.env.NODE_ENV === "production"
 
-    if (env !== "development") {
-      transports.push(
-        new winston.transports.Console({
-          level: "http",
-          format: winston.format.combine(
-            winston.format.timestamp({
-              format: "YYYY-MM-DD HH:mm:ss",
-            }),
-            winston.format.colorize(),
-            winston.format.simple(),
-            winston.format.printf(({ level, message, timestamp }) => {
-              return `${timestamp} [${level}]: ${message}`
-            }),
-          ),
-        }),
-      )
-    }
+    const transports = [
+      pino.transport<LokiOptions>({
+        target: "pino-loki",
+        options: {
+          batching: true,
+          interval: 5,
 
-    transports.push(
-      new LokiTransport({
-        host: lokiUri,
-        format: winston.format.combine(
-          winston.format.printf((info) => {
-            return typeof info === "object" ? safeJsonStringify(info) : info
-          }),
-        ),
+          host: lokiUri,
+          // basicAuth: {
+          //   username: "username",
+          //   password: "password",
+          // },
+        },
       }),
-    )
+    ]
 
-    this.logger = winston.createLogger({
-      level: "silly",
-      silent: env === "test",
-      transports: transports,
-    })
-
-    if (env === "development" && winstonDevConsole) {
-      this.logger = winstonDevConsole.init(this.logger)
-      this.logger.add(
-        winstonDevConsole.transport({
-          showTimestamps: false,
-          addLineSeparation: true,
-        }),
-      )
+    if (!isProduction) {
+      transports.push({
+        target: "pino-pretty",
+        options: { colorize: true },
+      })
     }
-  }
 
-  public stream() {
-    return {
-      write: (message: unknown) => {
-        if (typeof message === "string") {
-          this.logger.http(message.trim())
-        } else {
-          this.logger.http(message)
-        }
+    this.logger = pino({
+      formatters: formatters,
+      serializers: serializers,
+      level: level ?? "debug",
+      transport: {
+        targets: transports,
       },
-    }
+    })
   }
 }

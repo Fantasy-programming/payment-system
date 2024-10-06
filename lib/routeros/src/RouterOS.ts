@@ -2,11 +2,12 @@ import net from "net"
 import tls from "tls"
 import crypto from "crypto"
 
-type TalkReturnType<P extends boolean> = P extends true ? { [key: string]: string } : string[]
+type TalkReturnType<P extends boolean> = P extends true ? { [key: string]: string }[] : string[]
 
 export class RouterOSApi {
   private timeout: number = 3
   private attempts: number = 5
+  private retry: number = 3
   private delay: number = 3
   private socket: net.Socket | tls.TLSSocket | null = null
 
@@ -49,44 +50,82 @@ export class RouterOSApi {
     return true
   }
 
-  public talk<P extends boolean = true>(words: string[], parse: P = true as P): Promise<TalkReturnType<P>> {
+  public async talk<
+    O extends Record<string, string> | boolean | undefined,
+    P extends boolean = O extends boolean ? O : true,
+  >(
+    command: string | (string | Record<string, string>)[],
+    options?: O,
+    parse: P = (typeof options === "boolean" ? options : true) as P,
+  ): Promise<TalkReturnType<P>> {
+    let words: string[]
+
+    if (typeof command === "string") {
+      words = [command]
+    } else if (Array.isArray(command)) {
+      words = command
+        .map((item) =>
+          typeof item === "string" ? item : Object.entries(item).map(([key, value]) => `=${key}=${value}`),
+        )
+        .flat()
+    } else {
+      throw new Error("Invalid command format")
+    }
+
+    if (typeof options === "object") {
+      words.push(...Object.entries(options).map(([key, value]) => `=${key}=${value}`))
+    } else if (typeof options === "boolean") {
+      parse = options as unknown as P
+    }
+
     return new Promise((resolve, reject) => {
       let response: string = ""
+      let attempts: number = 0
 
-      const onData = (data: Buffer) => {
+      const onData = async (data: Buffer) => {
         const sentence = this.readSentence(data)
         const reply = sentence[0]
-
         if (!parse) {
+          console.log(sentence)
           this.socket?.off("data", onData)
-          resolve(sentence as TalkReturnType<P>)
+          if (reply === "!done") {
+            resolve(sentence as TalkReturnType<P>)
+            return
+          } else {
+            reject(`operation failed ${sentence[1]}`)
+            return
+          }
+        }
+        if (reply !== "!re") {
+          this.socket?.off("data", onData)
+          if (attempts < this.retry) {
+            attempts++
+            this.setDelay(this.delay * 1000)
+            attemptWrite()
+          } else {
+            reject("Failed after multiple attempts")
+          }
           return
         }
-
-        if (reply != "!re") {
-          this.socket?.off("data", onData)
-          console.error(sentence)
-          reject("idk what is going on")
-          return
-        }
-
         for (let i = 1; i < sentence.length; i++) {
           const item = sentence[i]
-
           if (item === "!done") {
             this.socket?.off("data", onData)
             const data = this.parseResponse(response)
             resolve(data as TalkReturnType<P>)
           }
-
           response += item + "\n"
         }
       }
-
-      this.socket?.on("data", onData)
-      this.writeSentence(words)
+      const attemptWrite = () => {
+        this.socket?.on("data", onData)
+        this.writeSentence(words)
+      }
+      attemptWrite()
     })
   }
+
+  private setDelay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
   private writeSentence(words: string[]): void {
     words.forEach((word) => this.writeWord(word))
@@ -108,18 +147,29 @@ export class RouterOSApi {
     return sentence
   }
 
-  private parseResponse(data: string): { [key: string]: string } {
+  private parseResponse(data: string): { [key: string]: string }[] {
     const lines = data.split("\n")
-    const result: { [key: string]: string } = {}
+
+    const result: { [key: string]: string }[] = []
+    let temp: { [key: string]: string } = {}
 
     lines.forEach((line) => {
       if (line.startsWith("=")) {
         const [key, value] = line.substring(1).split("=", 2) // substring(1) to remove the first "="
-        result[key] = value || ""
+        temp[key] = value || ""
+      } else {
+        if (!this.isObjEmpty(temp)) {
+          result.push(temp)
+          temp = {}
+        }
       }
     })
 
     return result
+  }
+
+  private isObjEmpty(obj: Object) {
+    return Object.keys(obj).length === 0
   }
 
   private writeWord(word: string): void {
@@ -179,7 +229,7 @@ export class RouterOSApi {
       this.socket = null // Clear the reference to the socket
       console.log("Socket closed.")
     } else {
-      console.log("No socket to close.")
+      console.error("No socket to close.")
     }
   }
 }

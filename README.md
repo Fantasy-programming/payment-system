@@ -1,6 +1,6 @@
 # MIKCLOUD: ISP Management system
 
-This is a project work for the course "Computer science" at the University of Helsinki, Department of Computer Science. You will see a bunch of over-engineering (to my standard) in this project. I'm sorry.
+This is a project work for the course "CPS 104 Project Work" at Accra technical university, Department of Computer Science. You will see a bunch of newbie mistakes and unecessary code in this project. I'm sorry in advance.
 
 - features
 - repository stats
@@ -9,8 +9,7 @@ This is a project work for the course "Computer science" at the University of He
 - project name & logo
 - images
 
-
-- [Mikronet Subscription management 'system'](#mikronet-subscription-management-system)
+- [MikCloud ISP management 'system'](#mikcloud--management-system)
   - [Documentation](#documentation)
   - [Installation](#installation)
     - [Requirements](#requirements)
