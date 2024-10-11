@@ -16,7 +16,5 @@
     "prettier": "^3.3.3",
     "typescript-eslint": "^8.7.0"
   },
-  "patchedDependencies": {
-    "@bogeychan/elysia-logger@0.1.2": "patches/@bogeychan%2Felysia-logger@0.1.2.patch"
-  }
+  "patchedDependencies": {}
 }

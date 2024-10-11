@@ -8,10 +8,11 @@ import { towerHealth } from "@/types/v2.type"
 export default (app: AppType) =>
   app.post(
     "/",
-    async ({ body, cache }) => {
+    async ({ body, cache, sendWs }) => {
       const { network, sn } = body
       // Check if the token exists
       cache.redis.set(`$type:health$sn:${sn}`, JSON.stringify(network))
+      sendWs(`$type:health$sn:${sn}`, { status: "success", data: network })
       return { success: true }
     },
     { body: towerHealth, type: "json" },

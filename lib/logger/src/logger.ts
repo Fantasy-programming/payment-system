@@ -10,6 +10,7 @@ type LogInstance = pino.Logger
 // TODO: Add auth
 export class Logger {
   public logger: LogInstance
+  public options: LoggerOptions
 
   constructor({ lokiUri, formatters, serializers, level }: MikcloudLoggerOpts) {
     const isProduction = process.env.NODE_ENV === "production"
@@ -37,13 +38,19 @@ export class Logger {
       })
     }
 
-    this.logger = pino({
+    this.options = {
       formatters: formatters,
       serializers: serializers,
       level: level ?? "debug",
       transport: {
         targets: transports,
       },
-    })
+    }
+
+    this.logger = pino(this.options)
+  }
+
+  getOptions() {
+    return this.options
   }
 }

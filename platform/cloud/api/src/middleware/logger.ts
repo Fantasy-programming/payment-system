@@ -5,7 +5,7 @@ import { Redis } from "ioredis"
 import env from "../env"
 
 const Log = new Logger({ lokiUri: env.LOKI_URI, formatters, serializers })
-export const log = createPinoLogger({}, Log.logger)
+export const log = createPinoLogger(Log.options)
 
 class Cache {
   public redis: Redis
