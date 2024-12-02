@@ -1,0 +1,4 @@
+# Get system resources
+:local cpuLoad [/system resource get cpu-load];
+:local memoryUsed [/system resource get memory-usage];
+:local uptime [/system resource get uptime];

@@ -1,0 +1,17 @@
+# Get interface statuses
+:local interfaces [:toarray ""];
+:local ifCount 0;
+
+/interface {
+  :foreach iface in=[find] do={
+    :if ([get $iface running]) do={
+      :local ifData "{";
+      :set ifData ($ifData . "\\"name\\":\\"" . [get $iface name] . "\\",");
+      :set ifData ($ifData . "\\"type\\":\\"" . [get $iface type] . "\\",");
+      :set ifData ($ifData . "\\"rx-byte\\":\\"" . [get $iface rx-byte] . "\\",");
+      :set ifData ($ifData . "\\"tx-byte\\":\\"" . [get $iface tx-byte] . "\\"");
+      :set ifData ($ifData . "}");
+      :set ($interfaces->$ifCount) $ifData;
+      :set ifCount ($ifCount + 1);
+    }
+  }

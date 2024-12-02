@@ -26,9 +26,14 @@
   ],
   "type": "module",
   "devDependencies": {
+    "@types/debug": "^4.1.12",
     "bun-plugin-dts": "^0.2.3"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "debug": "^4.3.7",
+    "iconv-lite": "^0.6.3"
   }
 }

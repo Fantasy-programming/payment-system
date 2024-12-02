@@ -1,0 +1,22 @@
+# Script start
+:local activeUsers [/ip hotspot active print as-value];
+
+# Initialize variables
+:local userCount [:len $activeUsers];
+:local jsonStr "{ \"user_count\": $userCount, \"users\": [";
+
+# Loop through the active users to build the JSON array
+:foreach user in=$activeUsers do={
+    :local userName ($user->"user");
+    :local userAddress ($user->"address");
+    :local userMacAddress ($user->"mac-address");
+    :local userUptime ($user->"uptime");
+
+    # Add the user data to the JSON string
+    :set jsonStr ($jsonStr . "{\"name\": \"$userName\", \"address\": \"$userAddress\", \"mac_address\": \"$userMacAddress\", \"uptime\": \"$userUptime\"},");
+}
+
+:set jsonStr [:pick $jsonStr 0 ([:len $jsonStr] - 1)];
+:set jsonStr ($jsonStr . "]}");
+
+# Script end
